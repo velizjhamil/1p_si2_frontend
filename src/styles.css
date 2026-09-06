@@ -1,3 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, also import other style files */
 
 @import 'tailwindcss';
+
+/* Paleta Attention — Tailwind v4 (@theme es la fuente real de colores) */
+@theme {
+  --color-primary: #1d528d; /* botones primarios */
+  --color-container: #e8f0fe; /* contenedores */
+  --color-accent: #f8c0e5; /* acento activo */
+}
