@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../../core/services/api';
+import { ApiService } from '../../core/services/api';
 import {
   ApiResponse,
   PermisoRead,
   RolCatalogo,
   RolCreatePayload,
   RolPermisosPayload,
-} from '../../../core/models/usuario.model';
+} from '../../core/models/usuario.model';
 
 /**
  * CU4 + CU5 — Roles y Permisos (vista unificada).

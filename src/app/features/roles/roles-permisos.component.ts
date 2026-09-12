@@ -5,14 +5,14 @@ import {
   PermisoRead,
   RolCatalogo,
   RolCreatePayload,
-} from '../../../core/models/usuario.model';
+} from '../../core/models/usuario.model';
 
 type TabActiva = 'roles' | 'matriz';
 
 @Component({
   selector: 'app-roles-permisos',
   imports: [ReactiveFormsModule],
-  templateUrl: './roles-permisos.html',
+  templateUrl: './roles-permisos.component.html',
 })
 export class RolesPermisos implements OnInit {
   private readonly fb = inject(FormBuilder);

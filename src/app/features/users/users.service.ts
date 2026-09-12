@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../../core/services/api';
+import { ApiService } from '../../core/services/api';
 import {
   ApiResponse,
   RolCatalogo,
   UsuarioCreatePayload,
   UsuarioList,
   UsuarioUpdatePayload,
-} from '../../../core/models/usuario.model';
+} from '../../core/models/usuario.model';
 
 /**
  * CU3 — Gestión de Usuarios.

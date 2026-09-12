@@ -1,13 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmpresaService } from './empresa.service';
+import { EmpresaService } from './company.service';
 
 @Component({
   selector: 'app-empresa',
   imports: [ReactiveFormsModule],
-  templateUrl: './empresa.html',
+  templateUrl: './company.component.html',
 })
-export class Empresa implements OnInit {
+export class CompanyComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly empresaService = inject(EmpresaService);
 

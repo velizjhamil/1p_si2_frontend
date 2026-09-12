@@ -1,0 +1,321 @@
+<!-- Dashboard de Administración (ASU) — pantalla de Inicio -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+  <!-- Banner de Bienvenida -->
+  <div
+    class="bg-primary text-white rounded-2xl shadow-lg p-8 relative overflow-hidden"
+  >
+    <div
+      class="absolute inset-0 bg-accent/10 pointer-events-none"
+      aria-hidden="true"
+    ></div>
+    <div class="relative">
+      <h1 class="text-2xl md:text-3xl font-bold">Panel de Administración</h1>
+      <p class="text-white/90 mt-2 text-sm md:text-base">
+        Bienvenido, {{ usuario?.nombre ?? 'Usuario' }} — Rol:
+        {{ usuario?.rol?.nombre_rol ?? 'Sin rol' }}
+      </p>
+      <button
+        type="button"
+        (click)="cerrarSesion()"
+        class="mt-6 bg-white/10 hover:bg-accent hover:text-primary text-white px-4 py-2 rounded-lg transition text-sm font-medium border border-white/20"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Error de carga -->
+  @if (errorMessage()) {
+    <div
+      class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Sección de Tarjetas KPI (grid de 4 columnas) -->
+  @if (cargando()) {
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 animate-pulse"
+    >
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="bg-white rounded-xl h-32 border border-primary/10"></div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <!-- 🏢 Total Sucursales -->
+      <div
+        class="bg-white rounded-xl shadow-lg border border-primary/10 p-5 flex flex-col gap-2"
+      >
+        <div class="flex items-start justify-between">
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 22V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v19M16 8h3a1 1 0 0 1 1 1v13M8 6h3M8 10h3M8 14h3M8 18h3"
+              />
+            </svg>
+          </span>
+          <span
+            class="px-2 py-1 rounded-full bg-container text-primary text-xs font-semibold"
+          >
+            Activas
+          </span>
+        </div>
+        <p class="text-3xl font-bold text-primary mt-1">
+          {{ metrics()?.total_sucursales ?? '—' }}
+        </p>
+        <p class="text-sm text-gray-600">Total Sucursales</p>
+      </div>
+
+      <!-- 👥 Usuarios / Empleados -->
+      <div
+        class="bg-white rounded-xl shadow-lg border border-primary/10 p-5 flex flex-col gap-2"
+      >
+        <div class="flex items-start justify-between">
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+              />
+            </svg>
+          </span>
+          <span
+            class="px-2 py-1 rounded-full bg-container text-primary text-xs font-semibold"
+          >
+            Registrados
+          </span>
+        </div>
+        <p class="text-3xl font-bold text-primary mt-1">
+          {{ metrics()?.total_usuarios ?? '—' }}
+        </p>
+        <p class="text-sm text-gray-600">Usuarios / Empleados</p>
+      </div>
+
+      <!-- 🛍️ Proveedores Homologados -->
+      <div
+        class="bg-white rounded-xl shadow-lg border border-primary/10 p-5 flex flex-col gap-2"
+      >
+        <div class="flex items-start justify-between">
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M1 4h13v12H1zM14 9h4l4 4v3h-8zM5.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
+              />
+            </svg>
+          </span>
+          <span
+            class="px-2 py-1 rounded-full bg-container text-primary text-xs font-semibold"
+          >
+            Homologados
+          </span>
+        </div>
+        <p class="text-3xl font-bold text-primary mt-1">
+          {{ metrics()?.total_proveedores ?? '—' }}
+        </p>
+        <p class="text-sm text-gray-600">Proveedores</p>
+      </div>
+
+      <!-- 👤 Clientes Registrados -->
+      <div
+        class="bg-white rounded-xl shadow-lg border border-primary/10 p-5 flex flex-col gap-2"
+      >
+        <div class="flex items-start justify-between">
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"
+              />
+            </svg>
+          </span>
+          <span
+            class="px-2 py-1 rounded-full bg-accent text-primary text-xs font-semibold"
+          >
+            Clientes
+          </span>
+        </div>
+        <p class="text-3xl font-bold text-primary mt-1">
+          {{ metrics()?.total_clientes ?? '—' }}
+        </p>
+        <p class="text-sm text-gray-600">Clientes Registrados</p>
+      </div>
+    </div>
+  }
+
+  <!-- Sección Inferior: Resumen Institucional + Accesos Rápidos -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Tarjeta: Empresa Matriz -->
+    <div
+      class="bg-container rounded-xl shadow-lg border border-primary/10 p-6"
+    >
+      <h2 class="text-lg font-bold text-primary mb-4">Empresa Matriz</h2>
+      @if (metrics()?.resumen_empresa; as empresa) {
+        <dl class="space-y-3 text-sm">
+          <div class="flex justify-between gap-4">
+            <dt class="text-primary/70 font-medium">Razón Social</dt>
+            <dd class="text-gray-800 font-medium text-right">
+              {{ empresa.razon_social }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-primary/70 font-medium">NIT</dt>
+            <dd class="text-gray-800">{{ empresa.nit }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-primary/70 font-medium">Ciudad Matriz</dt>
+            <dd class="text-gray-800">{{ empresa.ciudad || 'No configurada' }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-primary/70 font-medium">Dirección Principal</dt>
+            <dd class="text-gray-800 text-right">
+              {{ empresa.direccion || 'No configurada' }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-primary/70 font-medium">Contacto</dt>
+            <dd class="text-gray-800 text-right">
+              {{ empresa.email || '—' }}
+              @if (empresa.telefono) {
+                <span class="text-primary/50"> · {{ empresa.telefono }}</span>
+              }
+            </dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="text-sm text-gray-500">
+          La empresa matriz aún no tiene datos configurados.
+        </p>
+      }
+      <a
+        routerLink="/empresa"
+        class="inline-block mt-5 text-primary text-sm font-medium hover:text-primary/70 transition underline underline-offset-4"
+      >
+        Editar Perfil Institucional →
+      </a>
+    </div>
+
+    <!-- Tarjeta: Accesos Rápidos -->
+    <div class="bg-white rounded-xl shadow-lg border border-primary/10 p-6">
+      <h2 class="text-lg font-bold text-primary mb-4">Accesos Rápidos</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a
+          routerLink="/sucursales"
+          class="group flex items-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary hover:bg-container transition"
+        >
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary group-hover:bg-primary group-hover:text-white transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 22s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 15.8 12 22 12 22zM12 13a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+              />
+            </svg>
+          </span>
+          <span>
+            <span class="block text-sm font-semibold text-gray-800"
+              >Gestionar Sucursales</span
+            >
+            <span class="block text-xs text-gray-500"
+              >Puntos de venta y ciudades</span
+            >
+          </span>
+        </a>
+
+        <a
+          routerLink="/admin/usuarios"
+          class="group flex items-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary hover:bg-container transition"
+        >
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary group-hover:bg-primary group-hover:text-white transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+              />
+            </svg>
+          </span>
+          <span>
+            <span class="block text-sm font-semibold text-gray-800"
+              >Gestionar Usuarios</span
+            >
+            <span class="block text-xs text-gray-500">Cuentas y roles</span>
+          </span>
+        </a>
+
+        <a
+          routerLink="/proveedores"
+          class="group flex items-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary hover:bg-container transition"
+        >
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary group-hover:bg-primary group-hover:text-white transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M1 4h13v12H1zM14 9h4l4 4v3h-8zM5.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
+              />
+            </svg>
+          </span>
+          <span>
+            <span class="block text-sm font-semibold text-gray-800"
+              >Gestionar Proveedores</span
+            >
+            <span class="block text-xs text-gray-500">Abastecedores</span>
+          </span>
+        </a>
+
+        <a
+          routerLink="/dashboard/roles-permisos"
+          class="group flex items-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary hover:bg-container transition"
+        >
+          <span
+            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-container text-primary group-hover:bg-primary group-hover:text-white transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+              />
+            </svg>
+          </span>
+          <span>
+            <span class="block text-sm font-semibold text-gray-800"
+              >Roles y Permisos</span
+            >
+            <span class="block text-xs text-gray-500">Matriz de acceso</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

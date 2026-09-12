@@ -2,9 +2,48 @@
 
 @import 'tailwindcss';
 
-/* Paleta Attention — Tailwind v4 (@theme es la fuente real de colores) */
+/*
+ * Paleta Attention — Tailwind v4 (@theme es la fuente real de colores).
+ * Guía de estilo UI/UX Attention:
+ *   primary   #1E4D8C  azul corporativo (header modales, botones primarios,
+ *                       marca navbar, módulo activo)
+ *   container #F0F7FF  azul suave (badges, contenedores, fondo suave)
+ *   accent    #FCE7F3  rosa soft (badge de roles ASU/GS)
+ *   canvas    #F8FAFC  fondo de pantalla
+ */
 @theme {
-  --color-primary: #1d528d; /* botones primarios */
-  --color-container: #e8f0fe; /* contenedores */
-  --color-accent: #f8c0e5; /* acento activo */
+  --color-primary: #1e4d8c; /* botones primarios */
+  --color-container: #f0f7ff; /* contenedores / badges azules suaves */
+  --color-accent: #fce7f3; /* acento rosa soft (badges de rol) */
+  --color-canvas: #f8fafc; /* fondo de pantalla */
+}
+
+/* Transiciones suaves para modales (requisito UX: animación al abrir). */
+dialog,
+.modal-attention {
+  animation: modal-pop 180ms ease-out;
+}
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Drawer del sidebar (móvil): deslizamiento suave. */
+.sidebar-attention {
+  transition: transform 200ms ease-in-out, width 200ms ease-in-out;
+}
+
+/* Scrollbar discreto en el sidebar y tablas anchas. */
+.sidebar-attention nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-attention nav::-webkit-scrollbar-thumb {
+  background: rgb(30 77 140 / 0.15);
+  border-radius: 9999px;
 }

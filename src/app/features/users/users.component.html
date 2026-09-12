@@ -149,6 +149,7 @@
                     type="button"
                     (click)="abrirModalEditar(usuario)"
                     class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+                    title="Editar usuario"
                   >
                     Editar
                   </button>
@@ -156,6 +157,7 @@
                     type="button"
                     (click)="toggleEstado(usuario)"
                     class="font-medium transition"
+                    [title]="usuario.estado ? 'Desactivar usuario' : 'Activar usuario'"
                     [class]="
                       usuario.estado
                         ? 'text-red-600 hover:text-red-400'
@@ -297,7 +299,13 @@
             [disabled]="guardando()"
             class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ guardando() ? 'Guardando...' : 'Guardar' }}
+            @if (guardando()) {
+              Guardando...
+            } @else if (editandoId()) {
+              Guardar Cambios
+            } @else {
+              Crear Usuario
+            }
           </button>
         </div>
       </form>

@@ -11,25 +11,27 @@ export const routes: Routes = [
   },
   {
     // Layout principal (Navbar + Sidebar + router-outlet) para usuarios autenticados.
-    // Las URLs de los children no cambian: /admin/dashboard sigue siendo /admin/dashboard.
+    // Las URLs de los children NO cambian (contratos de navegación intactos).
     path: '',
     loadComponent: () =>
       import('./layout/layout.component').then((m) => m.LayoutComponent),
     canActivate: [authGuard],
     children: [
       {
+        // Dashboard de administración con métricas (ASU).
         path: 'admin/dashboard',
         loadComponent: () =>
-          import('./features/admin/dashboard/dashboard.component').then(
+          import('./features/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
           ),
         canActivate: [authGuard],
         data: { roles: ['ASU'] },
       },
       {
+        // CU3: Gestión de Usuarios (ASU).
         path: 'admin/usuarios',
         loadComponent: () =>
-          import('./features/admin/usuarios/usuarios').then((m) => m.Usuarios),
+          import('./features/users/users.component').then((m) => m.UsersComponent),
         canActivate: [authGuard],
         data: { roles: ['ASU'] },
       },
@@ -37,30 +39,35 @@ export const routes: Routes = [
         // CU4 + CU5: vista unificada de Roles y Permisos (tabs).
         path: 'dashboard/roles-permisos',
         loadComponent: () =>
-          import('./features/admin/roles-permisos/roles-permisos').then(
+          import('./features/roles/roles-permisos.component').then(
             (m) => m.RolesPermisos
           ),
         canActivate: [authGuard],
         data: { roles: ['ASU'] },
       },
       {
+        // CU16: Perfil Institucional de la Empresa.
         path: 'empresa',
         loadComponent: () =>
-          import('./features/empresa/empresa/empresa').then((m) => m.Empresa),
+          import('./features/company/company.component').then((m) => m.CompanyComponent),
         canActivate: [authGuard],
         data: { roles: ['ASU', 'GS'] },
       },
       {
+        // CU17: Gestión de Sucursales.
         path: 'sucursales',
         loadComponent: () =>
-          import('./features/sucursales/lista/lista').then((m) => m.Lista),
+          import('./features/branches/branches.component').then((m) => m.BranchesComponent),
         canActivate: [authGuard],
         data: { roles: ['ASU', 'GS'] },
       },
       {
+        // CU23: Gestión de Proveedores.
         path: 'proveedores',
         loadComponent: () =>
-          import('./features/proveedores/lista/lista').then((m) => m.Lista),
+          import('./features/suppliers/suppliers.component').then(
+            (m) => m.SuppliersComponent
+          ),
         canActivate: [authGuard],
         data: { roles: ['ASU', 'GS'] },
       },
@@ -90,6 +97,17 @@ export const routes: Routes = [
           ),
         canActivate: [authGuard],
         data: { roles: ['C'] },
+      },
+      {
+        // Placeholder de módulos Ciclos 2+ (ítems del sidebar en desarrollo).
+        path: 'proximamente/:modulo',
+        loadComponent: () =>
+          import('./features/proximamente/proximamente.component').then(
+            (m) => m.ProximamenteComponent
+          ),
+        canActivate: [authGuard],
+        // Ruta con params: se renderiza en el cliente, no en prerender.
+        data: { renderMode: 'client' },
       },
     ],
   },

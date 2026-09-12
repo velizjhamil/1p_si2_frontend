@@ -1,0 +1,426 @@
+<!-- CU23 — Gestión de Proveedores (ASU/GS) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gestión de Proveedores</h1>
+      <p class="text-gray-600 mt-1">
+        Administre los abastecedores de la empresa, sus contactos y estados.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="abrirModalCrear()"
+      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+    >
+      + Registrar Proveedor
+    </button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Proveedores Activos
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ totalActivos() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Verificados
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ totalVerificados() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Total Registrados
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ total() }}</p>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !modalAbierto()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Barra de filtros: búsqueda + categoría + estado + ciudad -->
+  <div
+    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+  >
+    <div class="relative flex-1">
+      <svg
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="onBusqueda($event)"
+        placeholder="Buscar por razón social, NIT/RUT o contacto..."
+        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+      />
+    </div>
+    <select
+      [value]="filtroCategoria()"
+      (change)="onFiltroCategoria($event)"
+      class="px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary text-sm text-primary font-medium"
+    >
+      <option value="">Todas las líneas</option>
+      <option value="Textiles">Textiles</option>
+      <option value="Calzado">Calzado</option>
+      <option value="Accesorios">Accesorios</option>
+      <option value="Jeans">Jeans</option>
+    </select>
+    <select
+      [value]="filtroCiudad()"
+      (change)="onFiltroCiudad($event)"
+      class="px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary text-sm text-primary font-medium"
+    >
+      <option value="">Todas las ubicaciones</option>
+      @for (ciudad of ciudades(); track ciudad.id) {
+        <option [value]="ciudad.nombre">{{ ciudad.nombre }}</option>
+      }
+    </select>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        (click)="onFiltroEstado('todos')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'todos'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('Activo')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'Activo'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Activos
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('Verificado')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'Verificado'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Verificados
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('Inactivo')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'Inactivo'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Inactivos
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla de proveedores -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+    @if (cargando()) {
+      <div class="p-10 text-center text-primary/60 text-sm">Cargando proveedores...</div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-primary text-white">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold">ID</th>
+              <th class="text-left px-4 py-3 font-semibold">Razón Social</th>
+              <th class="text-left px-4 py-3 font-semibold">NIT / RUT</th>
+              <th class="text-left px-4 py-3 font-semibold">Contacto</th>
+              <th class="text-center px-4 py-3 font-semibold">Estado</th>
+              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (proveedor of proveedores(); track proveedor.id_proveedor) {
+              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+                <td class="px-4 py-3 text-primary font-semibold">
+                  #{{ proveedor.id_proveedor }}
+                </td>
+                <td class="px-4 py-3">
+                  <p class="font-medium text-gray-800">{{ proveedor.nombre }}</p>
+                  @if (proveedor.categoria) {
+                    <p class="text-xs text-primary/70">{{ proveedor.categoria }}</p>
+                  }
+                </td>
+                <td class="px-4 py-3 text-gray-600">{{ proveedor.nit_rut }}</td>
+                <td class="px-4 py-3">
+                  <p class="text-gray-800">{{ proveedor.contacto_operativo || '—' }}</p>
+                  <p class="text-xs text-gray-500">{{ proveedor.correo || '—' }}</p>
+                  <p class="text-xs text-gray-500">{{ proveedor.telefono || '—' }}</p>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <app-badge
+                    [variant]="proveedor.estado === 'Activo' ? 'success' : (proveedor.estado === 'Verificado' ? 'info' : 'danger')"
+                    [texto]="proveedor.estado"
+                  />
+                </td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    (click)="abrirModalEditar(proveedor)"
+                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+                    title="Editar proveedor"
+                  >
+                    Editar
+                  </button>
+                  @if (proveedor.estado !== 'Inactivo') {
+                    <button
+                      type="button"
+                      (click)="desactivar(proveedor)"
+                      class="text-primary/60 hover:text-primary font-medium mr-3 transition text-sm"
+                      title="Marcar como Inactivo"
+                    >
+                      Desactivar
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    (click)="pedirEliminar(proveedor)"
+                    class="text-red-600 hover:text-red-400 font-medium transition"
+                    title="Eliminar proveedor"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No se encontraron proveedores con los criterios de búsqueda.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <!-- Paginación server-side -->
+      <div
+        class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
+      >
+        <span>
+          Página {{ pagina() }} de {{ pages() }} — {{ total() }} proveedores
+        </span>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="paginaAnterior()"
+            [disabled]="pagina() <= 1"
+            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+          >
+            ← Anterior
+          </button>
+          <button
+            type="button"
+            (click)="paginaSiguiente()"
+            [disabled]="pagina() >= pages()"
+            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+          >
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Modal Registrar / Editar Proveedor -->
+@if (modalAbierto()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModal()"
+    ></div>
+    <div
+      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+    >
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+        <h2 class="text-lg font-bold">
+          {{ editandoId() ? 'Editar Proveedor' : 'Registrar Proveedor' }}
+        </h2>
+        <p class="text-white/80 text-xs mt-0.5">
+          {{
+            editandoId()
+              ? 'Actualice los datos de contacto o razón social.'
+              : 'Complete los datos del nuevo abastecedor.'
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="proveedorForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="nombre">
+            Razón Social / Nombre *
+          </label>
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Textiles Bolivia S.R.L."
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="nit_rut">
+            NIT / RUT *
+          </label>
+          <input
+            id="nit_rut"
+            type="text"
+            formControlName="nit_rut"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: 1020304051"
+          />
+        </div>
+
+        <div>
+          <label
+            class="block text-sm font-medium text-primary mb-1"
+            for="contacto_operativo"
+          >
+            Nombre de Contacto Operativo
+          </label>
+          <input
+            id="contacto_operativo"
+            type="text"
+            formControlName="contacto_operativo"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Marcela Rojas"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="telefono">
+              Teléfono de contacto
+            </label>
+            <input
+              id="telefono"
+              type="text"
+              formControlName="telefono"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="+591 3 344-1101"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="correo">
+              Correo Electrónico
+            </label>
+            <input
+              id="correo"
+              type="email"
+              formControlName="correo"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="ventas@proveedor.com"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="categoria">
+              Línea / Categoría
+            </label>
+            <input
+              id="categoria"
+              type="text"
+              formControlName="categoria"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="Ej: Textiles"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="direccion">
+              Dirección
+            </label>
+            <input
+              id="direccion"
+              type="text"
+              formControlName="direccion"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="Ej: Parque Industrial Mz 12"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cerrarModal()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="guardando()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Proveedor') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ConfirmDialog de eliminación (CU23: 409 si tiene productos asociados) -->
+@if (confirmarEliminar(); as proveedor) {
+  <app-confirm-dialog
+    titulo="Eliminar Proveedor"
+    [mensaje]="'¿Eliminar a ' + proveedor.nombre + '? Si tiene productos asociados, el sistema impedirá la eliminación y sugerirá marcarlo como Inactivo.'"
+    textoConfirmar="Eliminar"
+    [peligro]="true"
+    (confirmado)="confirmarEliminacion()"
+    (cancelado)="confirmarEliminar.set(null)"
+  ></app-confirm-dialog>
+}

@@ -1,0 +1,378 @@
+<!-- CU17 — Gestión de Sucursales (ASU/GS) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gestión de Sucursales</h1>
+      <p class="text-gray-600 mt-1">
+        Administre los puntos de venta de la empresa y su asignación por ciudad.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="abrirModalCrear()"
+      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+    >
+      + Agregar Sucursal
+    </button>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !modalAbierto()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Barra de herramientas: búsqueda + filtro por ciudad -->
+  <div
+    class="bg-container rounded-xl p-4 flex flex-col md:flex-row gap-3 md:items-center mb-6"
+  >
+    <div class="relative flex-1">
+      <svg
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="onBusqueda($event)"
+        placeholder="Buscar por nombre, dirección o ciudad..."
+        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+      />
+    </div>
+    <select
+      [value]="filtroCiudad()"
+      (change)="onFiltroCiudad($event)"
+      class="px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-primary font-medium"
+    >
+      <option value="todas">Todas las ciudades</option>
+      @for (ciudad of ciudadesConSucursales(); track ciudad.id) {
+        <option [value]="ciudad.id">{{ ciudad.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Contenido: tarjetas agrupadas por ciudad -->
+  @if (cargando()) {
+    <div class="bg-white rounded-xl shadow-lg p-10 text-center text-primary/60 text-sm">
+      Cargando sucursales...
+    </div>
+  } @else if (gruposPorCiudad().length === 0) {
+    <div class="bg-white rounded-xl shadow-lg p-10 text-center text-gray-500 text-sm">
+      No se encontraron sucursales con los criterios de búsqueda.
+    </div>
+  } @else {
+    @for (grupo of gruposPorCiudad(); track grupo.ciudad.id) {
+      <div class="mb-8">
+        <!-- Encabezado del grupo ciudad -->
+        <div class="flex items-center gap-3 mb-4">
+          <span
+            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-white"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </span>
+          <h2 class="text-lg font-bold text-primary">{{ grupo.ciudad.nombre }}</h2>
+          <span class="text-xs text-primary/60 font-medium">
+            {{ grupo.sucursales.length }}
+            {{ grupo.sucursales.length === 1 ? 'sucursal' : 'sucursales' }}
+          </span>
+          @if (grupo.ciudad.departamento) {
+            <span class="text-xs text-gray-500">{{ grupo.ciudad.departamento }}</span>
+          }
+        </div>
+
+        <!-- Grid de tarjetas de sucursales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          @for (sucursal of grupo.sucursales; track sucursal.codigo_sucursal) {
+            <article
+              class="bg-white rounded-xl shadow-lg border border-primary/10 p-5 flex flex-col gap-3 hover:border-primary/30 transition"
+              [class.opacity-60]="!sucursal.is_active"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h3 class="font-bold text-gray-800">{{ sucursal.nombre }}</h3>
+                  <p class="text-xs text-primary font-semibold mt-0.5">
+                    Código #{{ sucursal.codigo_sucursal }}
+                  </p>
+                </div>
+                @if (sucursal.is_active) {
+                  <span
+                    class="inline-block px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold shrink-0"
+                  >
+                    Activo
+                  </span>
+                } @else {
+                  <span
+                    class="inline-block px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold shrink-0"
+                  >
+                    Inactivo
+                  </span>
+                }
+              </div>
+
+              <dl class="text-sm text-gray-600 space-y-1.5 flex-1">
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="w-4 h-4 mt-0.5 text-primary/60 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <dd>{{ sucursal.direccion || 'Sin dirección registrada' }}</dd>
+                </div>
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="w-4 h-4 mt-0.5 text-primary/60 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                  <dd>{{ sucursal.telefono || 'Sin teléfono' }}</dd>
+                </div>
+                <div class="flex items-start gap-2">
+                  <svg
+                    class="w-4 h-4 mt-0.5 text-primary/60 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <dd>{{ sucursal.horario_atencion || 'Horario no registrado' }}</dd>
+                </div>
+              </dl>
+
+              <div class="flex gap-2 pt-2 border-t border-primary/10">
+                <button
+                  type="button"
+                  (click)="abrirModalEditar(sucursal)"
+                  class="flex-1 px-3 py-2 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+                  title="Editar sucursal"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  (click)="pedirDesactivar(sucursal)"
+                  class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition"
+                  [title]="sucursal.is_active ? 'Desactivar sucursal' : 'Sucursal inactiva'"
+                  [class]="
+                    sucursal.is_active
+                      ? 'text-red-600 border border-red-200 hover:bg-red-50'
+                      : 'text-gray-400 border border-gray-200 cursor-not-allowed'
+                  "
+                  [disabled]="!sucursal.is_active"
+                >
+                  Desactivar
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+    <div class="px-4 py-3 bg-container/50 rounded-lg text-xs text-primary/70">
+      {{ sucursalesFiltradas().length }} de {{ sucursales().length }} sucursales
+    </div>
+  }
+</section>
+
+<!-- Modal Crear / Editar -->
+@if (modalAbierto()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModal()"
+    ></div>
+    <div
+      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+    >
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+        <h2 class="text-lg font-bold">
+          {{ editandoCodigo() ? 'Editar Sucursal' : 'Agregar Sucursal' }}
+        </h2>
+        <p class="text-white/80 text-xs mt-0.5">
+          {{
+            editandoCodigo()
+              ? 'Actualice los datos de la sucursal.'
+              : 'Registre un nuevo punto de venta y asígnele una ciudad.'
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="sucursalForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="nombre"
+            >Nombre de Sucursal *</label
+          >
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Sucursal Ventura Mall"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="id_ciudad"
+            >Ciudad *</label
+          >
+          <select
+            id="id_ciudad"
+            formControlName="id_ciudad"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+          >
+            <option value="" disabled>Seleccione una ciudad...</option>
+            @for (ciudad of ciudades(); track ciudad.id) {
+              <option [value]="ciudad.id">
+                {{ ciudad.nombre }}{{ ciudad.departamento ? ' — ' + ciudad.departamento : '' }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="direccion"
+            >Dirección *</label
+          >
+          <input
+            id="direccion"
+            type="text"
+            formControlName="direccion"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Av. San Martín 1500, Zona Central"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="telefono"
+              >Teléfono</label
+            >
+            <input
+              id="telefono"
+              type="text"
+              formControlName="telefono"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="+591 3 333-0000"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-sm font-medium text-primary mb-1"
+              for="horario_atencion"
+              >Horario de atención</label
+            >
+            <input
+              id="horario_atencion"
+              type="text"
+              formControlName="horario_atencion"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+              placeholder="Ej: Lun-Sáb 09:00-20:00"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cerrarModal()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="guardando()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ guardando() ? 'Guardando...' : (editandoCodigo() ? 'Guardar Cambios' : 'Agregar Sucursal') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ConfirmDialog de desactivación (soft delete CU17) -->
+@if (confirmarDesactivar(); as sucursal) {
+  <app-confirm-dialog
+    titulo="Desactivar Sucursal"
+    [mensaje]="'¿Desactivar ' + sucursal.nombre + '? Dejará de aparecer como sede activa.'"
+    textoConfirmar="Desactivar"
+    [peligro]="true"
+    (confirmado)="confirmarDesactivacion()"
+    (cancelado)="confirmarDesactivar.set(null)"
+  ></app-confirm-dialog>
+}

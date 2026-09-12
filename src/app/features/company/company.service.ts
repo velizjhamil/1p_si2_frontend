@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../../core/services/api';
+import { ApiService } from '../../core/services/api';
 import {
   ApiResponse,
-} from '../../../core/models/usuario.model';
+} from '../../core/models/usuario.model';
 import {
   Empresa,
   EmpresaUpdatePayload,
-} from '../../../core/models/empresa.model';
+} from '../../core/models/empresa.model';
 
 /**
  * CU16 — Gestión de Empresa (perfil institucional).

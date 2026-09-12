@@ -1,21 +1,21 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UsuariosService } from './usuarios.service';
+import { UsuariosService } from './users.service';
 import {
   RolCatalogo,
   UsuarioCreatePayload,
   UsuarioList,
   UsuarioUpdatePayload,
-} from '../../../core/models/usuario.model';
+} from '../../core/models/usuario.model';
 
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
 @Component({
   selector: 'app-usuarios',
   imports: [ReactiveFormsModule],
-  templateUrl: './usuarios.html',
+  templateUrl: './users.component.html',
 })
-export class Usuarios implements OnInit {
+export class UsersComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly usuariosService = inject(UsuariosService);
 
