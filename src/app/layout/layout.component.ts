@@ -11,6 +11,7 @@ import { filter } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
+import { CarritoService } from '../core/services/carrito.service';
 import { Rol } from '../core/models/usuario.model';
 
 interface MenuItem {
@@ -23,6 +24,8 @@ interface MenuItem {
 interface ModuleItem extends MenuItem {
   /** CU(s) que implementa — solo documentación. */
   cus?: string;
+  /** Badge destacado (ej: CU8 "IA Feature"). */
+  badge?: string;
 }
 
 /** Módulo del sistema: grupo desplegable con sus ítems. */
@@ -58,7 +61,7 @@ const ROLE_LABELS: Record<Rol, string> = {
  */
 const MODULES: MenuModule[] = [
   {
-    label: 'Usuarios, Roles y Sucursales',
+    label: 'Administración',
     icon: 'users',
     roles: ['ASU'],
     items: [
@@ -69,46 +72,48 @@ const MODULES: MenuModule[] = [
     ],
   },
   {
-    label: 'Catálogo de Productos',
+    label: 'Catálogo',
     icon: 'shirt',
     roles: ['ASU', 'GS'],
     items: [
-      { label: 'Productos de Ropa', icon: 'shirt', route: '/proximamente/productos', cus: 'CU6' },
-      { label: 'Tallas, Colores y Categorías', icon: 'tag', route: '/proximamente/variantes', cus: 'CU7, CU9' },
+      { label: 'Productos de Ropa', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6' },
+      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9' },
+      { label: 'Tallas y Colores', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7' },
       { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23' },
-      { label: 'Temporadas y Colecciones', icon: 'calendar', route: '/proximamente/temporadas', cus: 'CU24' },
+      { label: 'Temporadas y Colecciones', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24' },
     ],
   },
   {
-    label: 'Disponibilidad e Inventario',
+    label: 'Inventario',
     icon: 'boxes',
     roles: ['ASU', 'GS', 'V'],
     items: [
-      { label: 'Consultar Disponibilidad y Stock', icon: 'boxes', route: '/proximamente/stock', cus: 'CU22' },
-      { label: 'Movimientos de Inventario (Kardex)', icon: 'list', route: '/proximamente/kardex' },
+      { label: 'Consultar Disponibilidad y Stock', icon: 'boxes', route: '/inventario/stock', cus: 'CU22' },
+      { label: 'Movimientos de Inventario (Kardex)', icon: 'list', route: '/inventario/stock', cus: 'CU22' },
     ],
   },
   {
-    label: 'Reservas y Vestidor Virtual',
+    label: 'Reservas y AR',
     icon: 'sparkles',
     roles: ['ASU', 'GS', 'C'],
     items: [
-      { label: 'Gestión de Reservas', icon: 'clock', route: '/proximamente/reservas', cus: 'CU14' },
-      { label: 'Configuración AR Probador', icon: 'camera', route: '/proximamente/ar-probador', cus: 'CU8' },
+      { label: 'Gestión de Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14' },
+      { label: 'Probador Virtual', icon: 'camera', route: '/probador-virtual', cus: 'CU8', badge: 'IA' },
     ],
   },
   {
-    label: 'Ventas y Pagos',
+    label: 'Ventas',
     icon: 'cart',
     roles: ['ASU', 'GS', 'V', 'C'],
     items: [
-      { label: 'Carrito de Compras', icon: 'cart', route: '/proximamente/carrito', cus: 'CU15' },
+      { label: 'Carrito de Compras', icon: 'cart', route: '/carrito', cus: 'CU15' },
+      { label: 'Checkout / Confirmar Compra', icon: 'card', route: '/checkout', cus: 'CU21' },
       { label: 'Ventas Presenciales / Caja', icon: 'register', route: '/proximamente/caja', cus: 'CU11' },
       { label: 'Pasarela de Pago / Transacciones', icon: 'card', route: '/proximamente/pagos', cus: 'CU21' },
     ],
   },
   {
-    label: 'Inteligencia Artificial y Reportes',
+    label: 'Reportes e IA',
     icon: 'brain',
     roles: ['ASU', 'GS'],
     items: [
@@ -166,6 +171,9 @@ export class LayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
+
+  /** CU15: carrito global — contador de ítems para el badge del header. */
+  protected readonly carritoService = inject(CarritoService);
 
   /** Usuario autenticado reactivo (BehaviorSubject -> signal). */
   private readonly user = toSignal(this.authService.currentUser$, {

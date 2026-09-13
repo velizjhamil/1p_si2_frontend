@@ -1,0 +1,236 @@
+<!-- CU14 — Gestionar Reserva de Prendas (FASE MOCK) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-primary">Gestión de Reservas</h1>
+    <p class="text-gray-600 mt-1">
+      Reserve prendas para clientes y siga su ciclo de vida hasta la venta.
+    </p>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Barra de filtros: búsqueda + tabs por estado -->
+  <div
+    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+  >
+    <div class="relative flex-1">
+      <svg
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="onBusqueda($event)"
+        placeholder="Buscar por nombre de cliente..."
+        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+      />
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        (click)="onFiltroEstado('todas')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'todas'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Todas
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('PENDIENTE')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'PENDIENTE'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Pendientes
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('CONFIRMADA')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'CONFIRMADA'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Confirmadas
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('COMPLETADA')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'COMPLETADA'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Completadas
+      </button>
+      <button
+        type="button"
+        (click)="onFiltroEstado('CANCELADA')"
+        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+        [class]="
+          filtroEstado() === 'CANCELADA'
+            ? 'bg-primary text-white shadow-sm'
+            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+        "
+      >
+        Canceladas
+      </button>
+    </div>
+  </div>
+
+  <!-- Datatable de reservas -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+    @if (cargando()) {
+      <div class="p-10 text-center text-primary/60 text-sm">Cargando reservas...</div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-primary text-white">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold">Código</th>
+              <th class="text-left px-4 py-3 font-semibold">Cliente</th>
+              <th class="text-left px-4 py-3 font-semibold">Prendas</th>
+              <th class="text-left px-4 py-3 font-semibold">Expiración</th>
+              <th class="text-center px-4 py-3 font-semibold">Total Estimado</th>
+              <th class="text-center px-4 py-3 font-semibold">Estado</th>
+              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reserva of reservasFiltradas(); track reserva.id) {
+              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+                <td class="px-4 py-3 text-primary font-semibold whitespace-nowrap">
+                  #{{ reserva.id }}
+                </td>
+                <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
+                  {{ reserva.cliente_nombre }}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (prenda of reserva.prendas; track prenda.nombre) {
+                      <span
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-container text-primary text-xs font-medium border border-primary/20"
+                      >
+                        {{ prenda.nombre }}
+                        <span
+                          class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
+                        >
+                          {{ prenda.cantidad }}
+                        </span>
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+                  {{ reserva.fecha_expiracion | date: 'dd/MM/yyyy' }}
+                </td>
+                <td class="px-4 py-3 text-center font-semibold text-gray-800 whitespace-nowrap">
+                  {{ reserva.total_estimado | currency: 'BOB' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <app-badge [variant]="badgeDeEstado(reserva.estado)" [texto]="reserva.estado" />
+                </td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  @if (reserva.estado === 'PENDIENTE') {
+                    <button
+                      type="button"
+                      (click)="confirmar(reserva)"
+                      class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+                      title="Confirmar reserva (PENDIENTE -> CONFIRMADA)"
+                    >
+                      Confirmar Reserva
+                    </button>
+                  }
+                  @if (reserva.estado === 'CONFIRMADA') {
+                    <button
+                      type="button"
+                      (click)="completarVenta(reserva)"
+                      class="text-green-700 hover:text-green-500 font-medium mr-3 transition"
+                      title="Completar la venta de la reserva"
+                    >
+                      Completar Venta
+                    </button>
+                  }
+                  @if (reserva.estado === 'PENDIENTE' || reserva.estado === 'CONFIRMADA') {
+                    <button
+                      type="button"
+                      (click)="pedirCancelar(reserva)"
+                      class="text-red-600 hover:text-red-400 font-medium transition"
+                      title="Cancelar reserva"
+                    >
+                      Cancelar
+                    </button>
+                  }
+                  @if (reserva.estado === 'COMPLETADA' || reserva.estado === 'CANCELADA') {
+                    <span class="text-gray-400 text-xs italic">Sin acciones</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No se encontraron reservas con los criterios de búsqueda.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <!-- Pie: contador -->
+      <div
+        class="px-4 py-3 bg-container/50 text-xs text-primary/70 flex items-center justify-between"
+      >
+        <span>{{ reservasFiltradas().length }} de {{ reservas().length }} reservas</span>
+        <span class="italic">Ciclo: Pendiente → Confirmada → Completada / Cancelada</span>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ConfirmDialog de cancelación -->
+@if (confirmarCancelar(); as reserva) {
+  <app-confirm-dialog
+    titulo="Cancelar Reserva"
+    [mensaje]="'¿Cancelar la reserva de ' + reserva.cliente_nombre + '? Las prendas volverán a estar disponibles para la venta.'"
+    textoConfirmar="Sí, Cancelar"
+    [peligro]="true"
+    (confirmado)="confirmarCancelacion()"
+    (cancelado)="confirmarCancelar.set(null)"
+  ></app-confirm-dialog>
+}

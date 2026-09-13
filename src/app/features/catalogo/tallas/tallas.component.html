@@ -1,0 +1,386 @@
+<!-- CU7 — Gestión de Tallas y Colores (ASU/GS) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Tallas y Colores</h1>
+      <p class="text-gray-600 mt-1">
+        Administre las variantes de las prendas del catálogo.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="abrirModalCrear()"
+      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+    >
+      {{ pestania() === 'tallas' ? '+ Nueva Talla' : '+ Nuevo Color' }}
+    </button>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !modalAbierto()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Pestañas Tallas | Colores -->
+  <div class="bg-container rounded-xl p-2 inline-flex gap-2 mb-4">
+    <button
+      type="button"
+      (click)="cambiarPestania('tallas')"
+      class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        pestania() === 'tallas'
+          ? 'bg-primary text-white shadow-sm'
+          : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+      "
+    >
+      Tallas ({{ tallas().length }})
+    </button>
+    <button
+      type="button"
+      (click)="cambiarPestania('colores')"
+      class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
+      [class]="
+        pestania() === 'colores'
+          ? 'bg-primary text-white shadow-sm'
+          : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+      "
+    >
+      Colores ({{ colores().length }})
+    </button>
+  </div>
+
+  <!-- Datatables -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+    @if (cargando()) {
+      <div class="p-10 text-center text-primary/60 text-sm">Cargando catálogo...</div>
+    } @else if (pestania() === 'tallas') {
+      <!-- Tabla de TALLAS -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-primary text-white">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold">ID</th>
+              <th class="text-left px-4 py-3 font-semibold">Talla</th>
+              <th class="text-left px-4 py-3 font-semibold">Descripción</th>
+              <th class="text-center px-4 py-3 font-semibold">Estado</th>
+              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (talla of tallas(); track talla.id) {
+              <tr
+                class="border-b border-primary/10 hover:bg-container/60 transition"
+              >
+                <td class="px-4 py-3 text-primary font-semibold">#{{ talla.id }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800">{{ talla.nombre }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ talla.descripcion || '—' }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (talla.activo) {
+                    <app-badge variant="success" texto="Activo" />
+                  } @else {
+                    <app-badge variant="danger" texto="Inactivo" />
+                  }
+                </td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    (click)="abrirModalEditarTalla(talla)"
+                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+                    title="Editar talla"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="pedirEliminar({ tipo: 'tallas', id: talla.id, nombre: talla.nombre })"
+                    class="text-red-600 hover:text-red-400 font-medium transition"
+                    title="Eliminar talla"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No hay tallas registradas.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <!-- Tabla de COLORES -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-primary text-white">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold">ID</th>
+              <th class="text-left px-4 py-3 font-semibold">Color</th>
+              <th class="text-left px-4 py-3 font-semibold">Muestra</th>
+              <th class="text-left px-4 py-3 font-semibold">Código HEX</th>
+              <th class="text-left px-4 py-3 font-semibold">Descripción</th>
+              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (color of colores(); track color.id) {
+              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+                <td class="px-4 py-3 text-primary font-semibold">#{{ color.id }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800">{{ color.nombre }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-block w-6 h-6 rounded-full border border-primary/20 shadow-sm"
+                    [style.background]="color.hex"
+                  ></span>
+                </td>
+                <td class="px-4 py-3 text-gray-600 font-mono text-xs">{{ color.hex }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ color.descripcion || '—' }}</td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    (click)="abrirModalEditarColor(color)"
+                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+                    title="Editar color"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="pedirEliminar({ tipo: 'colores', id: color.id, nombre: color.nombre })"
+                    class="text-red-600 hover:text-red-400 font-medium transition"
+                    title="Eliminar color"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No hay colores registrados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Modal Nueva Talla / Editar Talla -->
+@if (modalAbierto() && pestania() === 'tallas') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModal()"
+    ></div>
+    <div
+      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+    >
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+        <h2 class="text-lg font-bold">
+          {{ editandoId() ? 'Editar Talla' : 'Nueva Talla' }}
+        </h2>
+        <p class="text-white/80 text-xs mt-0.5">
+          {{
+            editandoId()
+              ? 'Actualice los datos de la talla.'
+              : 'Registre una nueva variante de tamaño para el catálogo.'
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="tallaForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="talla-nombre">
+            Talla *
+          </label>
+          <input
+            id="talla-nombre"
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm uppercase"
+            placeholder="Ej: XXL"
+          />
+        </div>
+
+        <div>
+          <label
+            class="block text-sm font-medium text-primary mb-1"
+            for="talla-descripcion"
+          >
+            Descripción (opcional)
+          </label>
+          <input
+            id="talla-descripcion"
+            type="text"
+            formControlName="descripcion"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Extra extra large"
+          />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cerrarModal()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="guardando()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Talla') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Nuevo Color / Editar Color -->
+@if (modalAbierto() && pestania() === 'colores') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModal()"
+    ></div>
+    <div
+      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+    >
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+        <h2 class="text-lg font-bold">
+          {{ editandoId() ? 'Editar Color' : 'Nuevo Color' }}
+        </h2>
+        <p class="text-white/80 text-xs mt-0.5">
+          {{
+            editandoId()
+              ? 'Actualice los datos del color.'
+              : 'Registre un nuevo color para las variantes del catálogo.'
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="colorForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="color-nombre">
+            Nombre del Color *
+          </label>
+          <input
+            id="color-nombre"
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Verde Esmeralda"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="color-hex">
+            Código HEX *
+          </label>
+          <div class="flex gap-3 items-center">
+            <input
+              id="color-hex"
+              type="color"
+              formControlName="hex"
+              class="h-11 w-16 rounded-lg border border-primary/20 cursor-pointer bg-white"
+            />
+            <input
+              type="text"
+              formControlName="hex"
+              class="flex-1 px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-mono"
+              placeholder="#1d528d"
+            />
+            <span
+              class="inline-block w-10 h-10 rounded-full border border-primary/20 shadow-sm"
+              [style.background]="previewHex()"
+            ></span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            Use el selector o escriba el código directamente (formato #RRGGBB).
+          </p>
+        </div>
+
+        <div>
+          <label
+            class="block text-sm font-medium text-primary mb-1"
+            for="color-descripcion"
+          >
+            Descripción (opcional)
+          </label>
+          <input
+            id="color-descripcion"
+            type="text"
+            formControlName="descripcion"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Ej: Azul corporativo Attention"
+          />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cerrarModal()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="guardando()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Color') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ConfirmDialog de eliminación -->
+@if (confirmarEliminar(); as item) {
+  <app-confirm-dialog
+    [titulo]="item.tipo === 'tallas' ? 'Eliminar Talla' : 'Eliminar Color'"
+    [mensaje]="'¿Eliminar ' + (item.tipo === 'tallas' ? 'la talla' : 'el color') + ' ' + item.nombre + '? Esta acción no se puede deshacer.'"
+    textoConfirmar="Eliminar"
+    [peligro]="true"
+    (confirmado)="confirmarEliminacion()"
+    (cancelado)="confirmarEliminar.set(null)"
+  ></app-confirm-dialog>
+}

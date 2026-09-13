@@ -1,0 +1,336 @@
+<!-- CU22 — Gestión de Inventario (FASE MOCK) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gestión de Inventario</h1>
+      <p class="text-gray-600 mt-1">
+        Consulte el stock por producto y registre movimientos de inventario (kardex).
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="abrirModal()"
+      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+    >
+      + Registrar Movimiento de Stock
+    </button>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !modalAbierto()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- KPIs top -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-container rounded-xl p-5 border border-primary/10">
+      <p class="text-xs font-medium text-primary/70 uppercase tracking-wide">
+        Stock Total
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ stockTotal() }}</p>
+      <p class="text-xs text-gray-500 mt-1">unidades en catálogo</p>
+    </div>
+    <div class="bg-container rounded-xl p-5 border border-primary/10">
+      <p class="text-xs font-medium text-primary/70 uppercase tracking-wide">
+        Productos con Stock Crítico
+      </p>
+      <p
+        class="text-3xl font-bold mt-1"
+        [class]="productosCriticos() > 0 ? 'text-red-600' : 'text-primary'"
+      >
+        {{ productosCriticos() }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">menos de {{ 5 }} unidades</p>
+    </div>
+    <div class="bg-container rounded-xl p-5 border border-primary/10">
+      <p class="text-xs font-medium text-primary/70 uppercase tracking-wide">
+        Productos Gestionados
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ totalProductos() }}</p>
+      <p class="text-xs text-gray-500 mt-1">SKUs en inventario</p>
+    </div>
+  </div>
+
+  <!-- Tabla de stock actual -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10 mb-8">
+    <div class="px-4 py-3 bg-primary text-white flex items-center justify-between">
+      <h2 class="font-semibold text-sm">Stock Actual por Producto</h2>
+    </div>
+    @if (cargando()) {
+      <div class="p-10 text-center text-primary/60 text-sm">Cargando stock...</div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-container/70">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold text-primary">ID</th>
+              <th class="text-left px-4 py-3 font-semibold text-primary">Producto</th>
+              <th class="text-left px-4 py-3 font-semibold text-primary">Categoría</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Stock</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of stock(); track producto.id) {
+              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+                <td class="px-4 py-3 text-primary font-semibold">#{{ producto.id }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800">{{ producto.nombre }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ producto.categoria }}</td>
+                <td class="px-4 py-3 text-center font-semibold text-gray-800">
+                  {{ producto.stock_actual }}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <app-badge
+                    [variant]="badgeDeStock(producto.stock_actual)"
+                    [texto]="nivelDeStock(producto.stock_actual)"
+                  />
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No hay productos en el inventario.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Historial de movimientos (kardex) -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+    <div class="px-4 py-3 bg-primary text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <h2 class="font-semibold text-sm">Historial de Movimientos (Kardex)</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          (click)="onFiltroTipo('todos')"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          [class]="
+            filtroTipo() === 'todos'
+              ? 'bg-white text-primary shadow-sm'
+              : 'bg-white/20 text-white hover:bg-white/30'
+          "
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          (click)="onFiltroTipo('ENTRADA')"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          [class]="
+            filtroTipo() === 'ENTRADA'
+              ? 'bg-white text-primary shadow-sm'
+              : 'bg-white/20 text-white hover:bg-white/30'
+          "
+        >
+          Entradas
+        </button>
+        <button
+          type="button"
+          (click)="onFiltroTipo('SALIDA')"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          [class]="
+            filtroTipo() === 'SALIDA'
+              ? 'bg-white text-primary shadow-sm'
+              : 'bg-white/20 text-white hover:bg-white/30'
+          "
+        >
+          Salidas
+        </button>
+        <button
+          type="button"
+          (click)="onFiltroTipo('AJUSTE')"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          [class]="
+            filtroTipo() === 'AJUSTE'
+              ? 'bg-white text-primary shadow-sm'
+              : 'bg-white/20 text-white hover:bg-white/30'
+          "
+        >
+          Ajustes
+        </button>
+        <input
+          type="date"
+          [value]="filtroFecha()"
+          (input)="onFiltroFecha($event)"
+          class="px-2.5 py-1.5 rounded-lg text-xs bg-white text-primary border-0 focus:outline-none focus:ring-2 focus:ring-white/60"
+          title="Filtrar por fecha"
+        />
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <div class="p-10 text-center text-primary/60 text-sm">Cargando historial...</div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-container/70">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold text-primary">Fecha</th>
+              <th class="text-left px-4 py-3 font-semibold text-primary">Producto</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Tipo</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Cantidad</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Stock Ant.</th>
+              <th class="text-center px-4 py-3 font-semibold text-primary">Stock Nuevo</th>
+              <th class="text-left px-4 py-3 font-semibold text-primary">Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (mov of movimientosFiltrados(); track mov.id) {
+              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+                  {{ mov.fecha | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="px-4 py-3 font-medium text-gray-800">
+                  {{ mov.producto_nombre }}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <app-badge [variant]="badgeTipo(mov.tipo)" [texto]="mov.tipo" />
+                </td>
+                <td
+                  class="px-4 py-3 text-center font-semibold whitespace-nowrap"
+                  [class]="mov.cantidad >= 0 ? 'text-green-600' : 'text-red-600'"
+                >
+                  {{ mov.cantidad > 0 ? '+' : '' }}{{ mov.cantidad }}
+                </td>
+                <td class="px-4 py-3 text-center text-gray-600">{{ mov.stock_anterior }}</td>
+                <td class="px-4 py-3 text-center font-medium text-gray-800">
+                  {{ mov.stock_nuevo }}
+                </td>
+                <td class="px-4 py-3 text-gray-600">{{ mov.motivo }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
+                  No hay movimientos con los filtros aplicados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Modal + Registrar Movimiento de Stock -->
+@if (modalAbierto()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModal()"
+    ></div>
+    <div
+      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+    >
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+        <h2 class="text-lg font-bold">Registrar Movimiento de Stock</h2>
+        <p class="text-white/80 text-xs mt-0.5">
+          ENTRADA suma unidades, SALIDA descuenta y AJUSTE fija el stock total.
+        </p>
+      </div>
+
+      <form [formGroup]="movimientoForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="producto_id">
+            Producto *
+          </label>
+          <select
+            id="producto_id"
+            formControlName="producto_id"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+          >
+            <option value="" disabled>Seleccione un producto...</option>
+            @for (producto of stock(); track producto.id) {
+              <option [value]="producto.id">
+                {{ producto.nombre }} (stock: {{ producto.stock_actual }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="tipo">
+            Tipo de Movimiento *
+          </label>
+          <select
+            id="tipo"
+            formControlName="tipo"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+          >
+            <option value="ENTRADA">Entrada (ingreso de mercadería)</option>
+            <option value="SALIDA">Salida (venta, devolución a proveedor)</option>
+            <option value="AJUSTE">Ajuste (inventario físico)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="cantidad">
+            Cantidad *
+          </label>
+          <input
+            id="cantidad"
+            type="number"
+            formControlName="cantidad"
+            min="0"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+            placeholder="Unidades (para AJUSTE: stock final exacto)"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="motivo">
+            Motivo (opcional)
+          </label>
+          <textarea
+            id="motivo"
+            formControlName="motivo"
+            rows="2"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm resize-none"
+            placeholder="Ej: Compra a proveedor, venta #0012, inventario físico..."
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="cerrarModal()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="guardando()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ guardando() ? 'Registrando...' : 'Registrar Movimiento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

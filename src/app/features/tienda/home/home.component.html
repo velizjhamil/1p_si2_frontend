@@ -1,10 +1,134 @@
-<div class="min-h-screen bg-white p-8">
-  <div class="bg-container rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold text-primary">Bienvenido a la Tienda</h1>
-    <p class="text-gray-600 mt-2">Bienvenido, {{ usuario?.nombre ?? 'Usuario' }}</p>
-    <span class="inline-block mt-2 px-3 py-1 rounded-full bg-accent text-primary text-sm">Rol: {{ usuario?.rol?.nombre_rol }}</span>
-    <button (click)="cerrarSesion()" class="mt-6 bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary transition">
-      Cerrar sesión
-    </button>
+<!-- CU15 (mock) — Home de la tienda: catálogo del Cliente -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-primary">Bienvenido a la Tienda Attention</h1>
+    <p class="text-gray-600 mt-1">
+      Explore el catálogo, elija su variante (talla y color) y agréguela al carrito.
+    </p>
   </div>
-</div>
+
+  <!-- Toast de agregado -->
+  @if (agregado(); as msg) {
+    <div
+      class="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl bg-primary text-white shadow-lg text-sm font-medium animate-pulse"
+    >
+      ✓ {{ msg }}
+    </div>
+  }
+
+  <!-- Grid de productos -->
+  @if (cargando()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
+        <div class="bg-white rounded-2xl border border-primary/10 overflow-hidden animate-pulse">
+          <div class="h-44 bg-container"></div>
+          <div class="p-4 space-y-3">
+            <div class="h-4 bg-container rounded w-3/4"></div>
+            <div class="h-3 bg-container rounded w-1/2"></div>
+            <div class="h-9 bg-container rounded"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (producto of productos(); track producto.producto_id) {
+        <article
+          class="bg-white rounded-2xl shadow-lg overflow-hidden border border-primary/10 flex flex-col hover:shadow-xl transition"
+        >
+          <!-- Imagen / placeholder -->
+          <div
+            class="h-44 bg-container flex items-center justify-center relative"
+          >
+            @if (producto.imagen_url) {
+              <img
+                [src]="producto.imagen_url"
+                [alt]="producto.nombre"
+                class="h-full w-full object-cover"
+              />
+            } @else {
+              <svg
+                class="h-16 w-16 text-primary/30"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z" />
+              </svg>
+            }
+            <span
+              class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-primary text-xs font-semibold shadow-sm"
+            >
+              {{ producto.categoria }}
+            </span>
+          </div>
+
+          <!-- Info y selección de variante -->
+          <div class="p-4 flex flex-col gap-3 flex-1">
+            <div>
+              <h3 class="font-bold text-gray-800">{{ producto.nombre }}</h3>
+              <p class="text-primary font-semibold mt-1">{{ formatBs(producto.precio) }}</p>
+            </div>
+
+            <!-- Tallas -->
+            <div class="flex flex-wrap gap-1.5">
+              @for (talla of producto.tallas; track talla) {
+                <button
+                  type="button"
+                  (click)="elegirTalla(producto, talla)"
+                  class="h-8 w-9 rounded-lg text-xs font-semibold border transition"
+                  [class]="
+                    seleccion()[producto.producto_id]?.talla === talla
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
+                  "
+                >
+                  {{ talla }}
+                </button>
+              }
+            </div>
+
+            <!-- Colores -->
+            <div class="flex gap-2">
+              @for (color of producto.colores; track color.nombre) {
+                <button
+                  type="button"
+                  (click)="elegirColor(producto, color)"
+                  class="h-6 w-6 rounded-full border-2 transition"
+                  [style.background]="color.hex"
+                  [class]="
+                    seleccion()[producto.producto_id]?.color === color.nombre
+                      ? 'border-primary scale-110 shadow-sm'
+                      : 'border-primary/20 hover:border-primary/50'
+                  "
+                  [title]="color.nombre"
+                  [attr.aria-label]="'Color ' + color.nombre"
+                ></button>
+              }
+            </div>
+
+            <!-- Agregar -->
+            <button
+              type="button"
+              (click)="agregarAlCarrito(producto)"
+              class="mt-auto w-full bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium text-sm shadow-sm"
+            >
+              🛒 Agregar al Carrito
+            </button>
+          </div>
+        </article>
+      } @empty {
+        <div
+          class="col-span-full bg-white rounded-xl border border-primary/10 p-10 text-center text-gray-500"
+        >
+          No hay productos en el catálogo por ahora.
+        </div>
+      }
+    </div>
+  }
+</section>

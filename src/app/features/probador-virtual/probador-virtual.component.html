@@ -1,0 +1,522 @@
+<!-- CU8 — Probador Virtual AR (FASE MOCK) -->
+<section class="p-6 md:p-8 max-w-6xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary flex items-center gap-2">
+        Probador Virtual
+        <span class="px-2 py-0.5 rounded-full bg-accent text-primary text-xs font-bold tracking-wide">
+          IA FEATURE
+        </span>
+      </h1>
+      <p class="text-gray-600 mt-1">
+        Suba la foto del cliente, elija la prenda y vea cómo le queda antes de comprar.
+      </p>
+    </div>
+    <div class="bg-container rounded-xl px-4 py-3 border border-primary/10 text-sm">
+      <span class="font-semibold text-primary">{{ totalLookbook() }}</span>
+      <span class="text-gray-600"> pruebas en Mis Lookbooks</span>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm">
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Dos columnas: carga de foto | selector de prenda -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- (a) Panel de Carga de Foto -->
+    <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden flex flex-col">
+      <div class="px-4 py-3 bg-primary text-white">
+        <h2 class="font-semibold text-sm">1 · Foto del Cliente</h2>
+        <p class="text-white/80 text-xs mt-0.5">La IA analiza la silueta para recomendar su talla.</p>
+      </div>
+
+      <div class="p-5 flex flex-col gap-4 flex-1">
+        @if (!fotoUsuario()) {
+          <!-- Área Drag & Drop -->
+          <div
+            class="flex-1 min-h-56 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-3 p-6 text-center transition cursor-pointer"
+            [class]="
+              dragOver()
+                ? 'border-primary bg-container scale-[1.01] shadow-inner'
+                : 'border-primary/30 bg-canvas hover:bg-container/50'
+            "
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Área para arrastrar la foto del cliente'"
+            (keyup.enter)="fileInput.click()"
+          >
+            @if (vistaPrevia()) {
+              <img
+                [src]="vistaPrevia()"
+                alt="Vista previa de la foto del cliente"
+                class="max-h-56 rounded-lg shadow-md object-contain"
+              />
+            } @else {
+              <svg class="h-14 w-14 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <path d="M16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+              </svg>
+              <div>
+                <p class="font-semibold text-primary">Arrastre la foto aquí</p>
+                <p class="text-xs text-gray-500 mt-1">o haga clic para seleccionar (JPG/PNG, máx 3MB)</p>
+              </div>
+            }
+          </div>
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            class="hidden"
+            (change)="onFileSelected($event)"
+          />
+
+          <!-- Medidas opcionales -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-primary mb-1" for="estatura">
+                Estatura (cm) — opcional
+              </label>
+              <input
+                id="estatura"
+                type="number"
+                min="100"
+                max="230"
+                [(ngModel)]="estaturaInput"
+                class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+                placeholder="170"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-primary mb-1" for="peso">
+                Peso (kg) — opcional
+              </label>
+              <input
+                id="peso"
+                type="number"
+                min="25"
+                max="250"
+                [(ngModel)]="pesoInput"
+                class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+                placeholder="70"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="subirFoto()"
+            [disabled]="subiendoFoto() || !vistaPrevia()"
+            class="w-full bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (subiendoFoto()) {
+              <span class="inline-flex items-center gap-2">
+                <span class="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
+                Procesando imagen con IA...
+              </span>
+            } @else {
+              ⬆ Subir y Procesar Foto
+            }
+          </button>
+        } @else {
+          <!-- Foto ya procesada -->
+          <div class="flex-1 flex flex-col items-center gap-3">
+            <div class="relative">
+              <img
+                [src]="fotoUsuario()!.url_imagen"
+                alt="Foto del cliente procesada"
+                class="max-h-64 rounded-xl shadow-lg border-4 border-container object-contain"
+              />
+              <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-primary text-white text-xs font-semibold shadow-sm">
+                ✓ Analizada
+              </span>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-full bg-container text-primary font-semibold">
+                Complexión: {{ complexionLabel() }}
+              </span>
+              @if (fotoUsuario()!.medidas_aproximadas.estatura; as e) {
+                <span class="px-2.5 py-1 rounded-full bg-container text-primary font-semibold">
+                  {{ e }} cm
+                </span>
+              }
+              @if (fotoUsuario()!.medidas_aproximadas.peso; as p) {
+                <span class="px-2.5 py-1 rounded-full bg-container text-primary font-semibold">
+                  {{ p }} kg
+                </span>
+              }
+            </div>
+            <button
+              type="button"
+              (click)="cambiarFoto()"
+              class="text-sm text-primary underline underline-offset-2 hover:text-primary/70 transition"
+            >
+              Cambiar foto
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- (b) Selector de Prenda -->
+    <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden flex flex-col">
+      <div class="px-4 py-3 bg-primary text-white">
+        <h2 class="font-semibold text-sm">2 · Elija la Prenda</h2>
+        <p class="text-white/80 text-xs mt-0.5">Del catálogo Attention, con talla y color.</p>
+      </div>
+
+      <div class="p-5 flex flex-col gap-4 flex-1">
+        @if (cargandoCatalogo()) {
+          <div class="p-10 text-center text-primary/60 text-sm">Cargando catálogo...</div>
+        } @else {
+          <!-- Grid de prendas -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-y-auto pr-1">
+            @for (producto of productos(); track producto.producto_id) {
+              <button
+                type="button"
+                (click)="elegirProducto(producto)"
+                class="rounded-xl border p-3 text-left transition flex flex-col items-center gap-1.5"
+                [class]="
+                  productoSeleccionado()?.producto_id === producto.producto_id
+                    ? 'border-primary bg-container shadow-md scale-[1.02]'
+                    : 'border-primary/20 bg-white hover:bg-container/60'
+                "
+              >
+                <svg class="h-8 w-8" [class]="
+                  productoSeleccionado()?.producto_id === producto.producto_id
+                    ? 'text-primary' : 'text-primary/40'
+                " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z" />
+                </svg>
+                <span class="text-xs font-semibold text-gray-800 text-center leading-tight">
+                  {{ producto.nombre }}
+                </span>
+                <span class="text-[10px] text-primary font-semibold">
+                  Bs. {{ producto.precio.toFixed(2) }}
+                </span>
+              </button>
+            }
+          </div>
+
+          @if (productoSeleccionado(); as producto) {
+            <!-- Tallas -->
+            <div>
+              <p class="text-sm font-medium text-primary mb-1.5">Talla</p>
+              <div class="flex flex-wrap gap-1.5">
+                @for (talla of producto.tallas; track talla) {
+                  <button
+                    type="button"
+                    (click)="elegirTalla(talla)"
+                    class="h-9 w-11 rounded-lg text-xs font-semibold border transition"
+                    [class]="
+                      tallaSeleccionada() === talla
+                        ? 'bg-primary text-white border-primary shadow-sm'
+                        : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
+                    "
+                  >
+                    {{ talla }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Colores -->
+            <div>
+              <p class="text-sm font-medium text-primary mb-1.5">Color</p>
+              <div class="flex flex-wrap gap-2">
+                @for (color of producto.colores; track color.nombre) {
+                  <button
+                    type="button"
+                    (click)="elegirColor(color)"
+                    class="h-7 w-7 rounded-full border-2 transition"
+                    [style.background]="color.hex"
+                    [class]="
+                      colorSeleccionado()?.nombre === color.nombre
+                        ? 'border-primary scale-110 shadow-sm'
+                        : 'border-primary/20 hover:border-primary/50'
+                    "
+                    [title]="color.nombre"
+                    [attr.aria-label]="'Color ' + color.nombre"
+                  ></button>
+                }
+              </div>
+            </div>
+
+            <!-- Botón prominente -->
+            <button
+              type="button"
+              (click)="probarPrenda()"
+              [disabled]="simulando() || !fotoUsuario()"
+              class="w-full bg-accent text-primary px-5 py-3 rounded-xl text-sm font-bold hover:bg-primary hover:text-white transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (simulando()) {
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-4 w-4 rounded-full border-2 border-primary/40 border-t-primary animate-spin"></span>
+                  Generando superposición AR...
+                </span>
+              } @else {
+                ✨ Probar Prenda Virtual
+              }
+            </button>
+          } @else {
+            <p class="text-xs text-gray-500 text-center">
+              Seleccione una prenda del catálogo para habilitar talla, color y la prueba virtual.
+            </p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de Resultado Visual (comparativo) -->
+  @if (simulacion(); as sim) {
+    <div
+      id="resultado-probador"
+      class="bg-white rounded-2xl shadow-xl border border-primary/10 overflow-hidden mb-8 scroll-mt-20"
+    >
+      <div class="px-4 py-3 bg-primary text-white flex items-center justify-between">
+        <h2 class="font-semibold text-sm">Resultado de la Prueba Virtual</h2>
+        <span class="text-xs text-white/70">{{ fechaLegible(sim.fecha_simulacion) }}</span>
+      </div>
+
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Foto base -->
+        <div>
+          <p class="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Foto Base</p>
+          <img
+            [src]="fotoUsuario()!.url_imagen"
+            alt="Foto original del cliente"
+            class="w-full max-h-80 object-contain rounded-xl border border-primary/10 bg-canvas"
+          />
+        </div>
+
+        <!-- Foto simulada: silueta AR de la prenda superpuesta -->
+        <div>
+          <p class="text-xs font-semibold text-primary uppercase tracking-wide mb-2">
+            Con {{ sim.producto_nombre }} (Talla {{ sim.talla_seleccionada }})
+          </p>
+          <div class="relative w-full max-h-80 rounded-xl border-2 border-primary/30 bg-canvas overflow-hidden">
+            <img
+              [src]="sim.resultado_imagen_url"
+              alt="Simulación AR de la prenda sobre el cliente"
+              class="w-full max-h-80 object-contain"
+            />
+            <!-- Overlay AR: silueta de la prenda "puesta" -->
+            <div
+              class="absolute inset-0 flex items-center justify-center pointer-events-none"
+              aria-hidden="true"
+            >
+              <svg class="h-40 w-40 opacity-80 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" [attr.stroke]="sim.color_hex" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z"
+                  fill="currentColor"
+                  fill-opacity="0.25"
+                  stroke="currentColor"
+                />
+              </svg>
+            </div>
+            <span class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-accent text-primary text-[11px] font-bold shadow-sm">
+              AR SIMULACIÓN
+            </span>
+            <!-- Swatch del color elegido -->
+            <span
+              class="absolute bottom-2 left-2 h-5 w-5 rounded-full shadow-md"
+              [style.background]="sim.color_hex"
+              [class]="claseSwatch(sim.color_hex)"
+            ></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge de recomendación + acciones -->
+      <div class="px-5 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-primary/10 pt-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-sm font-semibold text-primary">Sugerencia IA:</span>
+          <app-badge variant="accent" [texto]="'Talla ' + sim.talla_recomendada" />
+          <app-badge [variant]="badgeAjuste(sim.ajuste_estimado)" [texto]="ajusteLabel(sim.ajuste_estimado)" />
+          <span class="text-xs text-gray-500">
+            (usted eligió talla {{ sim.talla_seleccionada }})
+          </span>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="agregarAlCarrito()"
+            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium shadow-sm"
+          >
+            🛒 Agregar Prenda al Carrito
+          </button>
+          <button
+            type="button"
+            (click)="guardarEnLookbook()"
+            class="border border-primary/30 text-primary px-5 py-2.5 rounded-lg hover:bg-container transition text-sm font-medium"
+          >
+            💾 Guardar En Mis Lookbooks
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Historial / Galería de pruebas -->
+  <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
+    <div class="px-4 py-3 bg-primary text-white flex items-center justify-between">
+      <h2 class="font-semibold text-sm">Mis Lookbooks — Historial de Pruebas</h2>
+    </div>
+
+    @if (historial().length === 0) {
+      <div class="p-10 text-center text-gray-500 text-sm">
+        Aún no guardó ninguna prueba. Pruebe una prenda y guárdela aquí.
+      </div>
+    } @else {
+      <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (sim of historial(); track sim.id) {
+          <div class="rounded-xl border border-primary/10 bg-canvas overflow-hidden flex flex-col">
+            <!-- Miniatura: silueta AR sobre gris -->
+            <div class="relative h-36 bg-container flex items-center justify-center">
+              <svg class="h-20 w-20 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                <path
+                  d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z"
+                  fill="currentColor"
+                  fill-opacity="0.2"
+                />
+              </svg>
+              <span
+                class="absolute bottom-2 left-2 h-4 w-4 rounded-full shadow"
+                [style.background]="sim.color_hex"
+                [class]="claseSwatch(sim.color_hex)"
+              ></span>
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-primary text-[10px] font-bold shadow-sm">
+                Talla {{ sim.talla_seleccionada }}
+              </span>
+            </div>
+            <div class="p-3 flex flex-col gap-2 flex-1">
+              <p class="text-sm font-semibold text-gray-800 leading-tight">{{ sim.producto_nombre }}</p>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <app-badge [variant]="badgeAjuste(sim.ajuste_estimado)" [texto]="ajusteLabel(sim.ajuste_estimado)" />
+                <span class="text-[11px] text-gray-500">{{ fechaLegible(sim.fecha_simulacion) }}</span>
+              </div>
+              <div class="mt-auto flex gap-2 pt-2">
+                <button
+                  type="button"
+                  (click)="verDetalle(sim)"
+                  class="flex-1 bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-accent hover:text-primary transition"
+                >
+                  Ver Detalle
+                </button>
+                <button
+                  type="button"
+                  (click)="eliminarPrueba(sim)"
+                  class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 border border-red-200 hover:bg-red-50 transition"
+                  title="Eliminar prueba del lookbook"
+                >
+                  🗑
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Modal: Detalle de la prueba del historial -->
+@if (detalleSimulacion(); as sim) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-primary/40 backdrop-blur-sm" (click)="cerrarDetalle()"></div>
+    <div class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold">{{ sim.producto_nombre }}</h2>
+          <p class="text-white/80 text-xs mt-0.5">{{ fechaLegible(sim.fecha_simulacion) }}</p>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarDetalle()"
+          class="h-9 w-9 rounded-full bg-white/15 hover:bg-white/30 transition text-white text-lg leading-none"
+          aria-label="Cerrar detalle"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Visual de la prenda en el modal -->
+        <div class="relative h-56 bg-canvas rounded-xl border border-primary/10 flex items-center justify-center">
+          <svg
+            class="h-28 w-28 opacity-80 drop-shadow-lg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            aria-hidden="true"
+          >
+            <path
+              d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z"
+              fill="currentColor"
+              fill-opacity="0.25"
+            />
+          </svg>
+          <span class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-accent text-primary text-[11px] font-bold shadow-sm">
+            AR SIMULACIÓN
+          </span>
+          <span
+            class="absolute bottom-2 left-2 h-5 w-5 rounded-full shadow-md"
+            [style.background]="sim.color_hex"
+            [class]="claseSwatch(sim.color_hex)"
+          ></span>
+        </div>
+
+        <!-- Detalles -->
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="bg-container rounded-lg p-3">
+            <p class="text-[11px] text-primary/70 uppercase font-semibold">Talla elegida</p>
+            <p class="font-bold text-primary text-lg">{{ sim.talla_seleccionada }}</p>
+          </div>
+          <div class="bg-container rounded-lg p-3">
+            <p class="text-[11px] text-primary/70 uppercase font-semibold">Color</p>
+            <p class="font-bold text-primary text-lg">{{ sim.color_seleccionado }}</p>
+          </div>
+          <div class="bg-container rounded-lg p-3">
+            <p class="text-[11px] text-primary/70 uppercase font-semibold">Ajuste estimado</p>
+            <app-badge [variant]="badgeAjuste(sim.ajuste_estimado)" [texto]="ajusteLabel(sim.ajuste_estimado)" />
+          </div>
+          <div class="bg-container rounded-lg p-3">
+            <p class="text-[11px] text-primary/70 uppercase font-semibold">Talla sugerida IA</p>
+            <app-badge variant="accent" [texto]="'Talla ' + sim.talla_recomendada" />
+          </div>
+          @if (sim.precio; as precio) {
+            <div class="bg-container rounded-lg p-3 col-span-2">
+              <p class="text-[11px] text-primary/70 uppercase font-semibold">Precio al momento de la prueba</p>
+              <p class="font-bold text-primary text-lg">Bs. {{ precio.toFixed(2) }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end gap-3 pt-1">
+          <button
+            type="button"
+            (click)="cerrarDetalle()"
+            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

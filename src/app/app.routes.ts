@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { CATALOGO_ROUTES } from './features/catalogo/catalogo.routes';
 
 export const routes: Routes = [
   {
@@ -72,6 +73,45 @@ export const routes: Routes = [
         data: { roles: ['ASU', 'GS'] },
       },
       {
+        // CU9: Gestión de Categorías.
+        path: 'categorias',
+        loadComponent: () =>
+          import('./features/categories/categories.component').then(
+            (m) => m.CategoriesComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['ASU', 'GS'] },
+      },
+      {
+        // Módulo Catálogo: rutas lazy children bajo /catalogo (CU6, CU7, CU24...).
+        path: 'catalogo',
+        children: CATALOGO_ROUTES,
+      },
+      {
+        // Módulo Inventario: rutas lazy children bajo /inventario (CU22...).
+        path: 'inventario',
+        loadChildren: () =>
+          import('./features/inventario/inventario.routes').then(
+            (m) => m.INVENTARIO_ROUTES,
+          ),
+      },
+      {
+        // Módulo Reservas: rutas lazy children bajo /reservas (CU14...).
+        path: 'reservas',
+        loadChildren: () =>
+          import('./features/reservas/reservas.routes').then(
+            (m) => m.RESERVAS_ROUTES,
+          ),
+      },
+      {
+        // Módulo Probador Virtual AR (CU8): ruta lazy bajo /probador-virtual.
+        path: 'probador-virtual',
+        loadChildren: () =>
+          import('./features/probador-virtual/probador.routes').then(
+            (m) => m.PROBADOR_ROUTES,
+          ),
+      },
+      {
         path: 'gerente/dashboard',
         loadComponent: () =>
           import('./features/gerente/dashboard/dashboard.component').then(
@@ -97,6 +137,26 @@ export const routes: Routes = [
           ),
         canActivate: [authGuard],
         data: { roles: ['C'] },
+      },
+      {
+        // CU15: Carrito de Compras del Cliente (mock).
+        path: 'carrito',
+        loadComponent: () =>
+          import('./features/tienda/carrito/carrito.component').then(
+            (m) => m.CarritoComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['C', 'V', 'ASU', 'GS'] },
+      },
+      {
+        // CU21: Checkout / Confirmación de compra (mock).
+        path: 'checkout',
+        loadComponent: () =>
+          import('./features/tienda/checkout/checkout.component').then(
+            (m) => m.CheckoutComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['C', 'V', 'ASU', 'GS'] },
       },
       {
         // Placeholder de módulos Ciclos 2+ (ítems del sidebar en desarrollo).

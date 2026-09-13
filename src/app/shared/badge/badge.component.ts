@@ -3,8 +3,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 /**
  * Badge — badge de estado reutilizable (shared/).
  * Variantes de la paleta Attention: success (verde suave), info (azul
- * claro de contenedor), danger (rojo suave), neutral (gris) y accent
- * (rosa Attention).
+ * claro de contenedor), danger (rojo suave), warning (ámbar suave),
+ * neutral (gris) y accent (rosa Attention).
  *
  * Uso: <app-badge variant="success" [texto]="'Activo'" />
  */
@@ -22,7 +22,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class BadgeComponent {
   /** Variante visual del badge. */
-  readonly variant = input.required<'success' | 'info' | 'danger' | 'neutral' | 'accent'>();
+  readonly variant = input.required<
+    'success' | 'info' | 'danger' | 'warning' | 'neutral' | 'accent'
+  >();
   /** Texto visible del badge. */
   readonly texto = input.required<string>();
 
@@ -34,6 +36,8 @@ export class BadgeComponent {
         return 'bg-container text-primary';
       case 'danger':
         return 'bg-red-100 text-red-600';
+      case 'warning':
+        return 'bg-amber-100 text-amber-700';
       case 'accent':
         return 'bg-accent text-primary';
       default:
