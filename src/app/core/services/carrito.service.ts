@@ -1,7 +1,8 @@
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable, map, throwError } from 'rxjs';
+import { ApiService } from './api';
+import { ApiResponse } from '../models/usuario.model';
 import {
   CarritoItem,
   DatosEntrega,
@@ -9,23 +10,49 @@ import {
   Venta,
 } from '../models/carrito.model';
 
-/** Latencia simulada de red (ms) para el checkout mock. */
-const MOCK_DELAY = 800;
-
 /** Clave de persistencia del carrito en localStorage. */
 const STORAGE_KEY = 'attention_carrito';
 
 /**
  * CU15 — Carrito de Compras (estado global con signals).
  *
- * Mantiene los ítems del carrito EN MEMORIA (mock), persistidos en
- * localStorage (SSR-safe con isPlatformBrowser) para que sobrevivan
- * recargas. Cuando llegue el backend del CU de ventas, este servicio
- * se conecta al ApiService sin tocar los componentes.
+ * Mantiene los ítems del carrito persistidos en localStorage (SSR-safe
+ * con isPlatformBrowser) para que sobrevivan recargas. El checkout
+ * (CU21) consume el endpoint real POST /api/v1/ventas/checkout del
+ * backend FastAPI; el precio final lo calcula el SERVER con los
+ * precios reales del catálogo (el carrito solo envía id+cantidad+variante).
  */
+
+/** DTO de línea de venta que devuelve el backend. */
+interface ItemVentaDTO {
+  id_detalle: number;
+  producto_id: number;
+  nombre: string;
+  talla: string | null;
+  color: string | null;
+  cantidad: number;
+  precio_unitario: number;
+  subtotal: number;
+}
+
+/** DTO completo de la venta procesada (contrato /api/v1/ventas). */
+interface VentaDTO {
+  id_venta: number;
+  codigo: string;
+  fecha_venta: string;
+  total: number;
+  costo_envio: number;
+  metodo_pago: MetodoPago;
+  estado_pago: Venta['estado_pago'];
+  comprobante_url: string | null;
+  items: ItemVentaDTO[];
+  datos_entrega: DatosEntrega;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly api = inject(ApiService);
 
   /** Ítems actuales del carrito (señal raíz del estado). */
   private readonly _items = signal<CarritoItem[]>(this.leerStorage());
@@ -43,7 +70,7 @@ export class CarritoService {
     this._items().reduce((acc, i) => acc + i.subtotal, 0),
   );
 
-  /** Costo fijo de envío mock (gratis sobre Bs. 300). */
+  /** Costo de envío (gratis sobre Bs. 300 — misma regla del backend). */
   readonly envio = computed(() => (this.subtotal() >= 300 ? 0 : 25));
 
   /** Total a pagar = subtotal + envío. */
@@ -124,11 +151,15 @@ export class CarritoService {
     this.persistir();
   }
 
-  // ------------------------------------------------------------- CU21 mock
+  // ------------------------------------------------------------- CU21 checkout
   /**
-   * CU21 (mock): Procesa la compra con el método de pago elegido.
-   * Simula latencia de pasarela y devuelve la Venta confirmada;
-   * vacía el carrito solo si el pago es exitoso.
+   * CU21: Procesa la compra contra el backend real.
+   *
+   * POST /api/v1/ventas/checkout — transacción atómica server-side:
+   * valida stock, calcula el total con precios REALES de la DB, registra
+   * venta + detalle, descuenta inventario y escribe el kardex. El JWT
+   * lo agrega el interceptor. Los 409/422 del backend llegan como
+   * {error: {detail}} (mismo contrato que el mock).
    */
   procesarCompra(
     metodo_pago: MetodoPago,
@@ -140,28 +171,52 @@ export class CarritoService {
       }));
     }
 
-    const venta: Venta = {
-      id: Math.floor(Math.random() * 1000) + 1,
-      codigo: `ATT-${Date.now().toString().slice(-6)}`,
-      items: [...this._items()],
-      total: this.total(),
-      metodo_pago,
-      estado_pago: 'PAGADO', // mock: la pasarela siempre aprueba
-      fecha: new Date().toISOString(),
-      datos_entrega,
-    };
+    // El carrito NO envía precios: el server usa precio_venta de la DB
+    // (anti-manipulación). Solo id + cantidad + variante.
+    const items = this._items().map((i) => ({
+      producto_id: i.producto_id,
+      cantidad: i.cantidad,
+      talla: i.talla,
+      color: i.color,
+    }));
 
-    // Simula la respuesta de la pasarela y confirma
-    return of(venta).pipe(
-      delay(MOCK_DELAY),
-      // Efecto: vaciar el carrito al confirmarse el pago
-      // (se ejecuta al suscribirse el componente)
-    );
+    return this.api
+      .post<ApiResponse<VentaDTO>>('/ventas/checkout', {
+        items,
+        metodo_pago,
+        datos_entrega,
+      })
+      .pipe(map((resp) => this.mapVenta(resp.data)));
   }
 
   /** Confirma la venta (callback del checkout): limpia el carrito. */
   confirmarVenta(): void {
     this.vaciarCarrito();
+  }
+
+  // -------------------------------------------------------------- mapeo DTOs
+  /** DTO backend -> modelo Venta del ticket (uso los items con precio real). */
+  private mapVenta(dto: VentaDTO): Venta {
+    return {
+      id: dto.id_venta,
+      codigo: dto.codigo,
+      items: dto.items.map((i) => ({
+        producto_id: i.producto_id,
+        nombre: i.nombre,
+        talla: i.talla ?? '—',
+        color: i.color ?? '—',
+        color_hex: '#1d528d',
+        precio: Number(i.precio_unitario),
+        cantidad: i.cantidad,
+        subtotal: Number(i.subtotal),
+        imagen_url: null,
+      })),
+      total: Number(dto.total),
+      metodo_pago: dto.metodo_pago,
+      estado_pago: dto.estado_pago,
+      fecha: dto.fecha_venta,
+      datos_entrega: dto.datos_entrega,
+    };
   }
 
   // ------------------------------------------------------------ persistencia
