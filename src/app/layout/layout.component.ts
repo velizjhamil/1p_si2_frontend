@@ -5,6 +5,7 @@ import {
   NavigationEnd,
   Router,
   RouterLink,
+  RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
@@ -26,6 +27,8 @@ interface ModuleItem extends MenuItem {
   cus?: string;
   /** Badge destacado (ej: CU8 "IA Feature"). */
   badge?: string;
+  /** Roles específicos que pueden ver este ítem. */
+  roles?: Rol[];
 }
 
 /** Módulo del sistema: grupo desplegable con sus ítems. */
@@ -39,16 +42,18 @@ interface MenuModule {
 }
 
 /** Página de inicio según el rol del usuario autenticado. */
-const ROLE_HOME: Record<Rol, string> = {
+const ROLE_HOME: Record<string, string> = {
   ASU: '/admin/dashboard',
+  ADMIN: '/admin/dashboard',
   GS: '/gerente/dashboard',
   V: '/vendedor/dashboard',
   C: '/tienda/home',
 };
 
 /** Etiqueta legible del rol para la Navbar. */
-const ROLE_LABELS: Record<Rol, string> = {
+const ROLE_LABELS: Record<string, string> = {
   ASU: 'Administrador Super Usuario',
+  ADMIN: 'Administrador',
   GS: 'Gerente de Sucursal',
   V: 'Vendedor',
   C: 'Cliente',
@@ -56,31 +61,38 @@ const ROLE_LABELS: Record<Rol, string> = {
 
 /**
  * Módulos del sistema según la documentación oficial de Attention.
- * Los ítems cuyo módulo aún no está implementado (Ciclos 2+) navegan a
- * una ruta placeholder bajo /proximamente que muestra "en desarrollo".
+ * Los ítems cuyo módulo aún no está implementado navegan a una ruta placeholder
+ * bajo /proximamente que muestra "en desarrollo".
  */
-const MODULES: MenuModule[] = [
+export const MODULES: MenuModule[] = [
   {
     label: 'Administración',
     icon: 'users',
     roles: ['ASU'],
     items: [
-      { label: 'Usuarios', icon: 'users', route: '/admin/usuarios', cus: 'CU3' },
-      { label: 'Roles y Permisos', icon: 'shield', route: '/dashboard/roles-permisos', cus: 'CU4, CU5' },
-      { label: 'Empresa', icon: 'building', route: '/empresa', cus: 'CU16' },
-      { label: 'Sucursales', icon: 'pin', route: '/sucursales', cus: 'CU17' },
+      { label: 'Usuarios', icon: 'users', route: '/admin/usuarios', cus: 'CU3', roles: ['ASU'] },
+      { label: 'Roles y Permisos', icon: 'shield', route: '/admin/roles', cus: 'CU4, CU5', roles: ['ASU'] },
+    ],
+  },
+  {
+    label: 'Empresa',
+    icon: 'building',
+    roles: ['ASU', 'GS'],
+    items: [
+      { label: 'Datos Empresa', icon: 'building', route: '/empresa', cus: 'CU16', roles: ['ASU', 'GS'] },
+      { label: 'Sucursales', icon: 'pin', route: '/sucursales', cus: 'CU17', roles: ['ASU', 'GS'] },
     ],
   },
   {
     label: 'Catálogo',
     icon: 'shirt',
-    roles: ['ASU', 'GS'],
+    roles: ['ASU', 'GS', 'V', 'C'],
     items: [
-      { label: 'Productos de Ropa', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6' },
-      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9' },
-      { label: 'Tallas y Colores', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7' },
-      { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23' },
-      { label: 'Temporadas y Colecciones', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24' },
+      { label: 'Productos', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6', roles: ['ASU', 'GS', 'V', 'C'] },
+      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9', roles: ['ASU', 'GS'] },
+      { label: 'Tallas/Colores', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7', roles: ['ASU', 'GS'] },
+      { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23', roles: ['ASU', 'GS'] },
+      { label: 'Temporadas', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24', roles: ['ASU', 'GS'] },
     ],
   },
   {
@@ -88,17 +100,16 @@ const MODULES: MenuModule[] = [
     icon: 'boxes',
     roles: ['ASU', 'GS', 'V'],
     items: [
-      { label: 'Consultar Disponibilidad y Stock', icon: 'boxes', route: '/inventario/stock', cus: 'CU22' },
-      { label: 'Movimientos de Inventario (Kardex)', icon: 'list', route: '/inventario/stock', cus: 'CU22' },
+      { label: 'Stock y Kardex', icon: 'boxes', route: '/inventario', cus: 'CU22', roles: ['ASU', 'GS', 'V'] },
     ],
   },
   {
-    label: 'Reservas y AR',
+    label: 'Reservas',
     icon: 'sparkles',
-    roles: ['ASU', 'GS', 'C'],
+    roles: ['ASU', 'GS', 'V', 'C'],
     items: [
-      { label: 'Gestión de Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14' },
-      { label: 'Probador Virtual', icon: 'camera', route: '/probador-virtual', cus: 'CU8', badge: 'IA' },
+      { label: 'Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14', roles: ['ASU', 'GS', 'V', 'C'] },
+      { label: 'Probador Virtual', icon: 'camera', route: '/probador-virtual', cus: 'CU8', badge: 'IA', roles: ['ASU', 'C'] },
     ],
   },
   {
@@ -106,19 +117,19 @@ const MODULES: MenuModule[] = [
     icon: 'cart',
     roles: ['ASU', 'GS', 'V', 'C'],
     items: [
-      { label: 'Carrito de Compras', icon: 'cart', route: '/carrito', cus: 'CU15' },
-      { label: 'Checkout / Confirmar Compra', icon: 'card', route: '/checkout', cus: 'CU21' },
-      { label: 'Ventas Presenciales / Caja', icon: 'register', route: '/proximamente/caja', cus: 'CU11' },
-      { label: 'Pasarela de Pago / Transacciones', icon: 'card', route: '/proximamente/pagos', cus: 'CU21' },
+      { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['ASU', 'C'] },
+      { label: 'Confirmación de Compra', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['ASU', 'C'] },
+      { label: 'Caja y Punto de Venta', icon: 'register', route: '/proximamente/caja', cus: 'CU11', roles: ['ASU', 'GS', 'V'] },
+      { label: 'Pasarela de Pago', icon: 'card', route: '/proximamente/pagos', cus: 'CU21', roles: ['ASU'] },
     ],
   },
   {
     label: 'Reportes e IA',
     icon: 'brain',
-    roles: ['ASU', 'GS'],
+    roles: ['ASU', 'GS', 'C'],
     items: [
-      { label: 'Reportes y Dashboards', icon: 'chart', route: '/proximamente/reportes', cus: 'CU20' },
-      { label: 'Recomendaciones / Asistente IA', icon: 'sparkles', route: '/proximamente/asistente', cus: 'CU25' },
+      { label: 'Dashboards', icon: 'chart', route: '/proximamente/reportes', cus: 'CU20', roles: ['ASU', 'GS'] },
+      { label: 'Asistente IA', icon: 'sparkles', route: '/proximamente/asistente', cus: 'CU25', roles: ['ASU', 'GS', 'C'] },
     ],
   },
 ];
@@ -164,7 +175,7 @@ const ICON_PATHS: Record<string, string> = {
 
 @Component({
   selector: 'app-layout',
-  imports: [NgClass, RouterOutlet, RouterLink],
+  imports: [NgClass, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
@@ -185,13 +196,32 @@ export class LayoutComponent {
   protected readonly modules = MODULES;
 
   /** Rol actual ('ASU' | 'GS' | 'V' | 'C') o null si no hay sesión. */
-  protected readonly rol = computed<Rol | null>(
-    () => (this.user()?.rol?.nombre_rol as Rol) ?? null,
-  );
+  /** Rol actual ('ASU' | 'GS' | 'V' | 'C' | 'ADMIN') o null si no hay sesión. */
+  protected readonly rol = computed<string | null>(() => {
+    const userRole = this.user()?.rol?.nombre_rol;
+    if (userRole) return userRole;
+
+    const authRole = this.authService.getRol();
+    if (authRole) return authRole;
+
+    if (isPlatformBrowser(this.platformId)) {
+      const raw = localStorage.getItem('auth_user');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          const rolStorage = parsed?.rol?.nombre_rol || parsed?.rol;
+          if (rolStorage) return String(rolStorage);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    return null;
+  });
 
   protected readonly rolLabel = computed(() => {
     const rol = this.rol();
-    return rol ? ROLE_LABELS[rol] : '';
+    return rol ? (ROLE_LABELS[rol.toUpperCase()] ?? rol) : '';
   });
 
   /** Inicial del nombre para el avatar del Navbar. */
@@ -200,9 +230,10 @@ export class LayoutComponent {
   );
 
   /** Ruta de inicio según rol (botón INICIO del sidebar). */
-  protected readonly inicio = computed(
-    () => ROLE_HOME[this.rol() ?? 'C'] ?? '/login',
-  );
+  protected readonly inicio = computed(() => {
+    const rol = this.rol();
+    return (rol ? ROLE_HOME[rol.toUpperCase()] : null) ?? '/login';
+  });
 
   // ------------------------------------------------------------- sidebar UI
   /** Drawer abierto en móvil/tablet (< 1024px). */
@@ -235,16 +266,37 @@ export class LayoutComponent {
 
   /** Módulos visibles según el rol del usuario autenticado. */
   protected readonly menu = computed<MenuModule[]>(() => {
-    const rol = this.rol();
-    if (!rol) return [];
-    return MODULES.filter(
-      (mod) => mod.roles.length === 0 || mod.roles.includes(rol),
-    );
+    const rawRol = this.rol();
+    if (!rawRol) return [];
+
+    const rolUpper = rawRol.toUpperCase();
+    const esAdmin = rolUpper === 'ASU' || rolUpper === 'ADMIN';
+
+    // REGLA CLAVE PARA ADMINISTRADOR (ASU / ADMIN):
+    // El rol de Administrador debe tener ACCESO TOTAL a TODOS los ítems y submenús del sistema sin restricción.
+    if (esAdmin) {
+      return MODULES;
+    }
+
+    return MODULES
+      .filter((mod) => mod.roles.length === 0 || mod.roles.some((r) => r.toUpperCase() === rolUpper))
+      .map((mod) => ({
+        ...mod,
+        items: mod.items.filter(
+          (item) =>
+            !item.roles ||
+            item.roles.length === 0 ||
+            item.roles.some((r) => r.toUpperCase() === rolUpper),
+        ),
+      }))
+      .filter((mod) => mod.items.length > 0);
   });
 
-  /** True si el ítem corresponde a la vista actual. */
+  /** True si el ítem corresponde exactamente a la vista actual. */
   protected isActive(route: string): boolean {
-    return this.currentUrl() === route;
+    const current = this.currentUrl().split('?')[0].split('#')[0];
+    const target = route.split('?')[0].split('#')[0];
+    return current === target;
   }
 
   /** True si algún ítem del módulo es la ruta activa. */
@@ -261,7 +313,7 @@ export class LayoutComponent {
 
   /** Expande el acordeón del módulo que contiene la URL dada. */
   private expandirModuloActivo(url: string): void {
-    const idx = MODULES.findIndex((mod) =>
+    const idx = this.menu().findIndex((mod) =>
       mod.items.some((item) => item.route === url),
     );
     this.moduloExpandido.set(idx >= 0 ? idx : null);

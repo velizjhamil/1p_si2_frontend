@@ -64,34 +64,40 @@
   </div>
 
   <!-- Tabla de stock actual -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10 mb-8">
-    <div class="px-4 py-3 bg-primary text-white flex items-center justify-between">
-      <h2 class="font-semibold text-sm">Stock Actual por Producto</h2>
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden mb-8">
+    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-base text-slate-800">Stock Actual por Producto</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Listado detallado de existencias en tiempo real</p>
+      </div>
+      <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-200/60 text-slate-700">
+        {{ totalProductos() }} SKUs
+      </span>
     </div>
     @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando stock...</div>
+      <div class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse">Cargando datos de inventario...</div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-container/70">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-slate-50/75 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
             <tr>
-              <th class="text-left px-4 py-3 font-semibold text-primary">ID</th>
-              <th class="text-left px-4 py-3 font-semibold text-primary">Producto</th>
-              <th class="text-left px-4 py-3 font-semibold text-primary">Categoría</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Stock</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Nivel</th>
+              <th class="px-6 py-3.5">ID</th>
+              <th class="px-6 py-3.5">Producto</th>
+              <th class="px-6 py-3.5">Categoría</th>
+              <th class="px-6 py-3.5 text-center">Stock Disponible</th>
+              <th class="px-6 py-3.5 text-center">Nivel</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-slate-100">
             @for (producto of stock(); track producto.id) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3 text-primary font-semibold">#{{ producto.id }}</td>
-                <td class="px-4 py-3 font-medium text-gray-800">{{ producto.nombre }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ producto.categoria }}</td>
-                <td class="px-4 py-3 text-center font-semibold text-gray-800">
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="px-6 py-4 text-primary font-semibold">#{{ producto.id }}</td>
+                <td class="px-6 py-4 font-medium text-slate-900">{{ producto.nombre }}</td>
+                <td class="px-6 py-4 text-slate-500">{{ producto.categoria }}</td>
+                <td class="px-6 py-4 text-center font-bold text-slate-800">
                   {{ producto.stock_actual }}
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="px-6 py-4 text-center">
                   <app-badge
                     [variant]="badgeDeStock(producto.stock_actual)"
                     [texto]="nivelDeStock(producto.stock_actual)"
@@ -100,8 +106,8 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No hay productos en el inventario.
+                <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
+                  No hay productos registrados en el inventario.
                 </td>
               </tr>
             }
@@ -112,18 +118,21 @@
   </div>
 
   <!-- Historial de movimientos (kardex) -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    <div class="px-4 py-3 bg-primary text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <h2 class="font-semibold text-sm">Historial de Movimientos (Kardex)</h2>
-      <div class="flex flex-wrap items-center gap-2">
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="font-bold text-base text-slate-800">Historial de Movimientos (Kárdex)</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Auditoría cronológica de entradas, salidas y ajustes</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl">
         <button
           type="button"
           (click)="onFiltroTipo('todos')"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition"
           [class]="
             filtroTipo() === 'todos'
               ? 'bg-white text-primary shadow-sm'
-              : 'bg-white/20 text-white hover:bg-white/30'
+              : 'text-slate-600 hover:text-slate-900'
           "
         >
           Todos
@@ -131,11 +140,11 @@
         <button
           type="button"
           (click)="onFiltroTipo('ENTRADA')"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition"
           [class]="
             filtroTipo() === 'ENTRADA'
-              ? 'bg-white text-primary shadow-sm'
-              : 'bg-white/20 text-white hover:bg-white/30'
+              ? 'bg-white text-emerald-700 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           "
         >
           Entradas
@@ -143,11 +152,11 @@
         <button
           type="button"
           (click)="onFiltroTipo('SALIDA')"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition"
           [class]="
             filtroTipo() === 'SALIDA'
-              ? 'bg-white text-primary shadow-sm'
-              : 'bg-white/20 text-white hover:bg-white/30'
+              ? 'bg-white text-rose-700 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           "
         >
           Salidas
@@ -155,11 +164,11 @@
         <button
           type="button"
           (click)="onFiltroTipo('AJUSTE')"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition"
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition"
           [class]="
             filtroTipo() === 'AJUSTE'
-              ? 'bg-white text-primary shadow-sm'
-              : 'bg-white/20 text-white hover:bg-white/30'
+              ? 'bg-white text-blue-700 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           "
         >
           Ajustes
@@ -168,56 +177,56 @@
           type="date"
           [value]="filtroFecha()"
           (input)="onFiltroFecha($event)"
-          class="px-2.5 py-1.5 rounded-lg text-xs bg-white text-primary border-0 focus:outline-none focus:ring-2 focus:ring-white/60"
+          class="px-2.5 py-1 rounded-lg text-xs bg-white text-slate-700 border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           title="Filtrar por fecha"
         />
       </div>
     </div>
 
     @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando historial...</div>
+      <div class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse">Cargando historial de movimientos...</div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-container/70">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-slate-50/75 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
             <tr>
-              <th class="text-left px-4 py-3 font-semibold text-primary">Fecha</th>
-              <th class="text-left px-4 py-3 font-semibold text-primary">Producto</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Tipo</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Cantidad</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Stock Ant.</th>
-              <th class="text-center px-4 py-3 font-semibold text-primary">Stock Nuevo</th>
-              <th class="text-left px-4 py-3 font-semibold text-primary">Motivo</th>
+              <th class="px-6 py-3.5">Fecha</th>
+              <th class="px-6 py-3.5">Producto</th>
+              <th class="px-6 py-3.5 text-center">Tipo</th>
+              <th class="px-6 py-3.5 text-center">Cantidad</th>
+              <th class="px-6 py-3.5 text-center">Stock Ant.</th>
+              <th class="px-6 py-3.5 text-center">Stock Nuevo</th>
+              <th class="px-6 py-3.5">Motivo</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-slate-100">
             @for (mov of movimientosFiltrados(); track mov.id) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="px-6 py-4 text-slate-500 whitespace-nowrap text-xs">
                   {{ mov.fecha | date: 'dd/MM/yyyy HH:mm' }}
                 </td>
-                <td class="px-4 py-3 font-medium text-gray-800">
+                <td class="px-6 py-4 font-semibold text-slate-900">
                   {{ mov.producto_nombre }}
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="px-6 py-4 text-center">
                   <app-badge [variant]="badgeTipo(mov.tipo)" [texto]="mov.tipo" />
                 </td>
                 <td
-                  class="px-4 py-3 text-center font-semibold whitespace-nowrap"
-                  [class]="mov.cantidad >= 0 ? 'text-green-600' : 'text-red-600'"
+                  class="px-6 py-4 text-center font-bold whitespace-nowrap"
+                  [class]="mov.cantidad >= 0 ? 'text-emerald-600' : 'text-rose-600'"
                 >
                   {{ mov.cantidad > 0 ? '+' : '' }}{{ mov.cantidad }}
                 </td>
-                <td class="px-4 py-3 text-center text-gray-600">{{ mov.stock_anterior }}</td>
-                <td class="px-4 py-3 text-center font-medium text-gray-800">
+                <td class="px-6 py-4 text-center text-slate-500">{{ mov.stock_anterior }}</td>
+                <td class="px-6 py-4 text-center font-semibold text-slate-900">
                   {{ mov.stock_nuevo }}
                 </td>
-                <td class="px-4 py-3 text-gray-600">{{ mov.motivo }}</td>
+                <td class="px-6 py-4 text-slate-500">{{ mov.motivo || '—' }}</td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No hay movimientos con los filtros aplicados.
+                <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                  No se encontraron movimientos registrados con los filtros aplicados.
                 </td>
               </tr>
             }

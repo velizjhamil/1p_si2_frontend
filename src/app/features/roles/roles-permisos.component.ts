@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RolesPermisosService } from './roles-permisos.service';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import {
   PermisoRead,
   RolCatalogo,
@@ -11,7 +12,7 @@ type TabActiva = 'roles' | 'matriz';
 
 @Component({
   selector: 'app-roles-permisos',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ConfirmDialogComponent],
   templateUrl: './roles-permisos.component.html',
 })
 export class RolesPermisos implements OnInit {
@@ -35,6 +36,8 @@ export class RolesPermisos implements OnInit {
   permisosSeleccionados = signal<Set<number>>(new Set());
 
   modalRolAbierto = signal(false);
+  rolEnEdicion = signal<RolCatalogo | null>(null);
+  rolAEliminar = signal<RolCatalogo | null>(null);
 
   rolSeleccionado = computed<RolCatalogo | null>(() => {
     const id = this.rolSeleccionadoId();
@@ -83,13 +86,25 @@ export class RolesPermisos implements OnInit {
 
   // ------------------------------------------------------------- tab roles
   abrirModalCrearRol(): void {
+    this.rolEnEdicion.set(null);
     this.rolForm.reset({ nombre_rol: '', descripcion: '' });
+    this.errorMessage.set('');
+    this.modalRolAbierto.set(true);
+  }
+
+  abrirModalEditarRol(rol: RolCatalogo): void {
+    this.rolEnEdicion.set(rol);
+    this.rolForm.reset({
+      nombre_rol: rol.nombre_rol,
+      descripcion: rol.descripcion || '',
+    });
     this.errorMessage.set('');
     this.modalRolAbierto.set(true);
   }
 
   cerrarModalRol(): void {
     this.modalRolAbierto.set(false);
+    this.rolEnEdicion.set(null);
     this.errorMessage.set('');
   }
 
@@ -99,23 +114,101 @@ export class RolesPermisos implements OnInit {
       return;
     }
     const { nombre_rol, descripcion } = this.rolForm.value;
-    const payload: RolCreatePayload = {
-      nombre_rol: nombre_rol!,
-      descripcion: descripcion || undefined,
-      permiso_ids: [], // se asignan luego desde la matriz
-    };
+    const rolActual = this.rolEnEdicion();
+
     this.guardando.set(true);
-    this.service.createRol(payload).subscribe({
+    this.errorMessage.set('');
+
+    if (rolActual) {
+      // Edición de rol existente
+      this.service
+        .updateRol(rolActual.id_rol, {
+          nombre_rol: nombre_rol!,
+          descripcion: descripcion || undefined,
+        })
+        .subscribe({
+          next: (resp) => {
+            this.guardando.set(false);
+            this.modalRolAbierto.set(false);
+            this.rolEnEdicion.set(null);
+            this.exitoMessage.set(`Rol '${resp.data.nombre_rol}' actualizado correctamente.`);
+            setTimeout(() => this.exitoMessage.set(''), 3000);
+            this.service.getRoles().subscribe({
+              next: (r) => this.roles.set(r.data),
+            });
+          },
+          error: (err) => this.mostrarError(err),
+        });
+    } else {
+      // Creación de nuevo rol
+      const payload: RolCreatePayload = {
+        nombre_rol: nombre_rol!,
+        descripcion: descripcion || undefined,
+        permiso_ids: [], // se asignan luego desde la matriz
+      };
+      this.service.createRol(payload).subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.modalRolAbierto.set(false);
+          this.exitoMessage.set('Rol creado. Asigne permisos desde la matriz.');
+          setTimeout(() => this.exitoMessage.set(''), 3000);
+          this.service.getRoles().subscribe({
+            next: (resp) => this.roles.set(resp.data),
+          });
+        },
+        error: (err) => this.mostrarError(err),
+      });
+    }
+  }
+
+  // ---------------------------------------------------- eliminación y protección
+  esRolProtegido(rol: RolCatalogo | null | undefined): boolean {
+    if (!rol) return false;
+    const nombre = rol.nombre_rol.toUpperCase().trim();
+    return ['ASU', 'ADMIN', 'ADMINISTRADOR'].includes(nombre);
+  }
+
+  iniciarEliminarRol(rol: RolCatalogo): void {
+    if (this.esRolProtegido(rol)) {
+      this.errorMessage.set(
+        `No se puede eliminar el rol esencial del sistema '${rol.nombre_rol}'.`
+      );
+      setTimeout(() => this.errorMessage.set(''), 4000);
+      return;
+    }
+    this.errorMessage.set('');
+    this.rolAEliminar.set(rol);
+  }
+
+  cancelarEliminarRol(): void {
+    this.rolAEliminar.set(null);
+  }
+
+  confirmarEliminarRol(): void {
+    const rol = this.rolAEliminar();
+    if (!rol) return;
+
+    if (this.esRolProtegido(rol)) {
+      this.errorMessage.set(
+        `No se puede eliminar el rol esencial del sistema '${rol.nombre_rol}'.`
+      );
+      this.rolAEliminar.set(null);
+      return;
+    }
+
+    this.guardando.set(true);
+    this.service.deleteRol(rol.id_rol).subscribe({
       next: () => {
         this.guardando.set(false);
-        this.modalRolAbierto.set(false);
-        this.exitoMessage.set('Rol creado. Asigne permisos desde la matriz.');
+        this.rolAEliminar.set(null);
+        this.exitoMessage.set(`Rol '${rol.nombre_rol}' eliminado correctamente.`);
         setTimeout(() => this.exitoMessage.set(''), 3000);
-        this.service.getRoles().subscribe({
-          next: (resp) => this.roles.set(resp.data),
-        });
+        this.roles.update((lista) => lista.filter((r) => r.id_rol !== rol.id_rol));
       },
-      error: (err) => this.mostrarError(err),
+      error: (err) => {
+        this.rolAEliminar.set(null);
+        this.mostrarError(err);
+      },
     });
   }
 

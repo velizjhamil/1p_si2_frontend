@@ -31,17 +31,17 @@ export class BadgeComponent {
   protected classes(): string {
     switch (this.variant()) {
       case 'success':
-        return 'bg-green-100 text-green-700';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium';
       case 'info':
-        return 'bg-container text-primary';
+        return 'bg-blue-50 text-blue-700 border border-blue-200/60 font-medium';
       case 'danger':
-        return 'bg-red-100 text-red-600';
+        return 'bg-rose-50 text-rose-700 border border-rose-200/60 font-medium';
       case 'warning':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-50 text-amber-800 border border-amber-200/60 font-medium';
       case 'accent':
-        return 'bg-accent text-primary';
+        return 'bg-accent/80 text-primary border border-primary/15 font-medium';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-slate-100 text-slate-700 border border-slate-200/60 font-medium';
     }
   }
 }

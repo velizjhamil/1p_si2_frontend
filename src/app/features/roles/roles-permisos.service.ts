@@ -39,6 +39,19 @@ export class RolesPermisosService {
     );
   }
 
+  /** PUT /api/v1/roles/{id} — actualiza datos básicos de un rol. */
+  updateRol(
+    idRol: string,
+    payload: { nombre_rol?: string; descripcion?: string }
+  ): Observable<ApiResponse<RolCatalogo>> {
+    return this.api.put<ApiResponse<RolCatalogo>>(`/roles/${idRol}`, payload);
+  }
+
+  /** DELETE /api/v1/roles/{id} — elimina un rol. */
+  deleteRol(idRol: string): Observable<ApiResponse<{ id_rol: string }>> {
+    return this.api.delete<ApiResponse<{ id_rol: string }>>(`/roles/${idRol}`);
+  }
+
   /** GET /api/v1/permisos — permisos agrupados por módulo. */
   getPermisosPorModulo(): Observable<ApiResponse<Record<string, PermisoRead[]>>> {
     return this.api.get<ApiResponse<Record<string, PermisoRead[]>>>('/permisos');

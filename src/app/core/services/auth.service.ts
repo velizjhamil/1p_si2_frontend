@@ -21,13 +21,23 @@ export class AuthService {
 
   private hasToken(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
-    return !!localStorage.getItem(this.tokenKey);
+    try {
+      const token = localStorage.getItem(this.tokenKey);
+      return !!token && token !== 'undefined' && token !== 'null';
+    } catch {
+      return false;
+    }
   }
 
   private getUserFromStorage(): Usuario | null {
     if (!isPlatformBrowser(this.platformId)) return null;
-    const raw = localStorage.getItem(this.userKey);
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem(this.userKey);
+      if (!raw || raw === 'undefined' || raw === 'null') return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
   }
 
   login(correo: string, contrasena: string): Observable<ApiResponse<TokenResponse>> {
@@ -39,8 +49,12 @@ export class AuthService {
 
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.tokenKey);
-      localStorage.removeItem(this.userKey);
+      try {
+        localStorage.removeItem(this.tokenKey);
+        localStorage.removeItem(this.userKey);
+      } catch {
+        // ignore
+      }
     }
     this._isAuthenticated.next(false);
     this._currentUser.next(null);
@@ -48,23 +62,57 @@ export class AuthService {
   }
 
   handleLogin(response: ApiResponse<TokenResponse>): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.tokenKey, response.data.access_token);
-      localStorage.setItem(this.userKey, JSON.stringify(response.data.user));
+    try {
+      if (!response || !response.data) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      const token = response.data.access_token;
+      const user = response.data.user;
+
+      if (!token || !user) {
+        throw new Error('Datos de sesión incompletos');
+      }
+
+      if (isPlatformBrowser(this.platformId)) {
+        try {
+          localStorage.setItem(this.tokenKey, token);
+          localStorage.setItem(this.userKey, JSON.stringify(user));
+        } catch (e) {
+          console.warn('Error al guardar sesión en localStorage:', e);
+        }
+      }
+
+      this._isAuthenticated.next(true);
+      this._currentUser.next(user);
+
+      const rolNombre = user.rol?.nombre_rol || (user.rol as unknown as string) || '';
+      this.redirectBasedOnRole(rolNombre);
+    } catch (err) {
+      console.error('Error al procesar login:', err);
+      throw err;
     }
-    this._isAuthenticated.next(true);
-    this._currentUser.next(response.data.user);
-    this.redirectBasedOnRole(response.data.user.rol.nombre_rol as Rol);
   }
 
-  private redirectBasedOnRole(rol: Rol): void {
-    const routes: Record<Rol, string[]> = {
-      ASU: ['/admin/dashboard'],
-      GS: ['/gerente/dashboard'],
-      V: ['/vendedor/dashboard'],
-      C: ['/tienda/home'],
-    };
-    this.router.navigate(routes[rol] || ['/login']);
+  redirectBasedOnRole(rol: string): void {
+    const rolUpper = (rol || '').toUpperCase();
+    if (rolUpper === 'ASU' || rolUpper === 'ADMIN') {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (rolUpper === 'GS') {
+      this.router.navigate(['/gerente/dashboard']);
+    } else if (rolUpper === 'V') {
+      this.router.navigate(['/vendedor/dashboard']);
+    } else if (rolUpper === 'C') {
+      this.router.navigate(['/tienda/home']);
+    } else {
+      this.router.navigate(['/admin/dashboard']);
+    }
+  }
+
+  redirectUserHome(): void {
+    const user = this.getCurrentUser();
+    const rol = user?.rol?.nombre_rol || (user?.rol as unknown as string) || this.getRol();
+    this.redirectBasedOnRole(rol);
   }
 
   isAuthenticated(): boolean {

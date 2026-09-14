@@ -129,17 +129,28 @@
           [attr.aria-expanded]="moduloExpandido() === i"
           [ngClass]="
             moduloActivo(mod)
-              ? 'text-primary bg-container/60'
-              : 'text-slate-600 hover:bg-slate-50'
+              ? 'text-primary font-semibold hover:bg-slate-50/80'
+              : 'text-slate-600 hover:bg-slate-50 font-medium'
           "
-          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition min-w-0"
         >
-          <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            class="h-5 w-5 shrink-0 transition-colors"
+            [class.text-primary]="moduloActivo(mod)"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <path [attr.d]="iconPaths[mod.icon]" />
           </svg>
           <span
-            class="flex-1 text-left whitespace-nowrap"
+            class="flex-1 text-left min-w-0 truncate"
             [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()"
+            style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
           >
             {{ mod.label }}
           </span>
@@ -162,25 +173,39 @@
 
         <!-- Ítems del módulo (solo visibles con el acordeón abierto y sidebar expandido) -->
         @if (moduloExpandido() === i && !sidebarCollapsed()) {
-          <div class="mt-1 ml-5 pl-3 border-l border-slate-200 flex flex-col gap-0.5">
-            @for (item of mod.items; track item.route) {
+          <div
+            class="mt-1 flex flex-col gap-1 pl-6"
+            style="padding-left: 1.5rem;"
+          >
+            @for (item of mod.items; track item.label) {
               <a
                 [routerLink]="item.route"
-                [ngClass]="
-                  isActive(item.route)
-                    ? 'bg-primary text-white font-semibold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-50'
-                "
-                class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition"
+                routerLinkActive="bg-container text-primary font-semibold"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-normal transition min-w-0 overflow-hidden"
                 [title]="item.label"
               >
-                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg
+                  class="h-4 w-4 shrink-0 text-current opacity-70"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
                   <path [attr.d]="iconPaths[item.icon]" />
                 </svg>
-                <span class="whitespace-nowrap">{{ item.label }}</span>
+                <span
+                  class="flex-1 min-w-0 truncate text-left"
+                  style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+                >
+                  {{ item.label }}
+                </span>
                 @if (item.badge) {
                   <span
-                    class="ml-auto px-1.5 py-0.5 rounded-full bg-accent text-primary text-[10px] font-bold tracking-wider shadow-sm"
+                    class="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-accent text-primary text-[10px] font-bold tracking-wider"
                   >
                     {{ item.badge }}
                   </span>

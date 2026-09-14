@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { CATALOGO_ROUTES } from './features/catalogo/catalogo.routes';
 
 export const routes: Routes = [
   {
     path: 'login',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/auth/login-form.component').then(
         (m) => m.LoginFormComponent
@@ -38,13 +40,18 @@ export const routes: Routes = [
       },
       {
         // CU4 + CU5: vista unificada de Roles y Permisos (tabs).
-        path: 'dashboard/roles-permisos',
+        path: 'admin/roles',
         loadComponent: () =>
           import('./features/roles/roles-permisos.component').then(
             (m) => m.RolesPermisos
           ),
         canActivate: [authGuard],
         data: { roles: ['ASU'] },
+      },
+      {
+        path: 'dashboard/roles-permisos',
+        redirectTo: 'admin/roles',
+        pathMatch: 'full',
       },
       {
         // CU16: Perfil Institucional de la Empresa.

@@ -13,7 +13,7 @@ export const CATALOGO_ROUTES: Routes = [
     loadComponent: () =>
       import('./productos/productos.component').then((m) => m.ProductosComponent),
     canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS'] },
+    data: { roles: ['ASU', 'GS', 'V', 'C'] },
   },
   {
     // CU7: Gestión de Tallas y Colores (mock en memoria, sin backend aún).

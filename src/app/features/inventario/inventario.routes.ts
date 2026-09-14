@@ -7,8 +7,24 @@ import { authGuard } from '../../core/guards/auth.guard';
  */
 export const INVENTARIO_ROUTES: Routes = [
   {
-    // CU22: Gestión de Inventario (FASE MOCK).
+    // Vista unificada (Stock + Kardex).
+    path: '',
+    loadComponent: () =>
+      import('./inventario.component').then((m) => m.InventarioComponent),
+    canActivate: [authGuard],
+    data: { roles: ['ASU', 'GS', 'V'] },
+  },
+  {
+    // CU22: Vista de Stock Actual.
     path: 'stock',
+    loadComponent: () =>
+      import('./inventario.component').then((m) => m.InventarioComponent),
+    canActivate: [authGuard],
+    data: { roles: ['ASU', 'GS', 'V'] },
+  },
+  {
+    // Kardex y Movimientos de Inventario.
+    path: 'movimientos',
     loadComponent: () =>
       import('./inventario.component').then((m) => m.InventarioComponent),
     canActivate: [authGuard],

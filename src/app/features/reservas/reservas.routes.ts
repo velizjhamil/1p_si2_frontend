@@ -12,6 +12,6 @@ export const RESERVAS_ROUTES: Routes = [
     loadComponent: () =>
       import('./reservas.component').then((m) => m.ReservasComponent),
     canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS', 'C'] },
+    data: { roles: ['ASU', 'GS', 'C', 'V'] },
   },
 ];

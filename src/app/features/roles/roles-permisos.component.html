@@ -72,52 +72,88 @@
         class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10"
       >
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-primary text-white">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
               <tr>
-                <th class="text-left px-4 py-3 font-semibold">Rol</th>
-                <th class="text-left px-4 py-3 font-semibold">Descripción</th>
-                <th class="text-center px-4 py-3 font-semibold">Usuarios</th>
-                <th class="text-center px-4 py-3 font-semibold">Permisos</th>
-                <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+                <th class="px-6 py-3.5">Rol</th>
+                <th class="px-6 py-3.5">Descripción</th>
+                <th class="text-center px-6 py-3.5">Usuarios</th>
+                <th class="text-center px-6 py-3.5">Permisos</th>
+                <th class="text-right px-6 py-3.5">Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
               @for (rol of roles(); track rol.id_rol) {
-                <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                  <td class="px-4 py-3">
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                  <td class="px-6 py-4">
                     <span
-                      class="inline-block px-2.5 py-1 rounded-full bg-container text-primary text-xs font-semibold"
+                      class="inline-block px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-xs font-semibold"
                     >
                       {{ rol.nombre_rol }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-gray-600">
+                  <td class="px-6 py-4 text-slate-600">
                     {{ rol.descripcion ?? '—' }}
                   </td>
-                  <td class="px-4 py-3 text-center text-gray-800 font-medium">
+                  <td class="px-6 py-4 text-center text-slate-800 font-medium">
                     {{ rol.cantidad_usuarios }}
                   </td>
-                  <td class="px-4 py-3 text-center">
+                  <td class="px-6 py-4 text-center">
                     <span
                       class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold"
                       [class]="
                         rol.permisos.length
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-600'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200/60'
                       "
                     >
                       {{ rol.permisos.length }} asignados
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      (click)="verPermisosDelRol(rol)"
-                      class="text-primary hover:text-primary/70 font-medium transition"
-                    >
-                      Ver permisos
-                    </button>
+                  <td class="px-6 py-4 text-right">
+                    <div class="inline-flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        (click)="verPermisosDelRol(rol)"
+                        class="text-primary hover:text-primary/70 font-medium transition text-xs flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-container"
+                        title="Ver y configurar permisos en la matriz"
+                      >
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Permisos</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="abrirModalEditarRol(rol)"
+                        class="text-slate-600 hover:text-primary font-medium transition text-xs flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-slate-100"
+                        title="Editar información del rol"
+                      >
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="iniciarEliminarRol(rol)"
+                        [disabled]="esRolProtegido(rol)"
+                        [class]="
+                          esRolProtegido(rol)
+                            ? 'text-slate-300 cursor-not-allowed opacity-50'
+                            : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                        "
+                        class="font-medium transition text-xs flex items-center gap-1 px-2.5 py-1.5 rounded-lg"
+                        [title]="esRolProtegido(rol) ? 'Rol esencial del sistema (no eliminable)' : 'Eliminar rol'"
+                      >
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        <span>Eliminar</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               } @empty {
@@ -233,9 +269,9 @@
       class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
     >
       <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">Nuevo Rol</h2>
+        <h2 class="text-lg font-bold">{{ rolEnEdicion() ? 'Editar Rol' : 'Nuevo Rol' }}</h2>
         <p class="text-white/80 text-xs mt-0.5">
-          Cree el rol; luego asigne permisos desde la matriz.
+          {{ rolEnEdicion() ? 'Modifique los datos del rol.' : 'Cree el rol; luego asigne permisos desde la matriz.' }}
         </p>
       </div>
       <form [formGroup]="rolForm" (ngSubmit)="guardarRol()" class="p-6 space-y-4">
@@ -283,10 +319,22 @@
             [disabled]="guardando()"
             class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ guardando() ? 'Guardando...' : 'Crear rol' }}
+            {{ guardando() ? 'Guardando...' : (rolEnEdicion() ? 'Guardar cambios' : 'Crear rol') }}
           </button>
         </div>
       </form>
     </div>
   </div>
+}
+
+<!-- Diálogo de confirmación para eliminar rol -->
+@if (rolAEliminar(); as rol) {
+  <app-confirm-dialog
+    titulo="Eliminar Rol"
+    [mensaje]="'¿Está seguro de que desea eliminar el rol \'' + rol.nombre_rol + '\'?'"
+    textoConfirmar="Eliminar"
+    [peligro]="true"
+    (confirmado)="confirmarEliminarRol()"
+    (cancelado)="cancelarEliminarRol()"
+  ></app-confirm-dialog>
 }

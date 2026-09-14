@@ -72,6 +72,13 @@ export interface RolCreatePayload {
   permiso_ids: number[];
 }
 
+/** Payload para actualizar un rol (PUT /roles/{id}). */
+export interface RolUpdatePayload {
+  nombre_rol?: string;
+  descripcion?: string;
+  permiso_ids?: number[];
+}
+
 /** Payload para reemplazar los permisos de un rol (PUT /roles/{id}/permisos). */
 export interface RolPermisosPayload {
   permiso_ids: number[];
