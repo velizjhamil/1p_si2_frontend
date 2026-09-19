@@ -24,8 +24,11 @@
       </a>
     </div>
 
-    <!-- Derecha: carrito (CU15) + avatar con iniciales, rol y Cerrar Sesión -->
+    <!-- Derecha: notificaciones (CU10) + carrito (CU15) + avatar y Cerrar Sesión -->
     <div class="flex items-center gap-3">
+      <!-- Campanita de notificaciones con dropdown (CU10) -->
+      <app-notificaciones-bell />
+
       <!-- Botón Carrito con badge contador (CU15) -->
       <a
         routerLink="/carrito"

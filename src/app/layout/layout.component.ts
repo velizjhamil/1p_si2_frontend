@@ -13,6 +13,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
 import { CarritoService } from '../core/services/carrito.service';
+import { NotificacionesService } from '../core/services/notificaciones.service';
+import { NotificacionesBellComponent } from '../features/notificaciones/notificaciones-bell.component';
 import { Rol } from '../core/models/usuario.model';
 
 interface MenuItem {
@@ -81,6 +83,7 @@ export const MODULES: MenuModule[] = [
     items: [
       { label: 'Datos Empresa', icon: 'building', route: '/empresa', cus: 'CU16', roles: ['ASU', 'GS'] },
       { label: 'Sucursales', icon: 'pin', route: '/sucursales', cus: 'CU17', roles: ['ASU', 'GS'] },
+      { label: 'Descuentos', icon: 'percent', route: '/descuentos', cus: 'CU12', roles: ['ASU', 'GS'] },
     ],
   },
   {
@@ -119,7 +122,8 @@ export const MODULES: MenuModule[] = [
     items: [
       { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['ASU', 'C'] },
       { label: 'Confirmación de Compra', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['ASU', 'C'] },
-      { label: 'Caja y Punto de Venta', icon: 'register', route: '/proximamente/caja', cus: 'CU11', roles: ['ASU', 'GS', 'V'] },
+      { label: 'Gestión de Ventas', icon: 'register', route: '/ventas', cus: 'CU11', roles: ['ASU', 'GS', 'V'] },
+      { label: 'Gestión de Devoluciones', icon: 'undo', route: '/devoluciones', cus: 'CU13', roles: ['ASU', 'GS', 'V'] },
       { label: 'Pasarela de Pago', icon: 'card', route: '/proximamente/pagos', cus: 'CU21', roles: ['ASU'] },
     ],
   },
@@ -166,7 +170,11 @@ const ICON_PATHS: Record<string, string> = {
     'M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM8 7v10M16 7v10M8 12h8',
   card:
     'M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zM2 10h20',
+  undo:
+    'M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-4',
   chart: 'M18 20V10M12 20V4M6 20v-6',
+  percent:
+    'M19 5 5 19M5 5l14 14M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   brain:
     'M12 4a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 5.8V18a3 3 0 0 0 4 2.8V22M12 4a3 3 0 0 1 3 3v0a3 3 0 0 1 3 3v1a3 3 0 0 1-1 5.8V18a3 3 0 0 1-4 2.8V22',
   sparkles:
@@ -175,7 +183,13 @@ const ICON_PATHS: Record<string, string> = {
 
 @Component({
   selector: 'app-layout',
-  imports: [NgClass, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [
+    NgClass,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    NotificacionesBellComponent,
+  ],
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
@@ -185,6 +199,9 @@ export class LayoutComponent {
 
   /** CU15: carrito global — contador de ítems para el badge del header. */
   protected readonly carritoService = inject(CarritoService);
+
+  /** CU10: bandeja de notificaciones in-app. */
+  protected readonly notificacionesService = inject(NotificacionesService);
 
   /** Usuario autenticado reactivo (BehaviorSubject -> signal). */
   private readonly user = toSignal(this.authService.currentUser$, {
@@ -352,6 +369,9 @@ export class LayoutComponent {
 
   /** CU2: Cerrar sesión — limpia LocalStorage y redirige al login. */
   protected cerrarSesion(): void {
+    // CU10: limpiar la cache de notificaciones del store al deslogear
+    // para que el siguiente usuario no vea las del anterior.
+    this.notificacionesService.limpiar();
     this.authService.logout();
   }
 }

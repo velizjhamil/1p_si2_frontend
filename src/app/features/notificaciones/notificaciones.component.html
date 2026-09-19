@@ -1,0 +1,439 @@
+<!-- CU10 — Vista dedicada de Notificaciones -->
+<section class="p-6 md:p-8 max-w-5xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Notificaciones</h1>
+      <p class="text-gray-600 mt-1">
+        Bandeja de alertas y avisos del sistema.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- CU10: solo GS y ASU pueden crear notificaciones nuevas. -->
+      @if (puedeEmitir()) {
+        <button
+          type="button"
+          (click)="abrirModalNueva()"
+          class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary transition shadow-sm flex items-center gap-1.5"
+          title="Enviar una nueva alerta a un usuario del sistema"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Nueva Notificación
+        </button>
+      }
+      <button
+        type="button"
+        (click)="cargar()"
+        [disabled]="cargando()"
+        class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
+      >
+        Refrescar
+      </button>
+      <button
+        type="button"
+        (click)="marcarTodasLeidas()"
+        [disabled]="guardando() || noti.noLeidas() === 0"
+        class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition"
+      >
+        Marcar todas como leídas
+      </button>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+    >
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Filtros rapidos (leidas/no leidas) -->
+  <div
+    class="bg-container rounded-xl p-3 flex flex-wrap gap-2 items-center mb-4"
+  >
+    <button
+      type="button"
+      (click)="setFiltro('todas')"
+      [class.bg-primary]="filtro() === 'todas'"
+      [class.text-white]="filtro() === 'todas'"
+      [class.bg-white]="filtro() !== 'todas'"
+      [class.text-primary]="filtro() !== 'todas'"
+      [class.border]="filtro() !== 'todas'"
+      [class.border-primary]="filtro() !== 'todas'"
+      class="px-4 py-1.5 rounded-full text-sm font-medium transition"
+    >
+      Todas ({{ noti.items().length }})
+    </button>
+    <button
+      type="button"
+      (click)="setFiltro('no_leidas')"
+      [class.bg-primary]="filtro() === 'no_leidas'"
+      [class.text-white]="filtro() === 'no_leidas'"
+      [class.bg-white]="filtro() !== 'no_leidas'"
+      [class.text-primary]="filtro() !== 'no_leidas'"
+      [class.border]="filtro() !== 'no_leidas'"
+      [class.border-primary]="filtro() !== 'no_leidas'"
+      class="px-4 py-1.5 rounded-full text-sm font-medium transition"
+    >
+      Sin leer ({{ noti.noLeidas() }})
+    </button>
+    <div class="ml-auto flex flex-wrap gap-1.5">
+      @for (t of tipos; track t) {
+        <button
+          type="button"
+          (click)="setTipo(t)"
+          [class.bg-primary]="tipoFiltro() === t"
+          [class.text-white]="tipoFiltro() === t"
+          [class.bg-white]="tipoFiltro() !== t"
+          [class.text-slate-600]="tipoFiltro() !== t"
+          [class.border]="tipoFiltro() !== t"
+          [class.border-slate-300]="tipoFiltro() !== t"
+          class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition"
+        >
+          {{ t }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    @if (cargando() && noti.items().length === 0) {
+      <p class="px-4 py-12 text-center text-slate-500 text-sm">
+        Cargando notificaciones...
+      </p>
+    } @else if (itemsFiltrados().length === 0) {
+      <div class="px-4 py-16 text-center">
+        <svg
+          class="h-12 w-12 mx-auto text-slate-300 mb-3"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"
+          />
+        </svg>
+        <p class="text-sm text-slate-500">
+          No hay notificaciones con los filtros actuales.
+        </p>
+      </div>
+    } @else {
+      <ul class="divide-y divide-slate-100">
+        @for (n of itemsFiltrados(); track n.id_notificacion) {
+          <li
+            class="px-4 py-3 flex items-start gap-3 hover:bg-slate-50/60 transition"
+            [class.bg-container]="!n.leida"
+          >
+            <span
+              class="mt-1.5 h-2 w-2 rounded-full shrink-0"
+              [class.bg-primary]="!n.leida"
+              [class.bg-transparent]="n.leida"
+            ></span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  (click)="onClickNotificacion(n)"
+                  class="text-left"
+                >
+                  <p
+                    class="text-sm font-semibold"
+                    [class.text-slate-900]="!n.leida"
+                    [class.text-slate-600]="n.leida"
+                  >
+                    {{ n.titulo }}
+                  </p>
+                </button>
+                <span
+                  class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+                  [class]="badgeClase(n.tipo)"
+                >
+                  {{ n.tipo }}
+                </span>
+              </div>
+              <p
+                class="text-sm mt-1"
+                [class.text-slate-700]="!n.leida"
+                [class.text-slate-500]="n.leida"
+              >
+                {{ n.mensaje }}
+              </p>
+              <p class="text-[11px] text-slate-400 mt-1">
+                {{ n.fecha_creacion | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              @if (!n.leida) {
+                <button
+                  type="button"
+                  (click)="onClickNotificacion(n)"
+                  class="text-[11px] font-semibold text-primary hover:text-accent transition"
+                >
+                  Marcar leída
+                </button>
+              }
+              <button
+                type="button"
+                (click)="pedirEliminar(n)"
+                class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 transition"
+                title="Eliminar notificación"
+              >
+                Eliminar
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>
+
+<!-- ConfirmDialog (compartido) -->
+@if (confirmarEliminar(); as n) {
+  <app-confirm-dialog
+    [titulo]="'Eliminar notificación'"
+    [mensaje]="'¿Eliminar la notificación &quot;' + n.titulo + '&quot;? Esta acción no se puede deshacer.'"
+    [textoConfirmar]="'Eliminar'"
+    [peligro]="true"
+    (confirmado)="confirmarEliminacion()"
+    (cancelado)="cancelarEliminacion()"
+  />
+}
+
+<!-- Modal: Nueva Notificación (solo visible si puedeEmitir() = true) -->
+@if (modalAbierto() && puedeEmitir()) {
+  <div
+    class="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 overflow-y-auto"
+    (click)="cerrarModal()"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl w-full max-w-lg my-8"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div
+        class="px-6 py-4 border-b border-slate-200 flex items-center justify-between"
+      >
+        <div>
+          <h2 class="text-lg font-bold text-primary">Nueva Notificación</h2>
+          <p class="text-xs text-slate-600">
+            Envía una alerta a un usuario del sistema. Solo visible para
+            Gerente de Sucursal y Administrador.
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarModal()"
+          [disabled]="enviando()"
+          class="h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 transition flex items-center justify-center disabled:opacity-30"
+          aria-label="Cerrar modal"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-5 space-y-4">
+        <!-- Destinatario (selector de usuarios: el value ES el UUID) -->
+        <div>
+          <label
+            for="notif-destinatario"
+            class="text-xs font-semibold text-slate-500 uppercase mb-1 block"
+          >
+            Destinatario
+          </label>
+          <select
+            id="notif-destinatario"
+            [value]="formDestinatarioId()"
+            (change)="formDestinatarioId.set($any($event.target).value)"
+            [disabled]="enviando() || cargandoUsuarios() || usuariosCatalogo().length === 0"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-slate-50 bg-white"
+          >
+            <option value="" disabled>
+              @if (cargandoUsuarios()) {
+                Cargando usuarios...
+              } @else if (usuariosCatalogo().length === 0) {
+                No hay usuarios disponibles
+              } @else {
+                Seleccione un destinatario...
+              }
+            </option>
+            @for (u of usuariosCatalogo(); track u.id_usuario) {
+              <option [value]="u.id_usuario">
+                @if (u.nombre || u.apellido) {
+                  {{ u.nombre }} {{ u.apellido }} — {{ u.correo }}
+                } @else {
+                  {{ u.correo }}
+                }
+              </option>
+            }
+          </select>
+          @if (cargandoUsuarios()) {
+            <p class="text-[11px] text-slate-500 mt-1">
+              Cargando catálogo de usuarios...
+            </p>
+          } @else {
+            <p class="text-[11px] text-slate-500 mt-1">
+              {{ usuariosCatalogo().length }} usuario(s) en el sistema.
+              <button
+                type="button"
+                (click)="abrirModalNueva(true)"
+                [disabled]="enviando()"
+                class="text-primary hover:text-accent font-semibold"
+              >
+                Refrescar
+              </button>
+            </p>
+          }
+        </div>
+
+        <!-- Tipo (chips) -->
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
+            Tipo de alerta
+          </label>
+          <div class="flex flex-wrap gap-1.5">
+            @for (t of tiposEnviables; track t) {
+              <button
+                type="button"
+                (click)="formTipo.set(t)"
+                [disabled]="enviando()"
+                [class.bg-primary]="formTipo() === t"
+                [class.text-white]="formTipo() === t"
+                [class.bg-white]="formTipo() !== t"
+                [class.text-slate-600]="formTipo() !== t"
+                [class.border]="formTipo() !== t"
+                [class.border-slate-300]="formTipo() !== t"
+                class="px-2.5 py-1 rounded-full text-[11px] font-semibold transition disabled:opacity-50"
+              >
+                {{ t }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Título -->
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
+            Título
+            <span class="text-slate-400 normal-case"
+              >({{ formTitulo().length }}/100)</span
+            >
+          </label>
+          <input
+            type="text"
+            [value]="formTitulo()"
+            (input)="formTitulo.set($any($event.target).value)"
+            placeholder="ej: Tu pedido está en camino"
+            maxlength="100"
+            [disabled]="enviando()"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-slate-50"
+          />
+        </div>
+
+        <!-- Mensaje -->
+        <div>
+          <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
+            Mensaje
+            <span class="text-slate-400 normal-case"
+              >({{ formMensaje().length }}/500)</span
+            >
+          </label>
+          <textarea
+            [value]="formMensaje()"
+            (input)="formMensaje.set($any($event.target).value)"
+            placeholder="Detalle de la alerta para el destinatario..."
+            maxlength="500"
+            rows="4"
+            [disabled]="enviando()"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:bg-slate-50 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Error del modal -->
+        @if (errorModal()) {
+          <div
+            class="px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs"
+          >
+            {{ errorModal() }}
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2"
+      >
+        <button
+          type="button"
+          (click)="cerrarModal()"
+          [disabled]="enviando()"
+          class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-30 transition"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="enviarNueva()"
+          [disabled]="!formValido() || enviando() || cargandoUsuarios() || usuariosCatalogo().length === 0"
+          class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5"
+        >
+          @if (enviando()) {
+            <svg
+              class="h-4 w-4 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                d="M21 12a9 9 0 1 1-6.219-8.56"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Enviando...</span>
+          } @else {
+            <span>Enviar alerta</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

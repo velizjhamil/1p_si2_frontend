@@ -111,6 +111,50 @@ export const routes: Routes = [
           ),
       },
       {
+        // Módulo Ventas: rutas lazy children bajo /ventas (CU15+CU21...).
+        path: 'ventas',
+        loadChildren: () =>
+          import('./features/ventas/ventas.routes').then(
+            (m) => m.VENTAS_ROUTES,
+          ),
+      },
+      {
+        // CU13: Gestión de Devoluciones (vista operativa ASU/GS/V).
+        // El cliente (rol C) tiene su propio flujo (solicitar) y NO
+        // accede a esta pantalla — la regla server-side del backend
+        // (/api/v1/devoluciones) refuerza la separación.
+        path: 'devoluciones',
+        loadComponent: () =>
+          import('./features/devoluciones/devoluciones.component').then(
+            (m) => m.DevolucionesComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['ASU', 'GS', 'V'] },
+      },
+      {
+        // CU10: Vista dedicada de Notificaciones (bandeja completa).
+        // Cualquier usuario autenticado puede ver SUS notificaciones;
+        // la regla server-side del backend (/api/v1/notificaciones)
+        // refuerza la separación entre usuarios.
+        path: 'notificaciones',
+        loadComponent: () =>
+          import('./features/notificaciones/notificaciones.component').then(
+            (m) => m.NotificacionesComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['ASU', 'GS', 'V', 'C'] },
+      },
+      {
+        // CU12: Gestión de Descuentos / Cupones (ASU/GS).
+        path: 'descuentos',
+        loadComponent: () =>
+          import('./features/descuentos/descuentos.component').then(
+            (m) => m.DescuentosComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['ASU', 'GS'] },
+      },
+      {
         // Módulo Probador Virtual AR (CU8): ruta lazy bajo /probador-virtual.
         path: 'probador-virtual',
         loadChildren: () =>

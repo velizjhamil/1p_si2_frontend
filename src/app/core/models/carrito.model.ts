@@ -32,7 +32,7 @@ export interface DatosEntrega {
   referencia?: string;
 }
 
-/** Venta procesada (mock): la genera procesarCompra(). */
+/** Venta procesada: la genera el backend (CU15+CU21 digital, CU11 POS). */
 export interface Venta {
   id: number;
   codigo: string;
@@ -42,7 +42,14 @@ export interface Venta {
   estado_pago: EstadoPago;
   fecha: string;
   datos_entrega: DatosEntrega;
+  /** CU11: id del vendedor que cobró (null en ventas online del Cliente). */
+  vendedor_id?: string | null;
+  /** CU11: tipo de venta (ONLINE para e-commerce, POS para mostrador). */
+  tipo_venta?: 'ONLINE' | 'POS';
 }
+
+/** Tipo de venta para el checkout (default ONLINE). */
+export type TipoVenta = 'ONLINE' | 'POS';
 
 /** Catálogo mock de la tienda para el home del cliente. */
 export interface ProductoTienda {

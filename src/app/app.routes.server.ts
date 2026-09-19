@@ -6,6 +6,10 @@ export const serverRoutes: ServerRoute[] = [
     path: 'proximamente/:modulo',
     renderMode: RenderMode.Client,
   },
+  {
+    path: 'ventas/:id',
+    renderMode: RenderMode.Client,
+  },
   // El resto de la app se prerenderiza como páginas estáticas.
   {
     path: '**',

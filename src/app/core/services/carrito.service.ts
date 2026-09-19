@@ -7,6 +7,7 @@ import {
   CarritoItem,
   DatosEntrega,
   MetodoPago,
+  TipoVenta,
   Venta,
 } from '../models/carrito.model';
 
@@ -47,6 +48,10 @@ interface VentaDTO {
   comprobante_url: string | null;
   items: ItemVentaDTO[];
   datos_entrega: DatosEntrega;
+  /** CU11: id del vendedor que registró la venta (null en ONLINE). */
+  vendedor_id: string | null;
+  /** CU11: tipo de venta (ONLINE | POS). Default ONLINE. */
+  tipo_venta: 'ONLINE' | 'POS';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -153,7 +158,9 @@ export class CarritoService {
 
   // ------------------------------------------------------------- CU21 checkout
   /**
-   * CU21: Procesa la compra contra el backend real.
+   * CU21: Procesa la compra contra el backend real (flujo ONLINE del
+   * Cliente). El id_cliente se toma del token; el backend ignora cualquier
+   * id_cliente_override que venga en el payload.
    *
    * POST /api/v1/ventas/checkout — transacción atómica server-side:
    * valida stock, calcula el total con precios REALES de la DB, registra
@@ -165,7 +172,49 @@ export class CarritoService {
     metodo_pago: MetodoPago,
     datos_entrega: DatosEntrega,
   ): Observable<Venta> {
-    if (this.vacio()) {
+    return this.procesarVenta(
+      this._items(),
+      metodo_pago,
+      datos_entrega,
+      'ONLINE',
+      undefined,
+    );
+  }
+
+  /**
+   * CU11: Procesa una venta POS (mostrador). El id del cliente lo elige
+   * el Vendedor en el modal POS; el id del vendedor lo toma el backend
+   * del token. NO toca el carrito global del Cliente (usa el array
+   * `items` que recibe como argumento).
+   */
+  procesarVentaPos(
+    items: CarritoItem[],
+    metodo_pago: MetodoPago,
+    datos_entrega: DatosEntrega,
+    id_cliente: string,
+  ): Observable<Venta> {
+    return this.procesarVenta(
+      items,
+      metodo_pago,
+      datos_entrega,
+      'POS',
+      id_cliente,
+    );
+  }
+
+  /**
+   * Implementación única de checkout usada por procesarCompra (online)
+   * y procesarVentaPos (POS). Valida carrito vacío, arma el payload
+   * con la forma extendida de CU11 y delega al endpoint.
+   */
+  private procesarVenta(
+    items: CarritoItem[],
+    metodo_pago: MetodoPago,
+    datos_entrega: DatosEntrega,
+    tipo_venta: TipoVenta,
+    id_cliente_override: string | undefined,
+  ): Observable<Venta> {
+    if (!items || items.length === 0) {
       return throwError(() => ({
         error: { detail: 'El carrito está vacío.' },
       }));
@@ -173,19 +222,25 @@ export class CarritoService {
 
     // El carrito NO envía precios: el server usa precio_venta de la DB
     // (anti-manipulación). Solo id + cantidad + variante.
-    const items = this._items().map((i) => ({
+    const itemsPayload = items.map((i) => ({
       producto_id: i.producto_id,
       cantidad: i.cantidad,
       talla: i.talla,
       color: i.color,
     }));
 
+    const body: Record<string, unknown> = {
+      items: itemsPayload,
+      metodo_pago,
+      datos_entrega,
+      tipo_venta,
+    };
+    if (id_cliente_override) {
+      body['id_cliente_override'] = id_cliente_override;
+    }
+
     return this.api
-      .post<ApiResponse<VentaDTO>>('/ventas/checkout', {
-        items,
-        metodo_pago,
-        datos_entrega,
-      })
+      .post<ApiResponse<VentaDTO>>('/ventas/checkout', body)
       .pipe(map((resp) => this.mapVenta(resp.data)));
   }
 
@@ -216,6 +271,8 @@ export class CarritoService {
       estado_pago: dto.estado_pago,
       fecha: dto.fecha_venta,
       datos_entrega: dto.datos_entrega,
+      vendedor_id: dto.vendedor_id ?? null,
+      tipo_venta: dto.tipo_venta ?? 'ONLINE',
     };
   }
 
