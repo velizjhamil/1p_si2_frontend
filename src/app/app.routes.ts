@@ -87,7 +87,7 @@ export const routes: Routes = [
             (m) => m.CategoriesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['ASU'] },
       },
       {
         // Módulo Catálogo: rutas lazy children bajo /catalogo (CU6, CU7, CU24...).
@@ -142,7 +142,7 @@ export const routes: Routes = [
             (m) => m.NotificacionesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS', 'V', 'C'] },
+        data: { roles: ['ASU', 'GS', 'V', 'C', 'D'] },
       },
       {
         // CU12: Gestión de Descuentos / Cupones (ASU/GS).
@@ -150,6 +150,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/descuentos/descuentos.component').then(
             (m) => m.DescuentosComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['ASU', 'GS'] },
+      },
+      {
+        // CU20: Gestión de Reportes (ASU/GS). Guard solo de navegación: la
+        // autorización real (401/403) la valida FastAPI en /api/v1/reportes.
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/reportes/reportes.component').then(
+            (m) => m.ReportesComponent
           ),
         canActivate: [authGuard],
         data: { roles: ['ASU', 'GS'] },
@@ -197,7 +208,8 @@ export const routes: Routes = [
             (m) => m.CarritoComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['C', 'V', 'ASU', 'GS'] },
+        // Solo el Cliente compra: strict = ni siquiera el ASU entra por el pase libre del guard.
+        data: { roles: ['C'], strict: true },
       },
       {
         // CU21: Checkout / Confirmación de compra (mock).
@@ -207,7 +219,21 @@ export const routes: Routes = [
             (m) => m.CheckoutComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['C', 'V', 'ASU', 'GS'] },
+        data: { roles: ['C'], strict: true },
+      },
+      {
+        // Módulo Envíos: rutas lazy children bajo /envios (CU18). Es también
+        // la pantalla de inicio del rol D (Encargado de Delivery).
+        path: 'envios',
+        loadChildren: () =>
+          import('./features/envios/envios.routes').then((m) => m.ENVIOS_ROUTES),
+      },
+      {
+        // Módulo Agencias de Reparto: rutas lazy children bajo /agencias (CU19).
+        // ASU/GS administran; D consulta (los guards por ruta están en el módulo).
+        path: 'agencias',
+        loadChildren: () =>
+          import('./features/agencias/agencias.routes').then((m) => m.AGENCIAS_ROUTES),
       },
       {
         // Placeholder de módulos Ciclos 2+ (ítems del sidebar en desarrollo).

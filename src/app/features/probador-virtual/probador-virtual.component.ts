@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ProbadorService, ProbarPrendaPayload } from '../../core/services/probador.service';
 import { CatalogoTiendaService } from '../../core/services/catalogo-tienda.service';
 import { CarritoService } from '../../core/services/carrito.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { ProductoTienda } from '../../core/models/carrito.model';
 import {
@@ -40,6 +41,10 @@ export class ProbadorVirtualComponent {
   private readonly probadorService = inject(ProbadorService);
   private readonly catalogoService = inject(CatalogoTiendaService);
   private readonly carritoService = inject(CarritoService);
+  private readonly auth = inject(AuthService);
+
+  /** Regla de negocio: solo el Cliente puede agregar al carrito. */
+  protected readonly esCliente = this.auth.esCliente();
 
   // ------------------------------------------------------------------ estado
   /** Catálogo de prendas disponibles para probar. */

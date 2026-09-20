@@ -8,7 +8,8 @@ import { authGuard } from '../../core/guards/auth.guard';
  */
 export const CATALOGO_ROUTES: Routes = [
   {
-    // CU6: Gestión de Productos de Ropa (vista + catálogo visual, FASE MOCK).
+    // CU6: Productos. Ruta de CONSULTA del catálogo (ASU/GS/V/C); la GESTIÓN
+    // (crear/editar/eliminar) la habilita el componente solo para ASU.
     path: 'productos',
     loadComponent: () =>
       import('./productos/productos.component').then((m) => m.ProductosComponent),
@@ -25,12 +26,14 @@ export const CATALOGO_ROUTES: Routes = [
   },
   {
     // CU24: Gestión de Temporadas y Colecciones (backend real FastAPI).
+    // Acceso exclusivo del Administrador super usuario (ASU): strict = lista exacta,
+    // sin el pase libre de otros alias administrativos del authGuard.
     path: 'temporadas',
     loadComponent: () =>
       import('./temporadas/temporadas.component').then(
         (m) => m.TemporadasComponent,
       ),
     canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS'] },
+    data: { roles: ['ASU'], strict: true },
   },
 ];

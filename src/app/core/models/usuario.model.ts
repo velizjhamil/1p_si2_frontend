@@ -1,4 +1,4 @@
-export type Rol = 'ASU' | 'GS' | 'V' | 'C';
+export type Rol = 'ASU' | 'GS' | 'V' | 'C' | 'D';
 
 export interface RolResponse {
   id_rol: string;

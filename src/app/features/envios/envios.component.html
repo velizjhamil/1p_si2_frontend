@@ -1,0 +1,198 @@
+<!-- CU18 — Gestión de Envíos (GS / Encargado de Delivery / ASU) -->
+<section class="p-6 md:p-8 max-w-7xl mx-auto">
+  <!-- Encabezado -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gestión de Envíos</h1>
+      <p class="text-gray-600 mt-1">
+        Prepare, asigne y siga las entregas a domicilio de los pedidos en línea.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="limpiarFiltros()"
+      class="self-start md:self-auto px-4 py-2 rounded-lg text-sm font-medium border border-primary/30 text-primary hover:bg-container transition"
+    >
+      Limpiar filtros
+    </button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">Preparando</p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ kpiPreparando() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">En ruta</p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ kpiEnRuta() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">Intento fallido</p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ kpiFallidos() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">Entregados</p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ kpiEntregados() }}</p>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  @if (exitoMessage()) {
+    <div class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm">
+      {{ exitoMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Filtros -->
+  <div class="bg-container rounded-xl p-4 space-y-3 mb-4">
+    <div class="flex flex-col lg:flex-row gap-3">
+      <input
+        type="search"
+        [ngModel]="busqueda()"
+        (ngModelChange)="onBusqueda($event)"
+        placeholder="Buscar por código de pedido o cliente"
+        class="flex-1 text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary/40"
+      />
+      <select
+        [ngModel]="filtroSucursal()"
+        (ngModelChange)="onFiltroSucursal($event)"
+        class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white lg:w-64"
+        aria-label="Filtrar por sucursal responsable"
+      >
+        <option [ngValue]="null">Todas las sucursales</option>
+        @for (s of sucursales(); track s.codigo_sucursal) {
+          <option [ngValue]="s.codigo_sucursal">{{ s.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      @for (estado of estados; track estado) {
+        <button
+          type="button"
+          (click)="onFiltroEstado(estado)"
+          [class.bg-primary]="filtroEstado() === estado"
+          [class.text-white]="filtroEstado() === estado"
+          [class.bg-white]="filtroEstado() !== estado"
+          [class.text-primary]="filtroEstado() !== estado"
+          [class.border]="filtroEstado() !== estado"
+          [class.border-primary]="filtroEstado() !== estado"
+          class="px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 transition"
+        >
+          {{ etiquetaFiltro(estado) }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-container">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Pedido</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Cliente</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Dirección</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Estado</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Sucursal</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Repartidor / Agencia</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">Entrega est.</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          @if (cargando()) {
+            <tr>
+              <td colspan="8" class="px-4 py-12 text-center text-slate-500 text-sm">Cargando envíos...</td>
+            </tr>
+          } @else if (envios().length === 0) {
+            <tr>
+              <td colspan="8" class="px-4 py-12 text-center text-slate-500 text-sm">
+                No hay envíos con el filtro actual.
+              </td>
+            </tr>
+          } @else {
+            @for (e of envios(); track e.id_envio) {
+              <tr class="hover:bg-slate-50/60 transition">
+                <td class="px-4 py-3 text-sm text-slate-700 font-medium whitespace-nowrap">
+                  {{ e.codigo_venta }}
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ e.cliente_nombre }}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 max-w-[16rem]">
+                  <span class="block truncate" [title]="e.datos_entrega.direccion + ', ' + e.datos_entrega.ciudad">
+                    {{ e.datos_entrega.direccion }}, {{ e.datos_entrega.ciudad }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm">
+                  <app-badge [variant]="estadoVariant[e.estado]" [texto]="estadoLabel[e.estado]" />
+                  @if (e.intentos_fallidos > 0) {
+                    <span class="block text-xs text-amber-700 mt-1">
+                      {{ e.intentos_fallidos }} intento(s) fallido(s)
+                    </span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600">{{ e.sucursal_nombre ?? '—' }}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">
+                  {{ e.repartidor_nombre ?? (e.agencia_nombre ? 'Agencia: ' + e.agencia_nombre : 'Sin asignar') }}
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
+                  {{ e.fecha_estimada_entrega ? (e.fecha_estimada_entrega | date: 'dd/MM/yyyy HH:mm') : '—' }}
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    (click)="verDetalle(e)"
+                    class="text-primary hover:text-accent text-sm font-semibold transition"
+                  >
+                    {{ e.transiciones_permitidas.length > 0 ? 'Gestionar' : 'Ver detalle' }}
+                  </button>
+                  @if (siguientePaso(e)) {
+                    <span class="block text-xs text-slate-500 mt-0.5">{{ siguientePaso(e) }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (!cargando() && envios().length > 0) {
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <span class="text-sm text-slate-600">
+          Página {{ pagina() }} de {{ pages() }} — {{ total() }} registro(s)
+        </span>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="paginaAnterior()"
+            [disabled]="pagina() <= 1"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            (click)="paginaSiguiente()"
+            [disabled]="pagina() >= pages()"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Modal de detalle + acciones -->
+@if (detalle(); as d) {
+  <app-envio-detalle [envio]="d" (cerrar)="cerrarDetalle()" (actualizado)="onActualizado($event)" />
+}

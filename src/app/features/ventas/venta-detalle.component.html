@@ -130,6 +130,20 @@
           </div>
         </section>
 
+        <!-- CU18: envío a domicilio asociado -->
+        @if (v.tipo_entrega === 'DOMICILIO' && puedeVerEnvio()) {
+          <section class="flex items-center justify-between gap-3 bg-container rounded-xl p-4 border border-primary/10">
+            <p class="text-sm text-slate-700">Este pedido se entrega a domicilio.</p>
+            <a
+              routerLink="/envios"
+              [queryParams]="{ q: v.codigo }"
+              class="text-sm font-semibold text-primary hover:text-accent transition"
+            >
+              Ver envío
+            </a>
+          </section>
+        }
+
         <!-- Ítems -->
         <section>
           <h2 class="font-bold text-sm text-slate-800 mb-2">

@@ -70,6 +70,8 @@ interface VentaDTO {
   vendedor_id: string | null;
   /** CU11: tipo de venta (ONLINE | POS). */
   tipo_venta: 'ONLINE' | 'POS';
+  /** CU18: DOMICILIO (genera envío) | RETIRO. */
+  tipo_entrega?: 'DOMICILIO' | 'RETIRO';
 }
 
 /** Envelope del GET paginado: lista en data + extras de paginación. */
@@ -158,6 +160,7 @@ export class VentasService {
       datos_entrega: this.mapEntrega(dto.datos_entrega),
       vendedor_id: dto.vendedor_id ?? null,
       tipo_venta: dto.tipo_venta ?? 'ONLINE',
+      tipo_entrega: dto.tipo_entrega,
     };
   }
 

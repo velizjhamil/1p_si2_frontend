@@ -6,6 +6,7 @@ import { CategoriasService } from '../../categories/categories.service';
 import { ProveedoresService } from '../../suppliers/suppliers.service';
 import { BadgeComponent } from '../../../shared/badge/badge.component';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../../core/services/auth.service';
 import { ApiResponse } from '../../../core/models/usuario.model';
 import {
   Categoria,
@@ -20,7 +21,8 @@ import {
 } from '../../../core/models/producto.model';
 
 /**
- * CU6 — Gestión de Productos de Ropa (ASU/GS) — BACKEND REAL.
+ * CU6 — Gestión de Productos de Ropa (solo ASU gestiona) — BACKEND REAL.
+ * Los demás roles (p. ej. Cliente) solo consultan el catálogo: sin crear/editar/eliminar.
  * Catálogo visual en grid de tarjetas con búsqueda, filtros por categoría
  * y estado, paginación server-side. Modal "+ Nuevo Producto" con selección
  * de tallas/colores (chips clickeables por id de catálogo), categoría y
@@ -42,6 +44,10 @@ export class ProductosComponent implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly categoriasService = inject(CategoriasService);
   private readonly proveedoresService = inject(ProveedoresService);
+  private readonly auth = inject(AuthService);
+
+  /** Solo el ASU gestiona productos; el resto de roles solo consulta. */
+  readonly puedeGestionar = (this.auth.getRol() || '').toUpperCase() === 'ASU';
 
   // ------------------------------------------------------------------ estado
   productos = signal<ProductoRopa[]>([]);
@@ -107,13 +113,15 @@ export class ProductosComponent implements OnInit {
         next: (resp: CategoriasPage) => this.categorias.set(resp.data),
         error: () => this.errorMessage.set('No se pudieron cargar las categorías.'),
       });
-    // Proveedores (mismo servicio del CU23)
-    this.proveedoresService
-      .getProveedores({ limit: 100 })
-      .subscribe({
-        next: (resp: ProveedoresPage) => this.proveedores.set(resp.data),
-        error: () => this.errorMessage.set('No se pudieron cargar los proveedores.'),
-      });
+    // Proveedores (CU23): solo alimentan el formulario de gestión
+    if (this.puedeGestionar) {
+      this.proveedoresService
+        .getProveedores({ limit: 100 })
+        .subscribe({
+          next: (resp: ProveedoresPage) => this.proveedores.set(resp.data),
+          error: () => this.errorMessage.set('No se pudieron cargar los proveedores.'),
+        });
+    }
     // Tallas y colores (CU7)
     this.productosService.getTallas().subscribe({
       next: (data) => this.tallas.set(data),
@@ -214,6 +222,7 @@ export class ProductosComponent implements OnInit {
 
   // ------------------------------------------------------------------ modal
   abrirModalCrear(): void {
+    if (!this.puedeGestionar) return;
     this.editandoId.set(null);
     this.productoForm.reset({
       nombre: '',
@@ -230,6 +239,7 @@ export class ProductosComponent implements OnInit {
   }
 
   abrirModalEditar(producto: ProductoRopa): void {
+    if (!this.puedeGestionar) return;
     this.editandoId.set(producto.id_producto);
     this.productoForm.reset({
       nombre: producto.nombre,
@@ -252,6 +262,7 @@ export class ProductosComponent implements OnInit {
 
   // ---------------------------------------------------------------- acciones
   guardar(): void {
+    if (!this.puedeGestionar) return;
     if (this.productoForm.invalid || this.guardando()) {
       this.errorMessage.set(
         'Complete los campos obligatorios (*) y seleccione al menos una talla y un color.',
@@ -302,6 +313,7 @@ export class ProductosComponent implements OnInit {
   }
 
   pedirEliminar(producto: ProductoRopa): void {
+    if (!this.puedeGestionar) return;
     this.confirmarEliminar.set(producto);
   }
 
@@ -311,6 +323,7 @@ export class ProductosComponent implements OnInit {
   }
 
   confirmarEliminacion(): void {
+    if (!this.puedeGestionar) return;
     const producto = this.confirmarEliminar();
     if (!producto) return;
     this.confirmarEliminar.set(null);

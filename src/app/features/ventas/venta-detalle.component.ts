@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VentasService } from './ventas.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { EstadoPago, MetodoPago, Venta, formatBs } from '../../core/models/carrito.model';
 
@@ -45,13 +46,14 @@ function etiquetaMetodo(m: MetodoPago): string {
  */
 @Component({
   selector: 'app-venta-detalle',
-  imports: [BadgeComponent, DatePipe],
+  imports: [BadgeComponent, DatePipe, RouterLink],
   templateUrl: './venta-detalle.component.html',
 })
 export class VentaDetalleComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ventasService = inject(VentasService);
+  private readonly authService = inject(AuthService);
 
   venta = signal<Venta | null>(null);
   cargando = signal(true);
@@ -78,6 +80,11 @@ export class VentaDetalleComponent implements OnInit {
         this.cargando.set(false);
       },
     });
+  }
+
+  /** CU18: solo quienes gestionan envíos (ASU/GS/D) ven el enlace a /envios. */
+  protected puedeVerEnvio(): boolean {
+    return ['ASU', 'GS', 'D'].includes(this.authService.getRol().toUpperCase());
   }
 
   protected volver(): void {

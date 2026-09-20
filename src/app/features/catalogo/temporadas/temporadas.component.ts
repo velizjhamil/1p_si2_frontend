@@ -47,7 +47,7 @@ function hoyISO(): string {
 }
 
 /**
- * CU24 — Gestión de Temporadas y Colecciones (ASU/GS).
+ * CU24 — Gestión de Temporadas y Colecciones (Administrador super usuario, ASU).
  * Datatable paginado server-side de temporadas con búsqueda por nombre,
  * tabs de vigencia (Vigentes/Finalizadas), badges de estado derivados
  * (Vigente/Programada/Finalizada), modal registrar/editar temporada con

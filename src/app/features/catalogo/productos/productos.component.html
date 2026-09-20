@@ -1,4 +1,4 @@
-<!-- CU6 — Gestión de Productos de Ropa (ASU/GS) — BACKEND REAL /api/v1/productos -->
+<!-- CU6 — Gestión de Productos de Ropa (gestión solo ASU; el resto consulta) — BACKEND REAL /api/v1/productos -->
 <section class="p-6 md:p-8 max-w-7xl mx-auto">
   <!-- Encabezado -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -38,6 +38,7 @@
           ☰ Tabla
         </button>
       </div>
+      @if (puedeGestionar) {
       <button
         type="button"
         (click)="abrirModalCrear()"
@@ -45,6 +46,7 @@
       >
         + Nuevo Producto
       </button>
+      }
     </div>
   </div>
 
@@ -209,6 +211,7 @@
                   {{ producto.stock_total }}
                 </span>
               </span>
+              @if (puedeGestionar) {
               <div class="flex gap-2 text-xs">
                 <button
                   type="button"
@@ -225,6 +228,7 @@
                   Eliminar
                 </button>
               </div>
+              }
 </div>
           </div>
         </article>
@@ -243,7 +247,9 @@
               <th class="text-center px-4 py-3 font-semibold">Stock</th>
               <th class="text-left px-4 py-3 font-semibold">Tallas / Colores</th>
               <th class="text-center px-4 py-3 font-semibold">Estado</th>
+              @if (puedeGestionar) {
               <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -315,6 +321,7 @@
                     [texto]="producto.estado"
                   />
                 </td>
+                @if (puedeGestionar) {
                 <td class="px-4 py-3 text-right whitespace-nowrap">
                   <button
                     type="button"
@@ -331,6 +338,7 @@
                     Eliminar
                   </button>
                 </td>
+                }
               </tr>
             } @empty {
               <tr>
@@ -371,7 +379,7 @@
 </section>
 
 <!-- Modal Registrar / Editar Producto -->
-@if (modalAbierto()) {
+@if (puedeGestionar && modalAbierto()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div
       class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
@@ -582,7 +590,7 @@
 }
 
 <!-- ConfirmDialog de eliminación -->
-@if (confirmarEliminar(); as producto) {
+@if (puedeGestionar && confirmarEliminar(); as producto) {
   <app-confirm-dialog
     titulo="Eliminar Producto"
     [mensaje]="mensajeEliminar(producto)"

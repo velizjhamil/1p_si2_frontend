@@ -1,0 +1,73 @@
+<!-- CU20 — Reporte de Inventario -->
+@let d = datos();
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <app-reporte-kpi etiqueta="Productos" [valor]="d.total_productos | number" nota="Activos y agotados" />
+  <app-reporte-kpi etiqueta="Unidades en stock" [valor]="d.stock_total_unidades | number" nota="Stock global" />
+  <app-reporte-kpi etiqueta="Valor del inventario" [valor]="'Bs. ' + (d.valor_inventario | number: '1.2-2')" nota="A precio de venta" />
+  <app-reporte-kpi etiqueta="Agotados" [valor]="d.agotados | number" nota="Stock = 0" />
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <h2 class="text-sm font-semibold text-primary mb-3">Productos por nivel de stock</h2>
+    <app-reporte-chart [config]="graficoNiveles()" descripcion="Cantidad de productos por nivel de stock" />
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <h2 class="text-sm font-semibold text-primary mb-3">Rotación aproximada por producto</h2>
+    @if (graficoRotacion().hayDatos) {
+      <app-reporte-chart [config]="graficoRotacion().config" [alto]="graficoRotacion().alto" descripcion="Rotación aproximada por producto" />
+    } @else {
+      <p class="text-sm text-gray-500 py-8 text-center">Ningún producto con stock para calcular rotación.</p>
+    }
+  </div>
+</div>
+
+<p class="text-xs text-gray-500 mb-3">
+  Rotación aproximada = unidades vendidas del período ÷ stock actual. No es la rotación contable (no hay costo de compra) y
+  no se calcula cuando el stock es 0. El stock es el actual; las fechas y el canal solo afectan a las unidades vendidas.
+</p>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+  @if (d.items.length < d.total_filas) {
+    <p class="px-4 py-2 text-xs text-amber-800 bg-amber-50 border-b border-amber-200" data-testid="aviso-limite">
+      Mostrando {{ d.items.length }} de {{ d.total_filas }} productos (límite {{ d.limite }}). Los indicadores corresponden al total.
+    </p>
+  }
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-inventario">
+      <thead class="bg-container">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Producto</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Stock</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Nivel</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Precio</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Valor en stock</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Vendidas (período)</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Rotación (aprox.)</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 text-sm">
+        @for (i of d.items; track i.id_producto) {
+          <tr>
+            <td class="px-4 py-3">{{ i.producto }}</td>
+            <td class="px-4 py-3">{{ i.categoria }}</td>
+            <td class="px-4 py-3 text-right">{{ i.stock_actual }}</td>
+            <td class="px-4 py-3"><app-badge [variant]="varianteNivel(i.nivel_stock)" [texto]="i.nivel_stock" /></td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ i.precio_venta | number: '1.2-2' }}</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ i.valor_stock | number: '1.2-2' }}</td>
+            <td class="px-4 py-3 text-right">{{ i.unidades_vendidas }}</td>
+            <td class="px-4 py-3 text-right" data-testid="celda-rotacion">
+              @if (i.rotacion_disponible && i.rotacion !== null) {
+                {{ i.rotacion | number: '1.2-2' }}
+              } @else {
+                <span class="text-gray-400" title="No calculable: el producto no tiene stock">N/D</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, map, throwError } from 'rxjs';
 import { ApiService } from './api';
+import { AuthService } from './auth.service';
 import { ApiResponse } from '../models/usuario.model';
 import {
   CarritoItem,
@@ -11,7 +12,11 @@ import {
   Venta,
 } from '../models/carrito.model';
 
-/** Clave de persistencia del carrito en localStorage. */
+/**
+ * Prefijo de la clave del carrito en localStorage. La clave real lleva el id del
+ * usuario (`attention_carrito_<id>`): el carrito es de UN Cliente, no del navegador.
+ * La clave sin sufijo es la versión anterior (global) y se elimina al leer.
+ */
 const STORAGE_KEY = 'attention_carrito';
 
 /**
@@ -58,9 +63,17 @@ interface VentaDTO {
 export class CarritoService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
 
   /** Ítems actuales del carrito (señal raíz del estado). */
   private readonly _items = signal<CarritoItem[]>(this.leerStorage());
+
+  constructor() {
+    // Regla de negocio: el carrito es exclusivo del Cliente y de SU sesión. Al cambiar de
+    // usuario (login/logout) se recarga el carrito de ese usuario (vacío si no es Cliente):
+    // nadie hereda el carrito de otra sesión abierta en el mismo navegador.
+    this.auth.currentUser$.subscribe(() => this._items.set(this.leerStorage()));
+  }
 
   /** Vista pública read-only de los ítems. */
   readonly items = this._items.asReadonly();
@@ -90,6 +103,8 @@ export class CarritoService {
    * Si ya existe la misma combinación, suma cantidades.
    */
   agregarAlCarrito(item: Omit<CarritoItem, 'subtotal'>): void {
+    // Solo el Cliente agrega al carrito (defensa además del botón oculto en la UI).
+    if (!this.auth.esCliente()) return;
     const nuevo: CarritoItem = {
       ...item,
       subtotal: item.precio * item.cantidad,
@@ -172,6 +187,13 @@ export class CarritoService {
     metodo_pago: MetodoPago,
     datos_entrega: DatosEntrega,
   ): Observable<Venta> {
+    // El checkout online es solo del Cliente; el backend además responde 403 a los demás roles.
+    if (!this.auth.esCliente()) {
+      return throwError(() => ({
+        status: 403,
+        error: { detail: 'Solo el rol Cliente puede comprar desde el carrito.' },
+      }));
+    }
     return this.procesarVenta(
       this._items(),
       metodo_pago,
@@ -182,10 +204,10 @@ export class CarritoService {
   }
 
   /**
-   * CU11: Procesa una venta POS (mostrador). El id del cliente lo elige
-   * el Vendedor en el modal POS; el id del vendedor lo toma el backend
-   * del token. NO toca el carrito global del Cliente (usa el array
-   * `items` que recibe como argumento).
+   * CU11: Procesa una venta POS (mostrador) por POST /api/v1/ventas/pos
+   * (solo V/GS/ASU). El id del cliente lo elige el Vendedor en el modal POS;
+   * el id del vendedor lo toma el backend del token. NO toca el carrito
+   * global del Cliente (usa el array `items` que recibe como argumento).
    */
   procesarVentaPos(
     items: CarritoItem[],
@@ -239,8 +261,11 @@ export class CarritoService {
       body['id_cliente_override'] = id_cliente_override;
     }
 
+    // Compra online del Cliente -> /ventas/checkout (solo C); mostrador -> /ventas/pos (V/GS/ASU).
+    const endpoint = tipo_venta === 'POS' ? '/ventas/pos' : '/ventas/checkout';
+
     return this.api
-      .post<ApiResponse<VentaDTO>>('/ventas/checkout', body)
+      .post<ApiResponse<VentaDTO>>(endpoint, body)
       .pipe(map((resp) => this.mapVenta(resp.data)));
   }
 
@@ -277,11 +302,19 @@ export class CarritoService {
   }
 
   // ------------------------------------------------------------ persistencia
-  /** Guarda los ítems en localStorage (solo en el navegador). */
+  /** Clave de localStorage del carrito del Cliente actual (null si no es Cliente). */
+  private storageKey(): string | null {
+    const id = this.auth.getCurrentUser()?.id_usuario;
+    return this.auth.esCliente() && id ? `${STORAGE_KEY}_${id}` : null;
+  }
+
+  /** Guarda los ítems en localStorage (solo en el navegador y solo para el Cliente). */
   private persistir(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    const clave = this.storageKey();
+    if (!clave) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this._items()));
+      localStorage.setItem(clave, JSON.stringify(this._items()));
     } catch {
       // storage lleno/bloqueado: el carrito sigue vivo en memoria
     }
@@ -291,7 +324,10 @@ export class CarritoService {
   private leerStorage(): CarritoItem[] {
     if (!isPlatformBrowser(this.platformId)) return [];
     try {
-      const crudo = localStorage.getItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY); // carrito global de la versión anterior
+      const clave = this.storageKey();
+      if (!clave) return [];
+      const crudo = localStorage.getItem(clave);
       return crudo ? (JSON.parse(crudo) as CarritoItem[]) : [];
     } catch {
       return [];

@@ -16,8 +16,11 @@ export const authGuard: CanActivateFn = (route, state) => {
     const userRole = authService.getRol();
     const roleUpper = (userRole || '').toUpperCase();
     const esAdmin = roleUpper === 'ASU' || roleUpper === 'ADMIN';
+    // data.strict = true: la lista de roles es EXACTA (sin el pase libre del ASU).
+    // Se usa en rutas exclusivas de un rol, como el carrito/checkout del Cliente.
+    const estricto = route.data?.['strict'] === true;
 
-    if (esAdmin) {
+    if (esAdmin && !estricto) {
       return true;
     }
 

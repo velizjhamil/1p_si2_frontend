@@ -1,0 +1,360 @@
+<!-- CU20 — Gestión de Reportes (ASU/GS) -->
+<section class="p-6 md:p-8 max-w-7xl mx-auto">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-primary">Gestión de Reportes</h1>
+    <p class="text-gray-600 mt-1">{{ pestanaActual().descripcion }}</p>
+  </div>
+
+  <!-- Selector de reporte -->
+  <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Tipo de reporte">
+    @for (p of pestanas; track p.tipo) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="tipo() === p.tipo"
+        [attr.data-testid]="'tab-' + p.tipo"
+        (click)="seleccionar(p.tipo)"
+        [class.bg-primary]="tipo() === p.tipo"
+        [class.text-white]="tipo() === p.tipo"
+        [class.bg-white]="tipo() !== p.tipo"
+        [class.text-primary]="tipo() !== p.tipo"
+        [class.border]="tipo() !== p.tipo"
+        [class.border-primary]="tipo() !== p.tipo"
+        class="px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 transition"
+      >
+        {{ p.etiqueta }}
+      </button>
+    }
+  </div>
+
+  <!-- Filtros: solo los que soporta el endpoint del reporte elegido -->
+  <form
+    class="bg-container rounded-xl p-4 mb-4"
+    (ngSubmit)="consultar()"
+    data-testid="form-filtros"
+    aria-label="Filtros del reporte"
+  >
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @if (muestra('fechas')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">
+            {{ tipo() === 'inventario' ? 'Rotación desde' : 'Fecha inicial' }}
+          </span>
+          <input
+            type="date"
+            name="fechaInicio"
+            data-testid="filtro-fecha-inicio"
+            [ngModel]="fechaInicio()"
+            (ngModelChange)="fechaInicio.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          />
+        </label>
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">
+            {{ tipo() === 'inventario' ? 'Rotación hasta' : 'Fecha final' }}
+          </span>
+          <input
+            type="date"
+            name="fechaFin"
+            data-testid="filtro-fecha-fin"
+            [ngModel]="fechaFin()"
+            (ngModelChange)="fechaFin.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          />
+        </label>
+      }
+
+      @if (muestra('categoria')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Categoría</span>
+          <select
+            name="categoria"
+            data-testid="filtro-categoria"
+            [ngModel]="categoriaId()"
+            (ngModelChange)="categoriaId.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          >
+            <option value="">Todas</option>
+            @for (c of categorias(); track c.id_categoria) {
+              <option [value]="c.id_categoria">{{ c.nombre }} ({{ c.linea }})</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (muestra('canal')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Canal de venta</span>
+          <select
+            name="canal"
+            data-testid="filtro-canal"
+            [ngModel]="canal()"
+            (ngModelChange)="canal.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          >
+            <option value="">Todos</option>
+            <option value="ONLINE">Online</option>
+            <option value="POS">POS (mostrador)</option>
+          </select>
+        </label>
+      }
+
+      @if (muestra('nivel')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Nivel de stock</span>
+          <select
+            name="nivel"
+            data-testid="filtro-nivel"
+            [ngModel]="nivelStock()"
+            (ngModelChange)="nivelStock.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          >
+            <option value="">Todos</option>
+            <option value="CRITICO">Crítico (&lt; 5)</option>
+            <option value="BAJO">Bajo (&lt; 15)</option>
+            <option value="OK">OK</option>
+          </select>
+        </label>
+      }
+
+      @if (muestra('estado')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Estado</span>
+          <select
+            name="estado"
+            data-testid="filtro-estado"
+            [ngModel]="estadoDevolucion()"
+            (ngModelChange)="estadoDevolucion.set($event ?? '')"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          >
+            <option value="">Todos</option>
+            <option value="SOLICITADA">Solicitada</option>
+            <option value="APROBADA">Aprobada</option>
+            <option value="COMPLETADA">Completada</option>
+            <option value="RECHAZADA">Rechazada</option>
+          </select>
+        </label>
+      }
+
+      @if (muestra('top')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">
+            {{ tipo() === 'devoluciones' ? 'Top de productos' : 'Top' }}
+          </span>
+          <input
+            type="number"
+            name="top"
+            min="1"
+            max="100"
+            placeholder="10"
+            data-testid="filtro-top"
+            [ngModel]="top()"
+            (ngModelChange)="top.set($event === null || $event === undefined ? '' : '' + $event)"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          />
+        </label>
+      }
+
+      @if (muestra('limite')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Máx. de filas</span>
+          <input
+            type="number"
+            name="limite"
+            min="1"
+            max="1000"
+            placeholder="200"
+            data-testid="filtro-limite"
+            [ngModel]="limite()"
+            (ngModelChange)="limite.set($event === null || $event === undefined ? '' : '' + $event)"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          />
+        </label>
+      }
+
+      @if (muestra('limiteDetalle')) {
+        <label class="block text-sm">
+          <span class="block text-xs font-semibold text-primary/70 uppercase mb-1">Máx. filas del detalle</span>
+          <input
+            type="number"
+            name="limiteDetalle"
+            min="1"
+            max="1000"
+            placeholder="200"
+            data-testid="filtro-limite-detalle"
+            [ngModel]="limiteDetalle()"
+            (ngModelChange)="limiteDetalle.set($event === null || $event === undefined ? '' : '' + $event)"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+          />
+        </label>
+      }
+    </div>
+
+    <p class="text-xs text-gray-500 mt-3">
+      Las fechas se interpretan como día UTC. Sin fechas se usan los últimos 30 días.
+      @if (tipo() === 'inventario') {
+        El stock es el actual; el rango y el canal solo afectan a las unidades vendidas y a la rotación.
+      }
+      @if (tipo() === 'rendimiento-vendedores') {
+        En este reporte indique ambas fechas o ninguna (si falta una se usan los últimos 30 días).
+      }
+    </p>
+    @if (errorCategorias()) {
+      <p class="text-xs text-amber-800 mt-2" role="status">
+        No se pudieron cargar las categorías: el filtro por categoría no está disponible.
+      </p>
+    }
+
+    <div class="flex flex-wrap gap-2 mt-4">
+      <button
+        type="submit"
+        data-testid="btn-consultar"
+        [disabled]="estado() === 'cargando'"
+        class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+      >
+        {{ estado() === 'cargando' ? 'Consultando…' : 'Aplicar filtros' }}
+      </button>
+      <button
+        type="button"
+        data-testid="btn-limpiar"
+        (click)="limpiar()"
+        [disabled]="estado() === 'cargando'"
+        class="px-5 py-2 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-white disabled:opacity-50"
+      >
+        Limpiar
+      </button>
+    </div>
+  </form>
+
+  <!-- Filtros aplicados (los que efectivamente usó el backend) -->
+  @if (resumen(); as r) {
+    <div class="flex flex-wrap items-center gap-2 mb-4 text-xs" data-testid="filtros-aplicados" aria-label="Filtros aplicados">
+      <span class="text-gray-500 font-semibold uppercase">Filtros aplicados:</span>
+      <span class="px-2.5 py-1 rounded-full bg-container text-primary border border-primary/20">{{ r.periodo }}</span>
+      @if (r.categoria) {
+        <span class="px-2.5 py-1 rounded-full bg-container text-primary border border-primary/20">Categoría: {{ r.categoria }}</span>
+      }
+      @if (r.canal) {
+        <span class="px-2.5 py-1 rounded-full bg-container text-primary border border-primary/20">Canal: {{ r.canal }}</span>
+      }
+      @for (e of r.extras; track e) {
+        <span class="px-2.5 py-1 rounded-full bg-container text-primary border border-primary/20">{{ e }}</span>
+      }
+    </div>
+  }
+
+  <!-- Exportación: el archivo corresponde a los filtros aplicados de la última consulta -->
+  @if (puedeExportar()) {
+    <div class="flex flex-wrap items-center gap-2 mb-4" data-testid="barra-exportar">
+      <span class="text-xs text-gray-500 font-semibold uppercase">Exportar este reporte:</span>
+      <button
+        type="button"
+        data-testid="btn-exportar-pdf"
+        (click)="exportar('pdf')"
+        [disabled]="exportando() !== null"
+        class="px-4 py-1.5 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-container disabled:opacity-50"
+      >
+        {{ exportando() === 'pdf' ? 'Generando PDF…' : 'Exportar PDF' }}
+      </button>
+      <button
+        type="button"
+        data-testid="btn-exportar-xlsx"
+        (click)="exportar('xlsx')"
+        [disabled]="exportando() !== null"
+        class="px-4 py-1.5 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-container disabled:opacity-50"
+      >
+        {{ exportando() === 'xlsx' ? 'Generando Excel…' : 'Exportar Excel' }}
+      </button>
+      <span class="text-xs text-gray-500">Incluye los filtros aplicados que se muestran arriba.</span>
+    </div>
+    @if (errorExportacion(); as msg) {
+      <div
+        role="alert"
+        data-testid="error-exportacion"
+        class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+      >
+        <span class="font-semibold">No se pudo exportar.</span> {{ msg }}
+      </div>
+    }
+  }
+
+  <!-- Estados -->
+  @switch (estado()) {
+    @case ('cargando') {
+      <div class="flex items-center justify-center gap-3 py-16 text-primary" role="status" aria-live="polite" data-testid="estado-cargando">
+        <span class="inline-block h-6 w-6 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+        <span class="text-sm font-medium">Cargando reporte…</span>
+      </div>
+    }
+
+    @case ('error') {
+      @if (error(); as e) {
+        <div
+          role="alert"
+          [attr.data-testid]="'estado-error-' + e.tipo"
+          class="px-4 py-4 rounded-lg border text-sm"
+          [class.bg-red-50]="e.tipo !== 'sin-permiso'"
+          [class.border-red-200]="e.tipo !== 'sin-permiso'"
+          [class.text-red-700]="e.tipo !== 'sin-permiso'"
+          [class.bg-amber-50]="e.tipo === 'sin-permiso'"
+          [class.border-amber-200]="e.tipo === 'sin-permiso'"
+          [class.text-amber-800]="e.tipo === 'sin-permiso'"
+        >
+          <p class="font-semibold mb-1">
+            @switch (e.tipo) {
+              @case ('no-autenticado') { Sesión no válida }
+              @case ('sin-permiso') { Acceso denegado }
+              @case ('filtros-invalidos') { Revise los filtros }
+              @default { No se pudo cargar el reporte }
+            }
+          </p>
+          <p data-testid="error-mensaje">{{ e.mensaje }}</p>
+          @if (e.tipo === 'inesperado') {
+            <button
+              type="button"
+              data-testid="btn-reintentar"
+              (click)="consultar()"
+              class="mt-3 px-4 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:opacity-90"
+            >
+              Reintentar
+            </button>
+          }
+        </div>
+      }
+    }
+
+    @case ('sin-datos') {
+      <div
+        role="status"
+        data-testid="estado-sin-datos"
+        class="px-4 py-6 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm text-center"
+      >
+        <p class="font-semibold">{{ mensajeSinDatos() }}</p>
+        <p class="text-xs mt-1">Pruebe con otro rango de fechas u otros filtros.</p>
+      </div>
+    }
+
+    @case ('datos') {
+      <div data-testid="estado-datos">
+        @switch (tipoMostrado()) {
+          @case ('ventas') {
+            @if (ventas(); as d) { <app-ventas-vista [datos]="d" /> }
+          }
+          @case ('productos-mas-vendidos') {
+            @if (productos(); as d) { <app-top-vista [datos]="d" /> }
+          }
+          @case ('inventario') {
+            @if (inventario(); as d) { <app-inventario-vista [datos]="d" /> }
+          }
+          @case ('devoluciones') {
+            @if (devoluciones(); as d) { <app-devoluciones-vista [datos]="d" /> }
+          }
+          @case ('rendimiento-vendedores') {
+            @if (rendimiento(); as d) { <app-rendimiento-vista [datos]="d" /> }
+          }
+        }
+      </div>
+    }
+  }
+</section>

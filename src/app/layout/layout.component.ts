@@ -50,6 +50,7 @@ const ROLE_HOME: Record<string, string> = {
   GS: '/gerente/dashboard',
   V: '/vendedor/dashboard',
   C: '/tienda/home',
+  D: '/envios',
 };
 
 /** Etiqueta legible del rol para la Navbar. */
@@ -59,6 +60,7 @@ const ROLE_LABELS: Record<string, string> = {
   GS: 'Gerente de Sucursal',
   V: 'Vendedor',
   C: 'Cliente',
+  D: 'Encargado de Delivery',
 };
 
 /**
@@ -92,10 +94,10 @@ export const MODULES: MenuModule[] = [
     roles: ['ASU', 'GS', 'V', 'C'],
     items: [
       { label: 'Productos', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6', roles: ['ASU', 'GS', 'V', 'C'] },
-      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9', roles: ['ASU', 'GS'] },
+      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9', roles: ['ASU'] },
       { label: 'Tallas/Colores', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7', roles: ['ASU', 'GS'] },
       { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23', roles: ['ASU', 'GS'] },
-      { label: 'Temporadas', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24', roles: ['ASU', 'GS'] },
+      { label: 'Temporadas', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24', roles: ['ASU'] },
     ],
   },
   {
@@ -120,11 +122,20 @@ export const MODULES: MenuModule[] = [
     icon: 'cart',
     roles: ['ASU', 'GS', 'V', 'C'],
     items: [
-      { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['ASU', 'C'] },
-      { label: 'Confirmación de Compra', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['ASU', 'C'] },
+      { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['C'] },
+      { label: 'Confirmación de Compra', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['C'] },
       { label: 'Gestión de Ventas', icon: 'register', route: '/ventas', cus: 'CU11', roles: ['ASU', 'GS', 'V'] },
       { label: 'Gestión de Devoluciones', icon: 'undo', route: '/devoluciones', cus: 'CU13', roles: ['ASU', 'GS', 'V'] },
       { label: 'Pasarela de Pago', icon: 'card', route: '/proximamente/pagos', cus: 'CU21', roles: ['ASU'] },
+    ],
+  },
+  {
+    label: 'Delivery',
+    icon: 'truck',
+    roles: ['ASU', 'GS', 'D'],
+    items: [
+      { label: 'Gestión de Envíos', icon: 'truck', route: '/envios', cus: 'CU18', roles: ['ASU', 'GS', 'D'] },
+      { label: 'Agencias de Reparto', icon: 'building', route: '/agencias', cus: 'CU19', roles: ['ASU', 'GS', 'D'] },
     ],
   },
   {
@@ -132,7 +143,7 @@ export const MODULES: MenuModule[] = [
     icon: 'brain',
     roles: ['ASU', 'GS', 'C'],
     items: [
-      { label: 'Dashboards', icon: 'chart', route: '/proximamente/reportes', cus: 'CU20', roles: ['ASU', 'GS'] },
+      { label: 'Gestión de Reportes', icon: 'chart', route: '/reportes', cus: 'CU20', roles: ['ASU', 'GS'] },
       { label: 'Asistente IA', icon: 'sparkles', route: '/proximamente/asistente', cus: 'CU25', roles: ['ASU', 'GS', 'C'] },
     ],
   },
@@ -235,6 +246,9 @@ export class LayoutComponent {
     }
     return null;
   });
+
+  /** Regla de negocio: solo el Cliente ve el carrito (los demás roles no compran). */
+  protected readonly esCliente = computed(() => (this.rol() ?? '').toUpperCase() === 'C');
 
   protected readonly rolLabel = computed(() => {
     const rol = this.rol();

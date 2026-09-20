@@ -104,6 +104,10 @@ export class AuthService {
       this.router.navigate(['/vendedor/dashboard']);
     } else if (rolUpper === 'C') {
       this.router.navigate(['/tienda/home']);
+    } else if (rolUpper === 'D') {
+      // Encargado de Delivery: su pantalla de trabajo es la gestión de envíos
+      // (CU18); no tiene dashboard propio ni acceso a /admin/dashboard.
+      this.router.navigate(['/envios']);
     } else {
       this.router.navigate(['/admin/dashboard']);
     }
@@ -125,6 +129,15 @@ export class AuthService {
 
   getRol(): string {
     return this._currentUser.getValue()?.rol?.nombre_rol ?? '';
+  }
+
+  /**
+   * True solo para el rol Cliente (C). El carrito y el checkout online son
+   * exclusivos de este rol (regla de negocio); ASU/GS/V/D no compran.
+   * Es una ayuda de UX: la autoridad real es el backend (403 en /ventas/checkout).
+   */
+  esCliente(): boolean {
+    return (this.getRol() || '').toUpperCase() === 'C';
   }
 
   getToken(): string | null {

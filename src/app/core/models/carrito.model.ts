@@ -46,6 +46,8 @@ export interface Venta {
   vendedor_id?: string | null;
   /** CU11: tipo de venta (ONLINE para e-commerce, POS para mostrador). */
   tipo_venta?: 'ONLINE' | 'POS';
+  /** CU18: DOMICILIO genera un envío (ver /envios); RETIRO es entrega en tienda. */
+  tipo_entrega?: 'DOMICILIO' | 'RETIRO';
 }
 
 /** Tipo de venta para el checkout (default ONLINE). */
