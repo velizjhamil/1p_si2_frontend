@@ -7,6 +7,12 @@
       <p class="text-gray-600 mt-1">
         Administre los abastecedores de la empresa, sus contactos y estados.
       </p>
+      @if (sucursalAsignadaNombre()) {
+        <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+          Sucursal Asignada: {{ sucursalAsignadaNombre() }}
+        </div>
+      }
     </div>
     <button
       type="button"
@@ -55,54 +61,53 @@
     </div>
   }
 
-  <!-- Barra de filtros: búsqueda + categoría + estado + ciudad -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+  <!-- Barra de búsqueda y filtros -->
+  <div class="bg-container rounded-xl p-4 mb-6 border border-primary/10 space-y-3">
+    <div class="flex flex-col md:flex-row gap-3">
+      <!-- Input de búsqueda -->
+      <div class="flex-1 relative">
+        <input
+          type="text"
+          [value]="busqueda()"
+          (input)="onBusqueda($event)"
+          placeholder="Buscar por nombre, NIT/RUT o contacto..."
+          class="w-full pl-3 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
         />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por razón social, NIT/RUT o contacto..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
+      </div>
+
+      <!-- Filtro por categoría/línea -->
+      <div class="w-full md:w-56">
+        <select
+          [value]="filtroCategoria()"
+          (change)="onFiltroCategoria($event)"
+          class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+        >
+          <option value="">Todas las categorías</option>
+          <option value="Textiles">Textiles</option>
+          <option value="Calzado">Calzado</option>
+          <option value="Accesorios">Accesorios</option>
+          <option value="Confección">Confección</option>
+          <option value="Avíos">Avíos</option>
+        </select>
+      </div>
+
+      <!-- Filtro por ciudad (sucursal que gestiona) -->
+      <div class="w-full md:w-56">
+        <select
+          [value]="filtroCiudad()"
+          (change)="onFiltroCiudad($event)"
+          class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+        >
+          <option value="">Todas las ciudades</option>
+          @for (ciudad of ciudades(); track ciudad.id) {
+            <option [value]="ciudad.nombre">{{ ciudad.nombre }}</option>
+          }
+        </select>
+      </div>
     </div>
-    <select
-      [value]="filtroCategoria()"
-      (change)="onFiltroCategoria($event)"
-      class="px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary text-sm text-primary font-medium"
-    >
-      <option value="">Todas las líneas</option>
-      <option value="Textiles">Textiles</option>
-      <option value="Calzado">Calzado</option>
-      <option value="Accesorios">Accesorios</option>
-      <option value="Jeans">Jeans</option>
-    </select>
-    <select
-      [value]="filtroCiudad()"
-      (change)="onFiltroCiudad($event)"
-      class="px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary text-sm text-primary font-medium"
-    >
-      <option value="">Todas las ubicaciones</option>
-      @for (ciudad of ciudades(); track ciudad.id) {
-        <option [value]="ciudad.nombre">{{ ciudad.nombre }}</option>
-      }
-    </select>
-    <div class="flex gap-2">
+
+    <!-- Filtro por estado (tabs de estado del CU23) -->
+    <div class="flex flex-wrap gap-2 pt-1 border-t border-primary/10">
       <button
         type="button"
         (click)="onFiltroEstado('todos')"
@@ -113,7 +118,7 @@
             : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
         "
       >
-        Todos
+        Todos ({{ total() }})
       </button>
       <button
         type="button"
@@ -166,6 +171,7 @@
               <th class="text-left px-4 py-3 font-semibold">ID</th>
               <th class="text-left px-4 py-3 font-semibold">Razón Social</th>
               <th class="text-left px-4 py-3 font-semibold">NIT / RUT</th>
+              <th class="text-left px-4 py-3 font-semibold">Sucursal</th>
               <th class="text-left px-4 py-3 font-semibold">Contacto</th>
               <th class="text-center px-4 py-3 font-semibold">Estado</th>
               <th class="text-right px-4 py-3 font-semibold">Acciones</th>
@@ -184,6 +190,14 @@
                   }
                 </td>
                 <td class="px-4 py-3 text-gray-600">{{ proveedor.nit_rut }}</td>
+                <td class="px-4 py-3 text-xs text-gray-700 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    {{ proveedor.sucursal_nombre || 'Global / Matriz' }}
+                  </span>
+                </td>
                 <td class="px-4 py-3">
                   <p class="text-gray-800">{{ proveedor.contacto_operativo || '—' }}</p>
                   <p class="text-xs text-gray-500">{{ proveedor.correo || '—' }}</p>
@@ -391,6 +405,32 @@
             />
           </div>
         </div>
+
+        @if (esAdmin()) {
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="sucursal_id">
+              Sucursal Asignada (Opcional)
+            </label>
+            <select
+              id="sucursal_id"
+              formControlName="sucursal_id"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+            >
+              <option [ngValue]="null">Global / Empresa Matriz (Sin sucursal exclusiva)</option>
+              @for (s of sucursales(); track s.codigo_sucursal) {
+                <option [value]="s.codigo_sucursal">{{ s.nombre }} ({{ s.ciudad?.nombre }})</option>
+              }
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              Deje en Global para proveedores corporativos compartidos, o vincúlelo a una sucursal física específica.
+            </p>
+          </div>
+        } @else if (esGerente() && sucursalAsignadaNombre()) {
+          <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-800 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+            <span>Este proveedor quedará vinculado operativamente a su sucursal (<strong>{{ sucursalAsignadaNombre() }}</strong>).</span>
+          </div>
+        }
 
         <div class="flex justify-end gap-3 pt-2">
           <button

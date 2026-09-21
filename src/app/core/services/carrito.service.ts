@@ -72,7 +72,12 @@ export class CarritoService {
     // Regla de negocio: el carrito es exclusivo del Cliente y de SU sesión. Al cambiar de
     // usuario (login/logout) se recarga el carrito de ese usuario (vacío si no es Cliente):
     // nadie hereda el carrito de otra sesión abierta en el mismo navegador.
-    this.auth.currentUser$.subscribe(() => this._items.set(this.leerStorage()));
+    this.auth.currentUser$.subscribe((u) => {
+      this._items.set(this.leerStorage());
+      if (u && this.auth.esCliente()) {
+        this.sincronizarConBackend();
+      }
+    });
   }
 
   /** Vista pública read-only de los ítems. */
@@ -130,6 +135,16 @@ export class CarritoService {
       return [...items, nuevo];
     });
     this.persistir();
+
+    // Sincronizar en segundo plano con el backend de base de datos
+    this.api
+      .post('/carrito/items', {
+        id_producto: item.producto_id,
+        cantidad: item.cantidad,
+        talla: item.talla,
+        color: item.color,
+      })
+      .subscribe({ error: () => {} });
   }
 
   /** CU15: Elimina un ítem por variante (producto+talla+color). */
@@ -169,6 +184,51 @@ export class CarritoService {
   vaciarCarrito(): void {
     this._items.set([]);
     this.persistir();
+    if (this.auth.esCliente()) {
+      this.api.delete('/carrito').subscribe({ error: () => {} });
+    }
+  }
+
+  /** CU15: Sincroniza el carrito local con el backend persistente de base de datos. */
+  sincronizarConBackend(): void {
+    if (!this.auth.esCliente() || !isPlatformBrowser(this.platformId)) return;
+    const items = this._items();
+    if (items.length > 0) {
+      const payload = {
+        items: items.map((i) => ({
+          id_producto: i.producto_id,
+          cantidad: i.cantidad,
+          talla: i.talla,
+          color: i.color,
+        })),
+        reemplazar: false,
+      };
+      this.api.post('/carrito/sincronizar', payload).subscribe({
+        error: () => {},
+      });
+    } else {
+      // Si está vacío localmente, cargar del backend
+      this.api.get<ApiResponse<any>>('/carrito').subscribe({
+        next: (resp) => {
+          if (resp?.data?.items && resp.data.items.length > 0) {
+            const mapped: CarritoItem[] = resp.data.items.map((it: any) => ({
+              producto_id: it.id_producto,
+              nombre: it.nombre_producto,
+              talla: it.talla ?? '—',
+              color: it.color ?? '—',
+              color_hex: '#1d528d',
+              precio: it.precio_unitario,
+              cantidad: it.cantidad,
+              subtotal: it.subtotal,
+              imagen_url: it.imagen_url ?? null,
+            }));
+            this._items.set(mapped);
+            this.persistir();
+          }
+        },
+        error: () => {},
+      });
+    }
   }
 
   // ------------------------------------------------------------- CU21 checkout

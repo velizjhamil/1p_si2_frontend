@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProveedoresService } from './suppliers.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
-import { Ciudad } from '../../core/models/sucursal.model';
+import { Ciudad, Sucursal } from '../../core/models/sucursal.model';
 import {
   EstadoProveedor,
   Proveedor,
@@ -12,6 +12,9 @@ import {
 } from '../../core/models/proveedor.model';
 import { ApiService } from '../../core/services/api';
 import { ApiResponse } from '../../core/models/usuario.model';
+import { AuthService } from '../../core/services/auth.service';
+import { RbacService } from '../../core/services/rbac.service';
+import { SucursalesService } from '../branches/branches.service';
 
 type FiltroEstado = 'todos' | EstadoProveedor;
 
@@ -31,14 +34,25 @@ export class SuppliersComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly proveedoresService = inject(ProveedoresService);
   private readonly api = inject(ApiService);
+  private readonly authService = inject(AuthService);
+  private readonly rbacService = inject(RbacService);
+  private readonly sucursalesService = inject(SucursalesService);
 
   // ------------------------------------------------------------------ estado
   proveedores = signal<Proveedor[]>([]);
   ciudades = signal<Ciudad[]>([]);
+  sucursales = signal<Sucursal[]>([]);
   cargando = signal(true);
   guardando = signal(false);
   errorMessage = signal('');
   exitoMessage = signal('');
+
+  readonly esAdmin = computed(() => this.rbacService.esAdmin());
+  readonly esGerente = computed(() => this.rbacService.esGerente());
+  readonly usuarioActual = computed(() => this.authService.usuario());
+  readonly sucursalAsignadaNombre = computed(
+    () => this.usuarioActual()?.sucursal_nombre ?? null,
+  );
 
   // ConfirmDialog de eliminación (reemplaza window.confirm)
   confirmarEliminar = signal<Proveedor | null>(null);
@@ -71,10 +85,17 @@ export class SuppliersComponent implements OnInit {
     correo: ['', Validators.email],
     categoria: [''],
     direccion: [''],
+    sucursal_id: [null as number | null],
   });
 
   ngOnInit(): void {
     this.cargarProveedores();
+    if (this.esAdmin()) {
+      this.sucursalesService.listar().subscribe({
+        next: (resp: Sucursal[]) => this.sucursales.set(resp),
+        error: () => {},
+      });
+    }
     // Catálogo de ciudades para el filtro de ubicación
     this.api.get<ApiResponse<Ciudad[]>>('/ciudades').subscribe({
       next: (resp) => this.ciudades.set(resp.data),
@@ -157,6 +178,9 @@ export class SuppliersComponent implements OnInit {
   // ------------------------------------------------------------------ modal
   abrirModalCrear(): void {
     this.editandoId.set(null);
+    const sucursalDefecto = this.esGerente()
+      ? (this.usuarioActual()?.id_sucursal ?? null)
+      : null;
     this.proveedorForm.reset({
       nombre: '',
       nit_rut: '',
@@ -165,6 +189,7 @@ export class SuppliersComponent implements OnInit {
       correo: '',
       categoria: '',
       direccion: '',
+      sucursal_id: sucursalDefecto,
     });
     this.errorMessage.set('');
     this.modalAbierto.set(true);
@@ -180,6 +205,7 @@ export class SuppliersComponent implements OnInit {
       correo: proveedor.correo ?? '',
       categoria: proveedor.categoria ?? '',
       direccion: proveedor.direccion ?? '',
+      sucursal_id: proveedor.sucursal_id ?? null,
     });
     this.errorMessage.set('');
     this.modalAbierto.set(true);
@@ -197,10 +223,22 @@ export class SuppliersComponent implements OnInit {
       return;
     }
 
-    const { nombre, nit_rut, contacto_operativo, telefono, correo, categoria, direccion } =
-      this.proveedorForm.value;
+    const {
+      nombre,
+      nit_rut,
+      contacto_operativo,
+      telefono,
+      correo,
+      categoria,
+      direccion,
+      sucursal_id,
+    } = this.proveedorForm.value;
     this.guardando.set(true);
     this.errorMessage.set('');
+
+    const sucursalFinal = this.esGerente()
+      ? (this.usuarioActual()?.id_sucursal ?? null)
+      : (sucursal_id ? Number(sucursal_id) : null);
 
     if (this.editandoId() !== null) {
       const payload: ProveedorUpdatePayload = {
@@ -211,6 +249,7 @@ export class SuppliersComponent implements OnInit {
         correo: correo || undefined,
         categoria: categoria || undefined,
         direccion: direccion || undefined,
+        sucursal_id: sucursalFinal,
       };
       this.proveedoresService.updateProveedor(this.editandoId()!, payload).subscribe({
         next: () => this.finalizarGuardado('Proveedor actualizado correctamente.'),
@@ -225,6 +264,7 @@ export class SuppliersComponent implements OnInit {
         correo: correo || undefined,
         categoria: categoria || undefined,
         direccion: direccion || undefined,
+        sucursal_id: sucursalFinal,
       };
       this.proveedoresService.createProveedor(payload).subscribe({
         next: () => this.finalizarGuardado('Proveedor registrado correctamente.'),

@@ -11,6 +11,8 @@ export interface Usuario {
   correo: string;
   estado: boolean;
   rol: RolResponse;
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
 }
 
 /** Usuario completo (GET/PUT /usuarios): agrega apellido, rol_id y auditoría. */
@@ -22,6 +24,8 @@ export interface UsuarioList {
   estado: boolean;
   rol: RolResponse;
   rol_id: string;
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
   fecha_creacion?: string | null;
   ultima_conexion?: string | null;
 }
@@ -34,6 +38,7 @@ export interface UsuarioCreatePayload {
   password: string;
   nombre_rol: string;
   estado?: boolean;
+  id_sucursal?: number | null;
 }
 
 /** Payload parcial para editar (PUT /usuarios/{id}): None = no cambiar. */
@@ -44,6 +49,7 @@ export interface UsuarioUpdatePayload {
   password?: string;
   rol_id?: string;
   estado?: boolean;
+  id_sucursal?: number | null;
 }
 
 /** Rol del catálogo GET /roles (CU4 lectura): permisos heredados + conteo. */

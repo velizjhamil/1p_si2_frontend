@@ -6,6 +6,9 @@ import { BadgeComponent } from '../../shared/badge/badge.component';
 import { PosCheckoutDialogComponent } from './pos-checkout-dialog.component';
 import { EstadoPago, MetodoPago, Venta, formatBs } from '../../core/models/carrito.model';
 import { AuthService } from '../../core/services/auth.service';
+import { RbacService } from '../../core/services/rbac.service';
+import { SucursalesService } from '../branches/branches.service';
+import { Sucursal } from '../../core/models/sucursal.model';
 
 type MetodoFiltro = 'TODOS' | MetodoPago;
 type EstadoFiltro = 'TODOS' | EstadoPago;
@@ -46,14 +49,14 @@ function etiquetaMetodo(m: MetodoPago): string {
  * Vista única compartida por ASU/GS/V/C. Cada rol ve una vista distinta
  * del MISMO backend, según:
  * - Filtros disponibles (tipo_venta y fechas solo para roles no-cliente).
- * - Columnas visibles (Tipo siempre para no-C; Vendedor para GS/ASU).
+ * - Columnas visibles (Tipo siempre para no-C; Vendedor para GS/ASU; Sucursal para no-C).
  * - Acciones (botón "Nueva venta POS" solo para V/GS/ASU).
  *
  * El aislamiento de VISIBILIDAD lo hace el backend:
  * - C: ve solo sus compras.
- * - V: ve solo las ventas POS que ÉL registró.
- * - GS/ASU: ven todas.
- * El frontend no replica esa lógica: la confía en el endpoint.
+ * - V: ve solo las ventas POS que ÉL registró en su sucursal.
+ * - GS: ve solo las ventas de su sucursal asignada.
+ * - ASU: ve todas y puede filtrar por sucursal.
  */
 @Component({
   selector: 'app-ventas',
@@ -68,9 +71,12 @@ function etiquetaMetodo(m: MetodoPago): string {
 export class VentasComponent implements OnInit {
   private readonly ventasService = inject(VentasService);
   private readonly auth = inject(AuthService);
+  private readonly rbacService = inject(RbacService);
+  private readonly sucursalesService = inject(SucursalesService);
 
   // ------------------------------------------------------------------ estado
   ventas = signal<Venta[]>([]);
+  sucursales = signal<Sucursal[]>([]);
   cargando = signal(true);
   errorMessage = signal('');
   vacio = computed(() => !this.cargando() && this.ventas().length === 0);
@@ -98,6 +104,7 @@ export class VentasComponent implements OnInit {
   readonly controlTipoVenta = new FormControl<TipoFiltro>('TODOS', {
     nonNullable: true,
   });
+  readonly controlSucursal = new FormControl<string>('', { nonNullable: true });
   // CU11: rango de fechas (inclusivo en ambos extremos).
   readonly controlFechaDesde = new FormControl<string>('', { nonNullable: true });
   readonly controlFechaHasta = new FormControl<string>('', { nonNullable: true });
@@ -112,6 +119,12 @@ export class VentasComponent implements OnInit {
   );
   protected readonly esRolC = computed(() => this.rol() === 'C');
   protected readonly esRolV = computed(() => this.rol() === 'V');
+  protected readonly esAdmin = computed(() => this.rbacService.esAdmin());
+  protected readonly esGerente = computed(() => this.rbacService.esGerente());
+  protected readonly usuarioActual = computed(() => this.auth.usuario());
+  protected readonly sucursalAsignadaNombre = computed(
+    () => this.usuarioActual()?.sucursal_nombre ?? null,
+  );
   /** Solo V/GS/ASU pueden registrar ventas POS (CU11). */
   protected readonly puedeRegistrarPos = computed(() =>
     ['V', 'GS', 'ASU'].includes(this.rol()),
@@ -146,12 +159,20 @@ export class VentasComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.esAdmin()) {
+      this.sucursalesService.listar().subscribe({
+        next: (data: Sucursal[]) => this.sucursales.set(data),
+        error: () => {},
+      });
+    }
+
     // Reaccionar a cambios de filtros (cada filtro dispara recarga,
     // reseteando a la página 1). El input de búsqueda usa debounce.
     this.controlBusqueda.valueChanges.subscribe(() => this.alCambiarBusqueda());
     this.controlMetodo.valueChanges.subscribe(() => this.reiniciarYCargar());
     this.controlEstado.valueChanges.subscribe(() => this.reiniciarYCargar());
     this.controlTipoVenta.valueChanges.subscribe(() => this.reiniciarYCargar());
+    this.controlSucursal.valueChanges.subscribe(() => this.reiniciarYCargar());
     this.controlFechaDesde.valueChanges.subscribe(() => this.reiniciarYCargar());
     this.controlFechaHasta.valueChanges.subscribe(() => this.reiniciarYCargar());
 
@@ -163,6 +184,7 @@ export class VentasComponent implements OnInit {
     this.cargando.set(true);
     this.errorMessage.set('');
 
+    const sucursalVal = this.controlSucursal.value;
     const filtros: VentaFiltros = {
       q: this.controlBusqueda.value.trim() || undefined,
       metodo_pago:
@@ -177,6 +199,7 @@ export class VentasComponent implements OnInit {
         this.controlTipoVenta.value === 'TODOS' || this.esRolC()
           ? undefined
           : this.controlTipoVenta.value,
+      sucursal_id: sucursalVal ? Number(sucursalVal) : undefined,
       fecha_desde: this.controlFechaDesde.value || undefined,
       fecha_hasta: this.controlFechaHasta.value || undefined,
       page: this.pagina(),
@@ -230,6 +253,7 @@ export class VentasComponent implements OnInit {
     this.controlMetodo.setValue('TODOS', { emitEvent: false });
     this.controlEstado.setValue('TODOS', { emitEvent: false });
     this.controlTipoVenta.setValue('TODOS', { emitEvent: false });
+    this.controlSucursal.setValue('', { emitEvent: false });
     this.controlFechaDesde.setValue('', { emitEvent: false });
     this.controlFechaHasta.setValue('', { emitEvent: false });
     if (this.debounceBusqueda) clearTimeout(this.debounceBusqueda);
@@ -293,6 +317,30 @@ export class VentasComponent implements OnInit {
       this.pagina.set(1);
       this.cargar();
     }
+  }
+
+  // -------------------------------------------------------- CU21 Cobro en Efectivo
+  protected cobrandoEfectivo = signal(false);
+  protected exitoCobro = signal('');
+
+  protected cobrarEfectivo(idVenta: number): void {
+    if (!confirm('¿Confirma el cobro en efectivo de esta venta en caja de sucursal?')) return;
+    this.cobrandoEfectivo.set(true);
+    this.ventasService.cobrarEnEfectivo({ id_venta: idVenta }).subscribe({
+      next: (resp) => {
+        this.cobrandoEfectivo.set(false);
+        this.exitoCobro.set(`Cobro exitoso: ${resp.codigo_comprobante}`);
+        this.cargar();
+        if (this.modalAbierto() && this.ventaDetalle()?.id === idVenta) {
+          this.ventaDetalle.set(resp.venta);
+        }
+        setTimeout(() => this.exitoCobro.set(''), 4000);
+      },
+      error: (err) => {
+        this.cobrandoEfectivo.set(false);
+        alert(err?.error?.detail || 'No se pudo procesar el cobro en efectivo.');
+      },
+    });
   }
 
   // --------------------------------------------------------- helpers vista

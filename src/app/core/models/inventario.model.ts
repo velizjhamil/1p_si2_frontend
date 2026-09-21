@@ -25,6 +25,8 @@ export interface MovimientoInventario {
   /** Fecha ISO del movimiento. */
   fecha: string;
   motivo: string;
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
 }
 
 /** Stock actual por producto (tabla principal del CU22). */
@@ -33,6 +35,8 @@ export interface StockProducto {
   nombre: string;
   categoria: string;
   stock_actual: number;
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
 }
 
 /** Payload del modal "+ Registrar Movimiento de Stock". */
@@ -40,6 +44,7 @@ export interface MovimientoPayload {
   producto_id: number;
   cantidad: number;
   motivo: string;
+  id_sucursal?: number | null;
 }
 
 /** Umbrales de alerta visual del CU22 (badges de stock). */

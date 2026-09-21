@@ -26,6 +26,15 @@ export interface ColorDetalle {
   codigo_hex: string;
 }
 
+/** Disponibilidad por sucursal física (CU6 / CU22). */
+export interface DisponibilidadSucursal {
+  id_sucursal: number;
+  nombre_sucursal: string;
+  ciudad?: string | null;
+  stock: number;
+  disponible: boolean;
+}
+
 /** Prenda de vestir del catálogo (GET/POST/PUT /api/v1/productos). */
 export interface ProductoRopa {
   id_producto: number;
@@ -41,6 +50,7 @@ export interface ProductoRopa {
   estado: EstadoProducto;
   tallas: TallaDetalle[];
   colores: ColorDetalle[];
+  disponibilidad_sucursales?: DisponibilidadSucursal[];
   fecha_creacion?: string | null;
 }
 

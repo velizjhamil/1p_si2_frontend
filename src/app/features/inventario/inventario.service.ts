@@ -34,6 +34,8 @@ interface StockFilaDTO {
   stock_total: number;
   umbral_minimo: number;
   nivel: 'CRITICO' | 'BAJO' | 'OK';
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
 }
 
 /** DTO de usuario embebido en el movimiento. */
@@ -62,6 +64,8 @@ interface MovimientoDTO {
   stock_nuevo: number;
   motivo: string | null;
   fecha_movimiento: string;
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
   producto: ProductoMovDTO;
   usuario: UsuarioMovDTO;
 }
@@ -78,17 +82,19 @@ interface PageEnvelope extends ApiResponse<MovimientoDTO[]> {
 export class InventarioService {
   private readonly api = inject(ApiService);
 
-  /** GET /inventario/stock — stock actual por producto. */
-  getStockActual(): Observable<StockProducto[]> {
+  /** GET /inventario/stock — stock actual por producto con filtro opcional de sucursal. */
+  getStockActual(sucursalId?: number | null): Observable<StockProducto[]> {
+    const params = sucursalId ? `?limit=100&sucursal_id=${sucursalId}` : '?limit=100';
     return this.api
-      .get<ApiResponse<StockFilaDTO[]> & { total: number }>('/inventario/stock?limit=100')
+      .get<ApiResponse<StockFilaDTO[]> & { total: number }>(`/inventario/stock${params}`)
       .pipe(map((resp) => resp.data.map((dto) => this.mapStock(dto))));
   }
 
   /** GET /inventario/movimientos — kardex completo (fecha desc). */
-  getHistorialMovimientos(): Observable<MovimientoInventario[]> {
+  getHistorialMovimientos(sucursalId?: number | null): Observable<MovimientoInventario[]> {
+    const params = sucursalId ? `?limit=100&sucursal_id=${sucursalId}` : '?limit=100';
     return this.api
-      .get<PageEnvelope>('/inventario/movimientos?limit=100')
+      .get<PageEnvelope>(`/inventario/movimientos${params}`)
       .pipe(map((resp) => resp.data.map((dto) => this.mapMovimiento(dto))));
   }
 
@@ -118,6 +124,7 @@ export class InventarioService {
         tipo,
         cantidad: Math.floor(payload.cantidad),
         motivo: payload.motivo?.trim() || null,
+        id_sucursal: payload.id_sucursal || undefined,
       })
       .pipe(map((resp) => this.mapMovimiento(resp.data)));
   }
@@ -130,6 +137,8 @@ export class InventarioService {
       nombre: dto.nombre,
       categoria: dto.categoria ?? 'Sin categoría',
       stock_actual: dto.stock_total,
+      id_sucursal: dto.id_sucursal,
+      sucursal_nombre: dto.sucursal_nombre,
     };
   }
 
@@ -147,6 +156,8 @@ export class InventarioService {
       stock_nuevo: dto.stock_nuevo,
       fecha: dto.fecha_movimiento,
       motivo: dto.motivo ?? 'Sin motivo registrado',
+      id_sucursal: dto.id_sucursal,
+      sucursal_nombre: dto.sucursal_nombre,
     };
   }
 }

@@ -31,12 +31,12 @@ export const routes: Routes = [
         data: { roles: ['ASU'] },
       },
       {
-        // CU3: Gestión de Usuarios (ASU).
+        // CU3: Gestión de Usuarios (ASU / GS sucursal).
         path: 'admin/usuarios',
         loadComponent: () =>
           import('./features/users/users.component').then((m) => m.UsersComponent),
         canActivate: [authGuard],
-        data: { roles: ['ASU'] },
+        data: { roles: ['ASU', 'GS'] },
       },
       {
         // CU4 + CU5: vista unificada de Roles y Permisos (tabs).
@@ -54,40 +54,40 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
-        // CU16: Perfil Institucional de la Empresa.
+        // CU16: Perfil Institucional de la Empresa (ASU).
         path: 'empresa',
         loadComponent: () =>
           import('./features/company/company.component').then((m) => m.CompanyComponent),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['ASU'], strict: true },
       },
       {
-        // CU17: Gestión de Sucursales.
+        // CU17: Gestión de Sucursales (ASU).
         path: 'sucursales',
         loadComponent: () =>
           import('./features/branches/branches.component').then((m) => m.BranchesComponent),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['ASU'], strict: true },
       },
       {
-        // CU23: Gestión de Proveedores.
+        // CU23: Gestión de Proveedores (GS).
         path: 'proveedores',
         loadComponent: () =>
           import('./features/suppliers/suppliers.component').then(
             (m) => m.SuppliersComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['GS'], strict: true },
       },
       {
-        // CU9: Gestión de Categorías.
+        // CU9: Gestión de Categorías (ASU).
         path: 'categorias',
         loadComponent: () =>
           import('./features/categories/categories.component').then(
             (m) => m.CategoriesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU'] },
+        data: { roles: ['ASU'], strict: true },
       },
       {
         // Módulo Catálogo: rutas lazy children bajo /catalogo (CU6, CU7, CU24...).
@@ -97,6 +97,8 @@ export const routes: Routes = [
       {
         // Módulo Inventario: rutas lazy children bajo /inventario (CU22...).
         path: 'inventario',
+        canActivate: [authGuard],
+        data: { roles: ['GS', 'V'], strict: true },
         loadChildren: () =>
           import('./features/inventario/inventario.routes').then(
             (m) => m.INVENTARIO_ROUTES,
@@ -105,73 +107,82 @@ export const routes: Routes = [
       {
         // Módulo Reservas: rutas lazy children bajo /reservas (CU14...).
         path: 'reservas',
+        canActivate: [authGuard],
+        data: { roles: ['GS', 'V', 'C'], strict: true },
         loadChildren: () =>
           import('./features/reservas/reservas.routes').then(
             (m) => m.RESERVAS_ROUTES,
           ),
       },
       {
-        // Módulo Ventas: rutas lazy children bajo /ventas (CU15+CU21...).
+        // Módulo Ventas: rutas lazy children bajo /ventas (CU11...).
         path: 'ventas',
+        canActivate: [authGuard],
+        data: { roles: ['GS', 'V'], strict: true },
         loadChildren: () =>
           import('./features/ventas/ventas.routes').then(
             (m) => m.VENTAS_ROUTES,
           ),
       },
       {
-        // CU13: Gestión de Devoluciones (vista operativa ASU/GS/V).
-        // El cliente (rol C) tiene su propio flujo (solicitar) y NO
-        // accede a esta pantalla — la regla server-side del backend
-        // (/api/v1/devoluciones) refuerza la separación.
+        // CU13: Gestión de Devoluciones (vista operativa GS/V).
         path: 'devoluciones',
         loadComponent: () =>
           import('./features/devoluciones/devoluciones.component').then(
             (m) => m.DevolucionesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS', 'V'] },
+        data: { roles: ['GS', 'V'], strict: true },
       },
       {
         // CU10: Vista dedicada de Notificaciones (bandeja completa).
-        // Cualquier usuario autenticado puede ver SUS notificaciones;
-        // la regla server-side del backend (/api/v1/notificaciones)
-        // refuerza la separación entre usuarios.
         path: 'notificaciones',
         loadComponent: () =>
           import('./features/notificaciones/notificaciones.component').then(
             (m) => m.NotificacionesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS', 'V', 'C', 'D'] },
+        data: { roles: ['GS', 'V', 'C', 'D'], strict: true },
       },
       {
-        // CU12: Gestión de Descuentos / Cupones (ASU/GS).
+        // CU12: Gestión de Descuentos / Cupones (GS).
         path: 'descuentos',
         loadComponent: () =>
           import('./features/descuentos/descuentos.component').then(
             (m) => m.DescuentosComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['GS'], strict: true },
       },
       {
-        // CU20: Gestión de Reportes (ASU/GS). Guard solo de navegación: la
-        // autorización real (401/403) la valida FastAPI en /api/v1/reportes.
+        // CU20: Gestión de Reportes (GS).
         path: 'reportes',
         loadComponent: () =>
           import('./features/reportes/reportes.component').then(
             (m) => m.ReportesComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['ASU', 'GS'] },
+        data: { roles: ['GS'], strict: true },
       },
       {
         // Módulo Probador Virtual AR (CU8): ruta lazy bajo /probador-virtual.
         path: 'probador-virtual',
+        canActivate: [authGuard],
+        data: { roles: ['C'], strict: true },
         loadChildren: () =>
           import('./features/probador-virtual/probador.routes').then(
             (m) => m.PROBADOR_ROUTES,
           ),
+      },
+      {
+        // CU25: Asistente Virtual Inteligente y Recomendaciones de Moda IA (Cliente).
+        path: 'asistente-ia',
+        loadComponent: () =>
+          import('./features/tienda/chat-ia-widget/chat-ia-page.component').then(
+            (m) => m.ChatIaPageComponent
+          ),
+        canActivate: [authGuard],
+        data: { roles: ['C'], strict: true },
       },
       {
         path: 'gerente/dashboard',
@@ -219,19 +230,21 @@ export const routes: Routes = [
             (m) => m.CheckoutComponent
           ),
         canActivate: [authGuard],
-        data: { roles: ['C'], strict: true },
+        data: { roles: ['V', 'C'], strict: true },
       },
       {
-        // Módulo Envíos: rutas lazy children bajo /envios (CU18). Es también
-        // la pantalla de inicio del rol D (Encargado de Delivery).
+        // Módulo Envíos (CU18): GS y D.
         path: 'envios',
+        canActivate: [authGuard],
+        data: { roles: ['GS', 'D'], strict: true },
         loadChildren: () =>
           import('./features/envios/envios.routes').then((m) => m.ENVIOS_ROUTES),
       },
       {
-        // Módulo Agencias de Reparto: rutas lazy children bajo /agencias (CU19).
-        // ASU/GS administran; D consulta (los guards por ruta están en el módulo).
+        // Módulo Agencias de Reparto (CU19): GS y D.
         path: 'agencias',
+        canActivate: [authGuard],
+        data: { roles: ['GS', 'D'], strict: true },
         loadChildren: () =>
           import('./features/agencias/agencias.routes').then((m) => m.AGENCIAS_ROUTES),
       },

@@ -42,10 +42,10 @@ function correrGuard(rol: string | null) {
 }
 
 describe('Ruta /reportes (CU20)', () => {
-  it('existe, usa authGuard y está limitada a ASU y GS', () => {
+  it('existe, usa authGuard y está limitada estrictamente a GS', () => {
     const ruta = rutaReportes();
     expect(ruta.canActivate).toContain(authGuard);
-    expect(ruta.data).toEqual({ roles: ['ASU', 'GS'] });
+    expect(ruta.data).toEqual({ roles: ['GS'], strict: true });
   });
 
   it('carga perezosamente ReportesComponent', async () => {
@@ -53,13 +53,11 @@ describe('Ruta /reportes (CU20)', () => {
     expect(componente).toBe(ReportesComponent);
   });
 
-  for (const rol of ['ASU', 'GS']) {
-    it(`${rol}: puede navegar`, () => {
-      expect(correrGuard(rol).permitido).toBe(true);
-    });
-  }
+  it('GS: puede navegar', () => {
+    expect(correrGuard('GS').permitido).toBe(true);
+  });
 
-  for (const rol of ['V', 'C', 'D']) {
+  for (const rol of ['ASU', 'V', 'C', 'D']) {
     it(`${rol}: el guard lo rechaza y lo lleva a su inicio`, () => {
       const { permitido, navigate } = correrGuard(rol);
       expect(permitido).toBe(false);
@@ -79,18 +77,13 @@ describe('Menú lateral (CU20)', () => {
   const item = () =>
     MODULES.flatMap((m) => m.items.map((i) => ({ modulo: m, item: i }))).find((x) => x.item.cus === 'CU20');
 
-  it('el ítem de CU20 apunta a /reportes (ya no al placeholder /proximamente)', () => {
+  it('el ítem de CU20 apunta a /reportes con nombre corto Reportes', () => {
     expect(item()?.item.route).toBe('/reportes');
-    expect(item()?.item.route).not.toContain('proximamente');
+    expect(item()?.item.label).toBe('Reportes');
   });
 
-  it('solo lo ven ASU y GS, dentro de "Reportes e IA"', () => {
-    expect(item()?.item.roles).toEqual(['ASU', 'GS']);
-    expect(item()?.modulo.label).toBe('Reportes e IA');
-  });
-
-  it('no se tocó el ítem del Asistente IA (CU25)', () => {
-    const cu25 = MODULES.flatMap((m) => m.items).find((i) => i.cus === 'CU25');
-    expect(cu25?.route).toBe('/proximamente/asistente');
+  it('solo lo ve GS, dentro de "Operativa Local"', () => {
+    expect(item()?.item.roles).toEqual(['GS']);
+    expect(item()?.modulo.label).toBe('Operativa Local');
   });
 });

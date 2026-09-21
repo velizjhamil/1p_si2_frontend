@@ -3,9 +3,9 @@
   <!-- Encabezado -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-primary">Gestión de Usuarios</h1>
+      <h1 class="text-2xl font-bold text-primary">{{ titulo() }}</h1>
       <p class="text-gray-600 mt-1">
-        Administre las cuentas de acceso, roles y estado del sistema.
+        {{ subtitulo() }}
       </p>
     </div>
     <button
@@ -13,7 +13,7 @@
       (click)="abrirModalCrear()"
       class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
     >
-      + Nuevo Usuario
+      {{ botonNuevo() }}
     </button>
   </div>
 
@@ -111,6 +111,7 @@
               <th class="px-6 py-3.5">Nombre Completo</th>
               <th class="px-6 py-3.5">Correo Electrónico</th>
               <th class="px-6 py-3.5">Rol Asignado</th>
+              <th class="px-6 py-3.5">Sucursal</th>
               <th class="px-6 py-3.5 text-center">Estado</th>
               <th class="px-6 py-3.5 text-right">Acciones</th>
             </tr>
@@ -128,6 +129,17 @@
                   >
                     {{ usuario.rol.nombre_rol }}
                   </span>
+                </td>
+                <td class="px-6 py-4">
+                  @if (usuario.sucursal_nombre) {
+                    <span
+                      class="inline-block px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200/60 text-xs font-semibold"
+                    >
+                      {{ usuario.sucursal_nombre }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-slate-400 italic">Sin sucursal</span>
+                  }
                 </td>
                 <td class="px-6 py-4 text-center">
                   @if (usuario.estado) {
@@ -278,13 +290,36 @@
             class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
           >
             <option value="" disabled>Seleccione un rol...</option>
-            @for (rol of roles(); track rol.id_rol) {
+            @for (rol of rolesDisponibles(); track rol.id_rol) {
               <option [value]="rol.id_rol">
                 {{ rol.nombre_rol }}{{ rol.descripcion ? ' — ' + rol.descripcion : '' }}
               </option>
             }
           </select>
         </div>
+
+        @if (!esGerente()) {
+          <div>
+            <label class="block text-sm font-medium text-primary mb-1" for="id_sucursal">
+              Sucursal Asignada
+            </label>
+            <select
+              id="id_sucursal"
+              formControlName="id_sucursal"
+              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+            >
+              <option value="">-- Sin Sucursal Asignada --</option>
+              @for (s of sucursales(); track s.codigo_sucursal) {
+                <option [value]="s.codigo_sucursal">
+                  {{ s.nombre }} ({{ s.ciudad.nombre }})
+                </option>
+              }
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              Requerido para roles operativos (Gerente de Sucursal y Vendedor).
+            </p>
+          </div>
+        }
 
         <div class="flex justify-end gap-3 pt-2">
           <button

@@ -12,9 +12,11 @@ import { filter } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
+import { RbacService } from '../core/services/rbac.service';
 import { CarritoService } from '../core/services/carrito.service';
 import { NotificacionesService } from '../core/services/notificaciones.service';
 import { NotificacionesBellComponent } from '../features/notificaciones/notificaciones-bell.component';
+import { ChatIaWidgetComponent } from '../features/tienda/chat-ia-widget/chat-ia-widget.component';
 import { Rol } from '../core/models/usuario.model';
 
 interface MenuItem {
@@ -63,15 +65,27 @@ const ROLE_LABELS: Record<string, string> = {
   D: 'Encargado de Delivery',
 };
 
+export interface NavDirectLink {
+  label: string;
+  icon: string;
+  route: string;
+  roles: Rol[];
+}
+
 /**
- * Módulos del sistema según la documentación oficial de Attention.
- * Los ítems cuyo módulo aún no está implementado navegan a una ruta placeholder
- * bajo /proximamente que muestra "en desarrollo".
+ * Módulos del sistema reestructurados según la matriz de roles y lineamientos UI/UX:
+ * - ASU: Seguridad + Catálogo y Configuración (Dashboard y Empresa en enlaces superiores directos).
+ * - GS: Operativa Local (Dashboard Sucursal en enlace superior directo).
+ * - V: Operaciones (Ventas, Devoluciones, Reservas, Checkout).
+ * - D: Logística (Envíos, Agencias).
+ * - C: Tienda (Catálogo, Carrito, Checkout, Reservas, Probador, Notificaciones).
+ *
+ * Nombres cortos, profesionales y directos (sin mención a CU... en UI).
  */
 export const MODULES: MenuModule[] = [
   {
-    label: 'Administración',
-    icon: 'users',
+    label: 'Seguridad',
+    icon: 'shield',
     roles: ['ASU'],
     items: [
       { label: 'Usuarios', icon: 'users', route: '/admin/usuarios', cus: 'CU3', roles: ['ASU'] },
@@ -79,72 +93,67 @@ export const MODULES: MenuModule[] = [
     ],
   },
   {
-    label: 'Empresa',
-    icon: 'building',
-    roles: ['ASU', 'GS'],
-    items: [
-      { label: 'Datos Empresa', icon: 'building', route: '/empresa', cus: 'CU16', roles: ['ASU', 'GS'] },
-      { label: 'Sucursales', icon: 'pin', route: '/sucursales', cus: 'CU17', roles: ['ASU', 'GS'] },
-      { label: 'Descuentos', icon: 'percent', route: '/descuentos', cus: 'CU12', roles: ['ASU', 'GS'] },
-    ],
-  },
-  {
-    label: 'Catálogo',
+    label: 'Catálogo y Configuración',
     icon: 'shirt',
-    roles: ['ASU', 'GS', 'V', 'C'],
+    roles: ['ASU'],
     items: [
-      { label: 'Productos', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6', roles: ['ASU', 'GS', 'V', 'C'] },
-      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9', roles: ['ASU'] },
-      { label: 'Tallas/Colores', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7', roles: ['ASU', 'GS'] },
-      { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23', roles: ['ASU', 'GS'] },
+      { label: 'Sucursales', icon: 'pin', route: '/sucursales', cus: 'CU17', roles: ['ASU'] },
       { label: 'Temporadas', icon: 'calendar', route: '/catalogo/temporadas', cus: 'CU24', roles: ['ASU'] },
+      { label: 'Productos', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6', roles: ['ASU'] },
+      { label: 'Categorías', icon: 'tag', route: '/categorias', cus: 'CU9', roles: ['ASU'] },
+      { label: 'Tallas', icon: 'tag', route: '/catalogo/tallas', cus: 'CU7', roles: ['ASU'] },
     ],
   },
   {
-    label: 'Inventario',
-    icon: 'boxes',
-    roles: ['ASU', 'GS', 'V'],
+    label: 'Operativa Local',
+    icon: 'building',
+    roles: ['GS'],
     items: [
-      { label: 'Stock y Kardex', icon: 'boxes', route: '/inventario', cus: 'CU22', roles: ['ASU', 'GS', 'V'] },
+      { label: 'Personal', icon: 'users', route: '/admin/usuarios', cus: 'CU3', roles: ['GS'] },
+      { label: 'Proveedores', icon: 'truck', route: '/proveedores', cus: 'CU23', roles: ['GS'] },
+      { label: 'Inventario', icon: 'boxes', route: '/inventario', cus: 'CU22', roles: ['GS'] },
+      { label: 'Descuentos', icon: 'percent', route: '/descuentos', cus: 'CU12', roles: ['GS'] },
+      { label: 'Devoluciones', icon: 'undo', route: '/devoluciones', cus: 'CU13', roles: ['GS'] },
+      { label: 'Ventas', icon: 'register', route: '/ventas', cus: 'CU11', roles: ['GS'] },
+      { label: 'Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14', roles: ['GS'] },
+      { label: 'Envíos', icon: 'truck', route: '/envios', cus: 'CU18', roles: ['GS'] },
+      { label: 'Agencias Reparto', icon: 'building', route: '/agencias', cus: 'CU19', roles: ['GS'] },
+      { label: 'Reportes', icon: 'chart', route: '/reportes', cus: 'CU20', roles: ['GS'] },
+      { label: 'Notificaciones', icon: 'bell', route: '/notificaciones', cus: 'CU10', roles: ['GS'] },
     ],
   },
   {
-    label: 'Reservas',
-    icon: 'sparkles',
-    roles: ['ASU', 'GS', 'V', 'C'],
+    label: 'Operaciones',
+    icon: 'register',
+    roles: ['V'],
     items: [
-      { label: 'Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14', roles: ['ASU', 'GS', 'V', 'C'] },
-      { label: 'Probador Virtual', icon: 'camera', route: '/probador-virtual', cus: 'CU8', badge: 'IA', roles: ['ASU', 'C'] },
+      { label: 'Ventas', icon: 'register', route: '/ventas', cus: 'CU11', roles: ['V'] },
+      { label: 'Devoluciones', icon: 'undo', route: '/devoluciones', cus: 'CU13', roles: ['V'] },
+      { label: 'Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14', roles: ['V'] },
+      { label: 'Checkout', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['V'] },
     ],
   },
   {
-    label: 'Ventas',
-    icon: 'cart',
-    roles: ['ASU', 'GS', 'V', 'C'],
-    items: [
-      { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['C'] },
-      { label: 'Confirmación de Compra', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['C'] },
-      { label: 'Gestión de Ventas', icon: 'register', route: '/ventas', cus: 'CU11', roles: ['ASU', 'GS', 'V'] },
-      { label: 'Gestión de Devoluciones', icon: 'undo', route: '/devoluciones', cus: 'CU13', roles: ['ASU', 'GS', 'V'] },
-      { label: 'Pasarela de Pago', icon: 'card', route: '/proximamente/pagos', cus: 'CU21', roles: ['ASU'] },
-    ],
-  },
-  {
-    label: 'Delivery',
+    label: 'Logística',
     icon: 'truck',
-    roles: ['ASU', 'GS', 'D'],
+    roles: ['D'],
     items: [
-      { label: 'Gestión de Envíos', icon: 'truck', route: '/envios', cus: 'CU18', roles: ['ASU', 'GS', 'D'] },
-      { label: 'Agencias de Reparto', icon: 'building', route: '/agencias', cus: 'CU19', roles: ['ASU', 'GS', 'D'] },
+      { label: 'Envíos', icon: 'truck', route: '/envios', cus: 'CU18', roles: ['D'] },
+      { label: 'Agencias', icon: 'building', route: '/agencias', cus: 'CU19', roles: ['D'] },
     ],
   },
   {
-    label: 'Reportes e IA',
-    icon: 'brain',
-    roles: ['ASU', 'GS', 'C'],
+    label: 'Tienda',
+    icon: 'cart',
+    roles: ['C'],
     items: [
-      { label: 'Gestión de Reportes', icon: 'chart', route: '/reportes', cus: 'CU20', roles: ['ASU', 'GS'] },
-      { label: 'Asistente IA', icon: 'sparkles', route: '/proximamente/asistente', cus: 'CU25', roles: ['ASU', 'GS', 'C'] },
+      { label: 'Catálogo', icon: 'shirt', route: '/catalogo/productos', cus: 'CU6', roles: ['C'] },
+      { label: 'Asistente IA', icon: 'sparkles', route: '/asistente-ia', cus: 'CU25', badge: 'IA', roles: ['C'] },
+      { label: 'Carrito', icon: 'cart', route: '/carrito', cus: 'CU15', roles: ['C'] },
+      { label: 'Checkout', icon: 'card', route: '/checkout', cus: 'CU21', roles: ['C'] },
+      { label: 'Reservas', icon: 'clock', route: '/reservas/gestion', cus: 'CU14', roles: ['C'] },
+      { label: 'Probador Virtual', icon: 'camera', route: '/probador-virtual', cus: 'CU8', badge: 'IA', roles: ['C'] },
+      { label: 'Notificaciones', icon: 'bell', route: '/notificaciones', cus: 'CU10', roles: ['C'] },
     ],
   },
 ];
@@ -190,6 +199,7 @@ const ICON_PATHS: Record<string, string> = {
     'M12 4a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 5.8V18a3 3 0 0 0 4 2.8V22M12 4a3 3 0 0 1 3 3v0a3 3 0 0 1 3 3v1a3 3 0 0 1-1 5.8V18a3 3 0 0 1-4 2.8V22',
   sparkles:
     'M12 3l1.9 5.8L20 10l-5.1 2.6L12 18l-2.9-5.4L4 10l6.1-1.2zM19 15l.9 2.6L22 18l-2.1 1.4L19 22l-.9-2.6L16 18l2.1-1.4z',
+  bell: 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0',
 };
 
 @Component({
@@ -200,11 +210,13 @@ const ICON_PATHS: Record<string, string> = {
     RouterLink,
     RouterLinkActive,
     NotificacionesBellComponent,
+    ChatIaWidgetComponent,
   ],
   templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
   private readonly authService = inject(AuthService);
+  private readonly rbacService = inject(RbacService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -223,9 +235,11 @@ export class LayoutComponent {
   protected readonly iconPaths = ICON_PATHS;
   protected readonly modules = MODULES;
 
-  /** Rol actual ('ASU' | 'GS' | 'V' | 'C') o null si no hay sesión. */
-  /** Rol actual ('ASU' | 'GS' | 'V' | 'C' | 'ADMIN') o null si no hay sesión. */
+  /** Rol actual ('ASU' | 'GS' | 'V' | 'C' | 'D' | 'ADMIN') o null si no hay sesión. */
   protected readonly rol = computed<string | null>(() => {
+    const fromRbac = this.rbacService.getRol();
+    if (fromRbac) return fromRbac;
+
     const userRole = this.user()?.rol?.nombre_rol;
     if (userRole) return userRole;
 
@@ -248,7 +262,7 @@ export class LayoutComponent {
   });
 
   /** Regla de negocio: solo el Cliente ve el carrito (los demás roles no compran). */
-  protected readonly esCliente = computed(() => (this.rol() ?? '').toUpperCase() === 'C');
+  protected readonly esCliente = computed(() => this.rbacService.esCliente());
 
   protected readonly rolLabel = computed(() => {
     const rol = this.rol();
@@ -264,6 +278,41 @@ export class LayoutComponent {
   protected readonly inicio = computed(() => {
     const rol = this.rol();
     return (rol ? ROLE_HOME[rol.toUpperCase()] : null) ?? '/login';
+  });
+
+  /** Enlaces directos superiores según el rol activo (Dashboard, Empresa, Dashboard Sucursal, etc.) */
+  protected readonly topLinks = computed<NavDirectLink[]>(() => {
+    const rawRol = this.rol();
+    if (!rawRol) return [];
+    const r = rawRol.toUpperCase();
+
+    if (r === 'ASU' || r === 'ADMIN') {
+      return [
+        { label: 'Dashboard', icon: 'home', route: '/admin/dashboard', roles: ['ASU'] },
+        { label: 'Empresa', icon: 'building', route: '/empresa', roles: ['ASU'] },
+      ];
+    }
+    if (r === 'GS') {
+      return [
+        { label: 'Dashboard Sucursal', icon: 'home', route: '/gerente/dashboard', roles: ['GS'] },
+      ];
+    }
+    if (r === 'V') {
+      return [
+        { label: 'Inicio', icon: 'home', route: '/vendedor/dashboard', roles: ['V'] },
+      ];
+    }
+    if (r === 'C') {
+      return [
+        { label: 'Inicio', icon: 'home', route: '/tienda/home', roles: ['C'] },
+      ];
+    }
+    if (r === 'D') {
+      return [
+        { label: 'Inicio', icon: 'home', route: '/envios', roles: ['D'] },
+      ];
+    }
+    return [];
   });
 
   // ------------------------------------------------------------- sidebar UI
@@ -295,32 +344,11 @@ export class LayoutComponent {
     this.expandirModuloActivo(this.router.url);
   }
 
-  /** Módulos visibles según el rol del usuario autenticado. */
+  /** Módulos visibles según el rol del usuario autenticado (filtrado dinámico RBAC). */
   protected readonly menu = computed<MenuModule[]>(() => {
     const rawRol = this.rol();
     if (!rawRol) return [];
-
-    const rolUpper = rawRol.toUpperCase();
-    const esAdmin = rolUpper === 'ASU' || rolUpper === 'ADMIN';
-
-    // REGLA CLAVE PARA ADMINISTRADOR (ASU / ADMIN):
-    // El rol de Administrador debe tener ACCESO TOTAL a TODOS los ítems y submenús del sistema sin restricción.
-    if (esAdmin) {
-      return MODULES;
-    }
-
-    return MODULES
-      .filter((mod) => mod.roles.length === 0 || mod.roles.some((r) => r.toUpperCase() === rolUpper))
-      .map((mod) => ({
-        ...mod,
-        items: mod.items.filter(
-          (item) =>
-            !item.roles ||
-            item.roles.length === 0 ||
-            item.roles.some((r) => r.toUpperCase() === rolUpper),
-        ),
-      }))
-      .filter((mod) => mod.items.length > 0);
+    return this.rbacService.filterMenu(MODULES, rawRol);
   });
 
   /** True si el ítem corresponde exactamente a la vista actual. */

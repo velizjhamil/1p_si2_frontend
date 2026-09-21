@@ -1,12 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsuariosService } from './users.service';
+import { SucursalesService } from '../branches/branches.service';
+import { RbacService } from '../../core/services/rbac.service';
 import {
   RolCatalogo,
   UsuarioCreatePayload,
   UsuarioList,
   UsuarioUpdatePayload,
 } from '../../core/models/usuario.model';
+import { Sucursal } from '../../core/models/sucursal.model';
 
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
@@ -18,10 +21,13 @@ type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 export class UsersComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly usuariosService = inject(UsuariosService);
+  private readonly sucursalesService = inject(SucursalesService);
+  private readonly rbacService = inject(RbacService);
 
   // ------------------------------------------------------------------ estado
   usuarios = signal<UsuarioList[]>([]);
   roles = signal<RolCatalogo[]>([]);
+  sucursales = signal<Sucursal[]>([]);
   cargando = signal(true);
   guardando = signal(false);
   errorMessage = signal('');
@@ -33,17 +39,60 @@ export class UsersComponent implements OnInit {
   modalAbierto = signal(false);
   editandoId = signal<string | null>(null); // null = crear, id = editar
 
-  // Filtrado reactivo: texto (nombre, correo, rol) + estado
+  readonly esGerente = computed(() => this.rbacService.esGerente());
+  readonly titulo = computed(() =>
+    this.esGerente() ? 'Personal de Sucursal' : 'Gestión de Usuarios',
+  );
+  readonly subtitulo = computed(() =>
+    this.esGerente()
+      ? 'Gestione el personal y vendedores asignados a su sucursal.'
+      : 'Administre las cuentas de acceso, roles y estado del sistema.',
+  );
+  readonly botonNuevo = computed(() =>
+    this.esGerente() ? '+ Nuevo Vendedor' : '+ Nuevo Usuario',
+  );
+
+  /** Roles disponibles en el select: el GS solo puede asignar rol Vendedor ('V'). */
+  rolesDisponibles = computed(() => {
+    const list = this.roles();
+    if (this.esGerente()) {
+      const rolesV = list.filter((r) => r.nombre_rol.toUpperCase() === 'V');
+      if (rolesV.length > 0) {
+        return rolesV;
+      }
+      return [
+        {
+          id_rol: 'V',
+          nombre_rol: 'V',
+          descripcion: 'Vendedor de Sucursal',
+          fecha_creacion: '',
+          permisos: [],
+          cantidad_usuarios: 0,
+        },
+      ];
+    }
+    return list;
+  });
+
+  // Filtrado reactivo: texto (nombre, correo, rol) + estado + sucursal
   usuariosFiltrados = computed(() => {
     const term = this.busqueda().toLowerCase().trim();
     const filtro = this.filtroEstado();
+    const esGerente = this.esGerente();
+
     return this.usuarios().filter((u) => {
+      // Si es gerente de sucursal, solo ve y administra vendedores (V)
+      if (esGerente && u.rol?.nombre_rol?.toUpperCase() !== 'V') {
+        return false;
+      }
+
       const nombreCompleto = `${u.nombre} ${u.apellido ?? ''}`.toLowerCase();
       const coincideTexto =
         !term ||
         nombreCompleto.includes(term) ||
         u.correo.toLowerCase().includes(term) ||
-        u.rol.nombre_rol.toLowerCase().includes(term);
+        u.rol.nombre_rol.toLowerCase().includes(term) ||
+        (u.sucursal_nombre ?? '').toLowerCase().includes(term);
       const coincideEstado =
         filtro === 'todos' ||
         (filtro === 'activos' && u.estado) ||
@@ -53,21 +102,50 @@ export class UsersComponent implements OnInit {
   });
 
   // ------------------------------------------------------------- formulario
-  // `rol` siempre guarda el id_rol; el payload de creación lo traduce a
-  // nombre_rol (POST usa nombre, PUT usa id — contrato del backend).
   usuarioForm = this.fb.group({
     nombre: ['', Validators.required],
     apellido: [''],
     correo: ['', [Validators.required, Validators.email]],
     password: [''],
     rol: ['', Validators.required],
+    id_sucursal: [''],
   });
 
   ngOnInit(): void {
     this.cargarUsuarios();
+    this.cargarRoles();
+    if (!this.esGerente()) {
+      this.sucursalesService.getSucursales().subscribe({
+        next: (resp) => this.sucursales.set(resp.data),
+        error: () => console.error('Error al cargar sucursales'),
+      });
+    }
+  }
+
+  cargarRoles(): void {
     this.usuariosService.getRoles().subscribe({
-      next: (resp) => this.roles.set(resp.data),
-      error: () => this.errorMessage.set('No se pudo cargar el catálogo de roles.'),
+      next: (resp) => {
+        const datos = resp.data || [];
+        this.roles.set(datos);
+      },
+      error: () => {
+        if (this.esGerente()) {
+          // Respaldo seguro para GS: evitar alerta roja y habilitar opción Vendedor
+          const rolVExistente = this.usuarios().find((u) => u.rol?.nombre_rol?.toUpperCase() === 'V')?.rol;
+          this.roles.set([
+            {
+              id_rol: rolVExistente?.id_rol ?? 'V',
+              nombre_rol: 'V',
+              descripcion: 'Vendedor de Sucursal',
+              fecha_creacion: new Date().toISOString(),
+              permisos: [],
+              cantidad_usuarios: 0,
+            },
+          ]);
+        } else {
+          this.errorMessage.set('No se pudo cargar el catálogo de roles.');
+        }
+      },
     });
   }
 
@@ -77,6 +155,23 @@ export class UsersComponent implements OnInit {
       next: (resp) => {
         this.usuarios.set(resp.data);
         this.cargando.set(false);
+
+        // Si es GS y el catálogo de roles está usando fallback sin id_rol real, intentar resolverlo desde los usuarios
+        if (this.esGerente() && this.roles().some((r) => r.id_rol === 'V')) {
+          const rolV = resp.data.find((u) => u.rol?.nombre_rol?.toUpperCase() === 'V')?.rol;
+          if (rolV) {
+            this.roles.set([
+              {
+                id_rol: rolV.id_rol,
+                nombre_rol: 'V',
+                descripcion: 'Vendedor de Sucursal',
+                fecha_creacion: new Date().toISOString(),
+                permisos: [],
+                cantidad_usuarios: 0,
+              },
+            ]);
+          }
+        }
       },
       error: () => {
         this.errorMessage.set('No se pudo cargar la lista de usuarios.');
@@ -88,7 +183,21 @@ export class UsersComponent implements OnInit {
   // ------------------------------------------------------------------ modal
   abrirModalCrear(): void {
     this.editandoId.set(null);
-    this.usuarioForm.reset({ nombre: '', apellido: '', correo: '', password: '', rol: '' });
+    let defaultRol = '';
+    if (this.esGerente()) {
+      const rolV = this.roles().find((r) => r.nombre_rol.toUpperCase() === 'V');
+      defaultRol = rolV?.id_rol ??
+        this.usuarios().find((u) => u.rol?.nombre_rol?.toUpperCase() === 'V')?.rol?.id_rol ??
+        (this.roles().length > 0 ? this.roles()[0].id_rol : 'V');
+    }
+    this.usuarioForm.reset({
+      nombre: '',
+      apellido: '',
+      correo: '',
+      password: '',
+      rol: defaultRol,
+      id_sucursal: '',
+    });
     // Password obligatorio SOLO al crear (mín. 6, igual que el backend)
     this.usuarioForm.controls.password.setValidators([
       Validators.required,
@@ -107,6 +216,7 @@ export class UsersComponent implements OnInit {
       correo: usuario.correo,
       password: '', // vacío = no cambiar
       rol: usuario.rol_id,
+      id_sucursal: usuario.id_sucursal ? String(usuario.id_sucursal) : '',
     });
     // En edición el password es opcional (solo se envía si se escribe)
     this.usuarioForm.controls.password.setValidators(Validators.minLength(6));
@@ -127,10 +237,12 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    const { nombre, apellido, correo, password, rol } = this.usuarioForm.value;
+    const { nombre, apellido, correo, password, rol, id_sucursal } = this.usuarioForm.value;
     const rolId = rol!;
     this.guardando.set(true);
     this.errorMessage.set('');
+
+    const sucursalNum = id_sucursal ? Number(id_sucursal) : undefined;
 
     if (this.editandoId()) {
       // Edición: PUT con campos parciales; password solo si se escribió
@@ -141,6 +253,9 @@ export class UsersComponent implements OnInit {
         rol_id: rolId,
       };
       if (password) payload.password = password;
+      if (!this.esGerente()) {
+        payload.id_sucursal = id_sucursal ? Number(id_sucursal) : 0; // 0 para desasignar en backend
+      }
 
       this.usuariosService.updateUsuario(this.editandoId()!, payload).subscribe({
         next: () => this.finalizarGuardado('Usuario actualizado correctamente.'),
@@ -148,7 +263,10 @@ export class UsersComponent implements OnInit {
       });
     } else {
       // Creación: POST requiere nombre_rol (no id)
-      const rolObj = this.roles().find((r) => r.id_rol === rolId);
+      let rolObj = this.roles().find((r) => r.id_rol === rolId);
+      if (!rolObj && this.esGerente()) {
+        rolObj = { id_rol: rolId, nombre_rol: 'V' } as RolCatalogo;
+      }
       if (!rolObj) {
         this.errorMessage.set('Seleccione un rol válido.');
         this.guardando.set(false);
@@ -160,6 +278,7 @@ export class UsersComponent implements OnInit {
         correo: correo!,
         password: password!,
         nombre_rol: rolObj.nombre_rol,
+        id_sucursal: sucursalNum,
       };
 
       this.usuariosService.createUsuario(payload).subscribe({

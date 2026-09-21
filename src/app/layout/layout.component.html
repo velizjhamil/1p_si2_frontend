@@ -104,24 +104,28 @@
   aria-label="Menú principal"
 >
   <nav class="h-full flex flex-col overflow-y-auto overflow-x-hidden px-3 py-4 gap-1">
-    <!-- 📌 INICIO: acceso directo superior, fuera de los módulos -->
-    <a
-      [routerLink]="inicio()"
-      [ngClass]="
-        isActive(inicio())
-          ? 'bg-primary text-white font-semibold shadow-sm'
-          : 'text-primary hover:bg-container font-semibold'
-      "
-      class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition shrink-0"
-      [title]="'Inicio'"
-    >
-      <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path [attr.d]="iconPaths['home']" />
-      </svg>
-      <span class="whitespace-nowrap" [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()">Inicio</span>
-    </a>
+    <!-- 📌 Enlaces directos superiores según rol (Dashboard, Empresa, Dashboard Sucursal, etc.) -->
+    @for (link of topLinks(); track link.route) {
+      <a
+        [routerLink]="link.route"
+        [ngClass]="
+          isActive(link.route)
+            ? 'bg-primary text-white font-semibold shadow-sm'
+            : 'text-primary hover:bg-container font-semibold'
+        "
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition shrink-0"
+        [title]="link.label"
+      >
+        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path [attr.d]="iconPaths[link.icon]" />
+        </svg>
+        <span class="whitespace-nowrap" [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()">{{ link.label }}</span>
+      </a>
+    }
 
-    <div class="my-2 border-t border-slate-100 shrink-0"></div>
+    @if (topLinks().length > 0 && menu().length > 0) {
+      <div class="my-2 border-t border-slate-100 shrink-0"></div>
+    }
 
     <!-- 📁 Módulos del sistema (acordeón exclusivo) -->
     @for (mod of menu(); track mod.label; let i = $index) {
@@ -242,3 +246,8 @@
 >
   <router-outlet />
 </main>
+
+<!-- Widget Flotante del Asistente Virtual Attention AI (CU25): Exclusivo para rol Cliente (C) -->
+@if (esCliente()) {
+  <app-chat-ia-widget />
+}

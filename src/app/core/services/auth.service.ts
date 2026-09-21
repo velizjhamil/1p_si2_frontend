@@ -127,6 +127,10 @@ export class AuthService {
     return this._currentUser.getValue();
   }
 
+  usuario(): Usuario | null {
+    return this.getCurrentUser();
+  }
+
   getRol(): string {
     return this._currentUser.getValue()?.rol?.nombre_rol ?? '';
   }

@@ -17,12 +17,12 @@ export const CATALOGO_ROUTES: Routes = [
     data: { roles: ['ASU', 'GS', 'V', 'C'] },
   },
   {
-    // CU7: Gestión de Tallas y Colores (mock en memoria, sin backend aún).
+    // CU7: Gestión de Tallas y Colores (ASU).
     path: 'tallas',
     loadComponent: () =>
       import('./tallas/tallas.component').then((m) => m.TallasComponent),
     canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS'] },
+    data: { roles: ['ASU'], strict: true },
   },
   {
     // CU24: Gestión de Temporadas y Colecciones (backend real FastAPI).

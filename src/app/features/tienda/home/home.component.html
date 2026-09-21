@@ -112,6 +112,31 @@
               }
             </div>
 
+            <!-- Disponibilidad por Sucursal -->
+            @if (producto.disponibilidad_sucursales && producto.disponibilidad_sucursales.length > 0) {
+              <div class="border-t border-primary/10 pt-2">
+                <p class="text-[11px] font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                  <span>🏬</span> Disponibilidad en Tiendas:
+                </p>
+                <div class="flex flex-wrap gap-1">
+                  @for (suc of producto.disponibilidad_sucursales; track suc.id_sucursal) {
+                    <span
+                      class="px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                      [class]="
+                        suc.stock === 0
+                          ? 'bg-gray-100 text-gray-400 border-gray-200'
+                          : suc.stock <= 5
+                            ? 'bg-amber-50 text-amber-800 border-amber-300 font-bold'
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      "
+                    >
+                      {{ suc.nombre_sucursal }}: {{ suc.stock > 0 ? (suc.stock <= 5 ? '¡Últimas ' + suc.stock + '!' : suc.stock + ' unids') : 'Agotado' }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
             <!-- Agregar -->
             <button
               type="button"

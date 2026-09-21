@@ -3,17 +3,18 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SucursalesService } from './branches.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import {
+  CandidatoGerente,
   Ciudad,
   Sucursal,
   SucursalCreatePayload,
   SucursalUpdatePayload,
 } from '../../core/models/sucursal.model';
+import { UsuarioList } from '../../core/models/usuario.model';
 
 /**
  * CU17 — Gestión de Sucursales (ASU/GS).
- * Tarjetas agrupadas por ciudad, búsqueda, modal crear/editar con
- * dropdown de ciudades, y desactivación (soft delete) con alerta
- * cuando el backend rechaza por dependencias activas.
+ * Tarjetas agrupadas por ciudad, asignación de Gerente Titular (1 a 1),
+ * conteo e inspección de personal, y alta/edición de sucursales.
  */
 @Component({
   selector: 'app-branches',
@@ -27,6 +28,7 @@ export class BranchesComponent implements OnInit {
   // ------------------------------------------------------------------ estado
   sucursales = signal<Sucursal[]>([]);
   ciudades = signal<Ciudad[]>([]);
+  candidatosGerentes = signal<CandidatoGerente[]>([]);
   cargando = signal(true);
   guardando = signal(false);
   errorMessage = signal('');
@@ -38,6 +40,10 @@ export class BranchesComponent implements OnInit {
 
   modalAbierto = signal(false);
   editandoCodigo = signal<number | null>(null); // null = crear, código = editar
+
+  // Modal para ver personal de la sucursal
+  modalPersonal = signal<{ sucursal: Sucursal; personal: UsuarioList[] } | null>(null);
+  cargandoPersonal = signal(false);
 
   // ConfirmDialog de desactivación (reemplaza window.confirm)
   confirmarDesactivar = signal<Sucursal | null>(null);
@@ -51,7 +57,8 @@ export class BranchesComponent implements OnInit {
         !term ||
         s.nombre.toLowerCase().includes(term) ||
         (s.direccion ?? '').toLowerCase().includes(term) ||
-        s.ciudad.nombre.toLowerCase().includes(term);
+        s.ciudad.nombre.toLowerCase().includes(term) ||
+        (s.gerente?.nombre ?? '').toLowerCase().includes(term);
       const coincideCiudad =
         filtro === 'todas' || String(s.ciudad.id) === filtro;
       return coincideTexto && coincideCiudad;
@@ -78,6 +85,14 @@ export class BranchesComponent implements OnInit {
     return this.ciudades().filter((c) => ids.has(c.id));
   });
 
+  /** Candidatos disponibles para el modal actual (disponibles o asignados a la sucursal editada). */
+  candidatosParaModal = computed(() => {
+    const editCodigo = this.editandoCodigo();
+    return this.candidatosGerentes().filter(
+      (c) => c.disponible || (editCodigo !== null && c.sucursal_asignada_codigo === editCodigo)
+    );
+  });
+
   // ------------------------------------------------------------- formulario
   sucursalForm = this.fb.group({
     nombre: ['', [Validators.required, Validators.minLength(2)]],
@@ -85,10 +100,12 @@ export class BranchesComponent implements OnInit {
     direccion: [''],
     telefono: [''],
     horario_atencion: [''],
+    id_gerente: [''],
   });
 
   ngOnInit(): void {
     this.cargarSucursales();
+    this.cargarCandidatos();
     this.sucursalesService.getCiudades().subscribe({
       next: (resp) => this.ciudades.set(resp.data),
       error: () => this.errorMessage.set('No se pudo cargar el catálogo de ciudades.'),
@@ -109,15 +126,24 @@ export class BranchesComponent implements OnInit {
     });
   }
 
+  cargarCandidatos(): void {
+    this.sucursalesService.getCandidatosGerente().subscribe({
+      next: (resp) => this.candidatosGerentes.set(resp.data),
+      error: () => console.error('No se pudo cargar candidatos a gerente'),
+    });
+  }
+
   // ------------------------------------------------------------------ modal
   abrirModalCrear(): void {
     this.editandoCodigo.set(null);
+    this.cargarCandidatos();
     this.sucursalForm.reset({
       nombre: '',
       id_ciudad: '',
       direccion: '',
       telefono: '',
       horario_atencion: '',
+      id_gerente: '',
     });
     this.errorMessage.set('');
     this.modalAbierto.set(true);
@@ -125,12 +151,14 @@ export class BranchesComponent implements OnInit {
 
   abrirModalEditar(sucursal: Sucursal): void {
     this.editandoCodigo.set(sucursal.codigo_sucursal);
+    this.cargarCandidatos();
     this.sucursalForm.reset({
       nombre: sucursal.nombre,
       id_ciudad: String(sucursal.ciudad.id),
       direccion: sucursal.direccion ?? '',
       telefono: sucursal.telefono ?? '',
       horario_atencion: sucursal.horario_atencion ?? '',
+      id_gerente: sucursal.id_gerente ?? '',
     });
     this.errorMessage.set('');
     this.modalAbierto.set(true);
@@ -148,19 +176,22 @@ export class BranchesComponent implements OnInit {
       return;
     }
 
-    const { nombre, id_ciudad, direccion, telefono, horario_atencion } =
+    const { nombre, id_ciudad, direccion, telefono, horario_atencion, id_gerente } =
       this.sucursalForm.value;
     this.guardando.set(true);
     this.errorMessage.set('');
 
+    const idGerenteLimpio = id_gerente ? id_gerente : null;
+
     if (this.editandoCodigo() !== null) {
-      // Edición: PUT parcial (solo lo que cambió; ciudad siempre si se moveó)
+      // Edición: PUT parcial (incluyendo gerente titular)
       const payload: SucursalUpdatePayload = {
         nombre: nombre!,
         id_ciudad: Number(id_ciudad),
         direccion: direccion || undefined,
         telefono: telefono || undefined,
         horario_atencion: horario_atencion || undefined,
+        id_gerente: idGerenteLimpio,
       };
       this.sucursalesService
         .updateSucursal(this.editandoCodigo()!, payload)
@@ -169,19 +200,38 @@ export class BranchesComponent implements OnInit {
           error: (err) => this.mostrarError(err),
         });
     } else {
-      // Creación: POST con ciudad asignada
+      // Creación: POST con ciudad y gerente asignados
       const payload: SucursalCreatePayload = {
         nombre: nombre!,
         id_ciudad: Number(id_ciudad),
         direccion: direccion || undefined,
         telefono: telefono || undefined,
         horario_atencion: horario_atencion || undefined,
+        id_gerente: idGerenteLimpio,
       };
       this.sucursalesService.createSucursal(payload).subscribe({
         next: () => this.finalizarGuardado('Sucursal creada correctamente.'),
         error: (err) => this.mostrarError(err),
       });
     }
+  }
+
+  verPersonal(sucursal: Sucursal): void {
+    this.cargandoPersonal.set(true);
+    this.modalPersonal.set({ sucursal, personal: [] });
+    this.sucursalesService.getPersonalSucursal(sucursal.codigo_sucursal).subscribe({
+      next: (resp) => {
+        this.modalPersonal.set({ sucursal, personal: resp.data });
+        this.cargandoPersonal.set(false);
+      },
+      error: () => {
+        this.cargandoPersonal.set(false);
+      },
+    });
+  }
+
+  cerrarModalPersonal(): void {
+    this.modalPersonal.set(null);
   }
 
   /** Abre el ConfirmDialog de desactivación (soft delete). */

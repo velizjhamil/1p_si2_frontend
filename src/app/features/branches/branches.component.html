@@ -204,6 +204,33 @@
                 </div>
               </dl>
 
+              <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Gerente Titular</span>
+                  @if (sucursal.gerente) {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {{ sucursal.gerente.nombre }}
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      Sin Asignar
+                    </span>
+                  }
+                </div>
+                <div class="flex items-center justify-between text-xs text-gray-600 pt-1 border-t border-gray-200/60">
+                  <span>Personal: <strong>{{ sucursal.total_personal ?? 0 }}</strong> miembros</span>
+                  <button
+                    type="button"
+                    (click)="verPersonal(sucursal)"
+                    class="text-primary hover:text-accent font-semibold hover:underline"
+                  >
+                    Ver Equipo →
+                  </button>
+                </div>
+              </div>
+
               <div class="flex gap-2 pt-2 border-t border-primary/10">
                 <button
                   type="button"
@@ -256,7 +283,7 @@
         <p class="text-white/80 text-xs mt-0.5">
           {{
             editandoCodigo()
-              ? 'Actualice los datos de la sucursal.'
+              ? 'Actualice los datos de la sucursal y asigne su gerente titular.'
               : 'Registre un nuevo punto de venta y asígnele una ciudad.'
           }}
         </p>
@@ -300,6 +327,27 @@
               </option>
             }
           </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-primary mb-1" for="id_gerente">
+            Gerente Titular (Rol GS)
+          </label>
+          <select
+            id="id_gerente"
+            formControlName="id_gerente"
+            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+          >
+            <option value="">-- Sin Gerente Titular Asignado --</option>
+            @for (cand of candidatosParaModal(); track cand.id_usuario) {
+              <option [value]="cand.id_usuario">
+                {{ cand.nombre }} ({{ cand.correo }}) {{ cand.disponible ? '• Disponible' : '• Asignado a esta tienda' }}
+              </option>
+            }
+          </select>
+          <p class="text-xs text-gray-500 mt-1">
+            Cada sucursal puede tener como máximo un gerente titular exclusivo (relación 1 a 1).
+          </p>
         </div>
 
         <div>
@@ -361,6 +409,86 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Ver Personal de la Sucursal -->
+@if (modalPersonal(); as data) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+      (click)="cerrarModalPersonal()"
+    ></div>
+    <div
+      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden"
+    >
+      <div class="bg-primary text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold">Equipo de {{ data.sucursal.nombre }}</h2>
+          <p class="text-white/80 text-xs mt-0.5">
+            Personal operativo y de ventas asignado a este punto de venta.
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarModalPersonal()"
+          class="text-white/80 hover:text-white text-xl font-bold p-1"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1">
+        @if (cargandoPersonal()) {
+          <div class="text-center py-8 text-primary/60 text-sm">
+            Cargando personal de la sucursal...
+          </div>
+        } @else if (data.personal.length === 0) {
+          <div class="text-center py-8 text-gray-500 text-sm bg-gray-50 rounded-xl border border-gray-100">
+            No hay empleados asignados a esta sucursal aún.
+          </div>
+        } @else {
+          <div class="divide-y divide-gray-100">
+            @for (miembro of data.personal; track miembro.id_usuario) {
+              <div class="py-3 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    {{ miembro.nombre.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm">{{ miembro.nombre }} {{ miembro.apellido || '' }}</div>
+                    <div class="text-xs text-gray-500">{{ miembro.correo }}</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                    [class]="miembro.rol.nombre_rol === 'GS' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+                  >
+                    {{ miembro.rol.nombre_rol === 'GS' ? 'Gerente' : 'Vendedor' }}
+                  </span>
+                  <span
+                    class="w-2 h-2 rounded-full"
+                    [class]="miembro.estado ? 'bg-emerald-500' : 'bg-red-400'"
+                    [title]="miembro.estado ? 'Activo' : 'Inactivo'"
+                  ></span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-end">
+        <button
+          type="button"
+          (click)="cerrarModalPersonal()"
+          class="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium"
+        >
+          Cerrar
+        </button>
+      </div>
     </div>
   </div>
 }

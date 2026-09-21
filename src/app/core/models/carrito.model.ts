@@ -48,10 +48,34 @@ export interface Venta {
   tipo_venta?: 'ONLINE' | 'POS';
   /** CU18: DOMICILIO genera un envío (ver /envios); RETIRO es entrega en tienda. */
   tipo_entrega?: 'DOMICILIO' | 'RETIRO';
+  id_sucursal?: number | null;
+  sucursal_nombre?: string | null;
+  stripe_id?: string;
+  comprobante_fiscal?: {
+    empresa: string;
+    nit: string;
+    nro_factura: string;
+    nro_autorizacion: string;
+    codigo_control: string;
+    fecha_emision: string;
+    total_bs: number;
+    estado: string;
+    metodo: string;
+    leyenda: string;
+  };
 }
 
 /** Tipo de venta para el checkout (default ONLINE). */
 export type TipoVenta = 'ONLINE' | 'POS';
+
+/** Disponibilidad por sucursal para la vista de tienda. */
+export interface DisponibilidadTienda {
+  id_sucursal: number;
+  nombre_sucursal: string;
+  ciudad?: string | null;
+  stock: number;
+  disponible: boolean;
+}
 
 /** Catálogo mock de la tienda para el home del cliente. */
 export interface ProductoTienda {
@@ -62,9 +86,48 @@ export interface ProductoTienda {
   imagen_url: string | null;
   tallas: string[];
   colores: { nombre: string; hex: string }[];
+  disponibilidad_sucursales?: DisponibilidadTienda[];
 }
 
 /** Formatea un monto en Bs. con 2 decimales (moneda local Bolivia). */
 export function formatBs(monto: number): string {
   return `Bs. ${monto.toFixed(2)}`;
 }
+
+/** Datos de tarjeta de crédito/débito para procesar pago (CU15/CU21). */
+export interface DatosTarjeta {
+  titular: string;
+  numero_tarjeta: string;
+  expiracion: string;
+  cvv: string;
+}
+
+/** Transacción generada en la pasarela de pagos. */
+export interface TransaccionPago {
+  id_transaccion: number;
+  codigo_transaccion: string;
+  pasarela: string;
+  monto: number;
+  moneda: string;
+  metodo_pago: MetodoPago;
+  estado: 'PENDIENTE' | 'PAGADO' | 'RECHAZADO';
+  qr_data?: string | null;
+  detalles_pago?: string | null;
+  fecha_creacion: string;
+  fecha_actualizacion?: string;
+  id_venta?: number;
+  codigo_venta?: string;
+  estado_venta?: string;
+}
+
+/** Respuesta del endpoint POST /api/v1/pagos/procesar */
+export interface ProcesarPagoResponse {
+  id_venta: number;
+  codigo_venta: string;
+  total: number;
+  costo_envio: number;
+  metodo_pago: MetodoPago;
+  estado_pago: EstadoPago;
+  transaccion: TransaccionPago;
+}
+

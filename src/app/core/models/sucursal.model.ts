@@ -10,7 +10,27 @@ export interface Ciudad {
   departamento: string | null;
 }
 
-/** Sucursal con ciudad anidada (GET/POST/PUT/DELETE /api/v1/sucursales). */
+/** Resumen del Gerente Titular asignado a la sucursal. */
+export interface GerenteResumen {
+  id_usuario: string;
+  nombre: string;
+  apellido: string | null;
+  correo: string;
+  estado?: boolean;
+}
+
+/** Candidato a Gerente (usuarios con rol GS) para asignación 1 a 1. */
+export interface CandidatoGerente {
+  id_usuario: string;
+  nombre: string;
+  apellido: string | null;
+  correo: string;
+  sucursal_asignada_codigo: number | null;
+  sucursal_asignada_nombre: string | null;
+  disponible: boolean;
+}
+
+/** Sucursal con ciudad, gerente titular y conteo de personal. */
 export interface Sucursal {
   codigo_sucursal: number;
   nombre: string;
@@ -21,6 +41,9 @@ export interface Sucursal {
   is_active: boolean;
   ciudad: Ciudad;
   empresa_id: number;
+  id_gerente?: string | null;
+  gerente?: GerenteResumen | null;
+  total_personal?: number;
   fecha_actualizacion?: string | null;
 }
 
@@ -31,6 +54,7 @@ export interface SucursalCreatePayload {
   direccion?: string;
   telefono?: string;
   horario_atencion?: string;
+  id_gerente?: string | null;
 }
 
 /** Payload parcial PUT /api/v1/sucursales/{codigo} (null = no cambiar). */
@@ -40,4 +64,5 @@ export interface SucursalUpdatePayload {
   direccion?: string;
   telefono?: string;
   horario_atencion?: string;
+  id_gerente?: string | null;
 }

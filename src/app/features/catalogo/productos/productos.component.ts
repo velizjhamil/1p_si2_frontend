@@ -94,6 +94,7 @@ export class ProductosComponent implements OnInit {
       Validators.required,
       Validators.min(0),
     ]),
+    imagen_url: [''],
     descripcion: [''],
     tallas: [[] as number[], Validators.required],
     colores: [[] as number[], Validators.required],
@@ -230,6 +231,7 @@ export class ProductosComponent implements OnInit {
       id_proveedor: null,
       precio_venta: null,
       stock_total: null,
+      imagen_url: '',
       descripcion: '',
       tallas: [],
       colores: [],
@@ -247,6 +249,7 @@ export class ProductosComponent implements OnInit {
       id_proveedor: producto.id_proveedor ?? null,
       precio_venta: Number(producto.precio_venta),
       stock_total: producto.stock_total,
+      imagen_url: producto.imagen_url ?? '',
       descripcion: producto.descripcion ?? '',
       tallas: producto.tallas.map((t) => t.id_talla),
       colores: producto.colores.map((c) => c.id_color),
@@ -271,7 +274,7 @@ export class ProductosComponent implements OnInit {
       return;
     }
 
-    const { nombre, id_categoria, id_proveedor, precio_venta, stock_total, descripcion, tallas, colores } =
+    const { nombre, id_categoria, id_proveedor, precio_venta, stock_total, imagen_url, descripcion, tallas, colores } =
       this.productoForm.value;
 
     this.guardando.set(true);
@@ -284,6 +287,7 @@ export class ProductosComponent implements OnInit {
         id_proveedor: id_proveedor ?? null,
         precio_venta: Number(precio_venta),
         stock_total: Number(stock_total),
+        imagen_url: imagen_url?.trim() || null,
         descripcion: descripcion?.trim() || null,
         tallas: tallas ?? [],
         colores: colores ?? [],
@@ -301,6 +305,7 @@ export class ProductosComponent implements OnInit {
         id_proveedor: id_proveedor ?? null,
         precio_venta: Number(precio_venta),
         stock_total: Number(stock_total),
+        imagen_url: imagen_url?.trim() || null,
         descripcion: descripcion?.trim() || null,
         tallas: tallas ?? [],
         colores: colores ?? [],

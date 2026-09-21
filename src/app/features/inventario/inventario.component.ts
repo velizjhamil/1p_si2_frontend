@@ -2,6 +2,9 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventarioService } from './inventario.service';
+import { AuthService } from '../../core/services/auth.service';
+import { RbacService } from '../../core/services/rbac.service';
+import { SucursalesService } from '../branches/branches.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import {
   MovimientoInventario,
@@ -10,6 +13,7 @@ import {
   StockProducto,
   TipoMovimiento,
 } from '../../core/models/inventario.model';
+import { Sucursal } from '../../core/models/sucursal.model';
 type FiltroTipo = 'todos' | TipoMovimiento;
 
 /** Badge de stock según umbrales: crítico (<5) rojo, medio (<15) ámbar, OK verde. */
@@ -27,11 +31,9 @@ function nivelStock(stock: number): string {
 }
 
 /**
- * CU22 — Gestión de Inventario (FASE MOCK).
- * KPIs de stock, tabla de stock actual con alertas visuales por umbral
- * (crítico <5 rojo, medio <15 ámbar, OK verde), historial de movimientos
- * (kardex) filtrable por tipo y fecha, y modal "+ Registrar Movimiento
- * de Stock" con ENTRADA/SALIDA/AJUSTE.
+ * CU22 — Gestión de Inventario.
+ * KPIs de stock, tabla de stock actual con alertas visuales por umbral,
+ * aislamiento multi-sucursal y kardex.
  */
 @Component({
   selector: 'app-inventario',
@@ -41,20 +43,35 @@ function nivelStock(stock: number): string {
 export class InventarioComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly inventarioService = inject(InventarioService);
+  private readonly authService = inject(AuthService);
+  private readonly rbacService = inject(RbacService);
+  private readonly sucursalesService = inject(SucursalesService);
 
   // ------------------------------------------------------------------ estado
   stock = signal<StockProducto[]>([]);
   movimientos = signal<MovimientoInventario[]>([]);
+  sucursales = signal<Sucursal[]>([]);
   cargando = signal(true);
   guardando = signal(false);
   errorMessage = signal('');
   exitoMessage = signal('');
 
-  // Filtros del historial
+  // Filtros del inventario y kardex
   filtroTipo = signal<FiltroTipo>('todos');
   filtroFecha = signal('');
+  filtroSucursal = signal<number | null>(null);
 
   modalAbierto = signal(false);
+
+  readonly esAdmin = computed(() => this.rbacService.esAdmin());
+  readonly esGerente = computed(() => this.rbacService.esGerente());
+  readonly esOperativoSucursal = computed(
+    () => this.rbacService.esGerente() || this.rbacService.esVendedor(),
+  );
+  readonly usuarioActual = computed(() => this.authService.usuario());
+  readonly sucursalAsignadaNombre = computed(
+    () => this.usuarioActual()?.sucursal_nombre ?? null,
+  );
 
   // ---------------------------------------------------------------- KPIs top
   /** Unidades totales sumadas de todos los productos. */
@@ -87,15 +104,28 @@ export class InventarioComponent implements OnInit {
     tipo: ['ENTRADA', Validators.required],
     cantidad: ['', [Validators.required, Validators.min(0)]],
     motivo: [''],
+    id_sucursal: [''],
   });
 
   ngOnInit(): void {
+    if (this.esAdmin()) {
+      this.sucursalesService.getSucursales().subscribe({
+        next: (resp) => this.sucursales.set(resp.data),
+        error: () => console.error('Error al cargar sucursales en inventario'),
+      });
+    } else if (this.esOperativoSucursal()) {
+      const sucId = this.usuarioActual()?.id_sucursal;
+      if (sucId) {
+        this.filtroSucursal.set(sucId);
+      }
+    }
     this.cargarDatos();
   }
 
-  private cargarDatos(): void {
+  cargarDatos(): void {
     this.cargando.set(true);
-    this.inventarioService.getStockActual().subscribe({
+    const sucId = this.filtroSucursal();
+    this.inventarioService.getStockActual(sucId).subscribe({
       next: (stock) => {
         this.stock.set(stock);
         this.cargando.set(false);
@@ -105,10 +135,16 @@ export class InventarioComponent implements OnInit {
         this.cargando.set(false);
       },
     });
-    this.inventarioService.getHistorialMovimientos().subscribe({
+    this.inventarioService.getHistorialMovimientos(sucId).subscribe({
       next: (movs) => this.movimientos.set(movs),
       error: () => this.errorMessage.set('No se pudo cargar el historial.'),
     });
+  }
+
+  onCambioSucursal(event: Event): void {
+    const val = (event.target as HTMLSelectElement).value;
+    this.filtroSucursal.set(val ? Number(val) : null);
+    this.cargarDatos();
   }
 
   // -------------------------------------------------------------- UI helpers
@@ -141,11 +177,16 @@ export class InventarioComponent implements OnInit {
 
   // ------------------------------------------------------------------ modal
   abrirModal(): void {
+    const sucursalDefault = this.esAdmin()
+      ? (this.filtroSucursal() ? String(this.filtroSucursal()) : '')
+      : String(this.usuarioActual()?.id_sucursal ?? '');
+
     this.movimientoForm.reset({
       producto_id: '',
       tipo: 'ENTRADA',
       cantidad: '',
       motivo: '',
+      id_sucursal: sucursalDefault,
     });
     this.errorMessage.set('');
     this.modalAbierto.set(true);
@@ -166,10 +207,15 @@ export class InventarioComponent implements OnInit {
     }
 
     const form = this.movimientoForm.value;
+    const sucIdFinal = this.esAdmin()
+      ? (form.id_sucursal ? Number(form.id_sucursal) : undefined)
+      : (this.usuarioActual()?.id_sucursal ?? undefined);
+
     const payload = {
       producto_id: Number(form.producto_id),
       cantidad: Number(form.cantidad),
       motivo: form.motivo || '',
+      id_sucursal: sucIdFinal,
     };
 
     this.guardando.set(true);

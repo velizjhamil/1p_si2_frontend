@@ -32,6 +32,9 @@ importers:
       '@angular/ssr':
         specifier: ^22.1.6
         version: 22.1.6(d0f92bc181cbcc87ae7dce9aa16ff397)
+      '@stripe/stripe-js':
+        specifier: ^9.16.0
+        version: 9.16.0
       chart.js:
         specifier: 4.5.1
         version: 4.5.1
@@ -1368,6 +1371,10 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@stripe/stripe-js@9.16.0':
+    resolution: {integrity: sha512-PNZmy9hbuiuiyjAsigMlQChzJqrNEzQUtYIL/z5w0dsx27Ha69SBTYa2o8/M0Hbfiz9V2qctqX2DBd5sa57qoA==}
+    engines: {node: '>=12.16'}
 
   '@tailwindcss/node@4.3.3':
     resolution: {integrity: sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg==}
@@ -3802,6 +3809,8 @@ snapshots:
       - chokidar
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@stripe/stripe-js@9.16.0': {}
 
   '@tailwindcss/node@4.3.3':
     dependencies:

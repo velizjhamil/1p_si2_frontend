@@ -1,13 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ApiService } from '../../core/services/api';
 import { ApiResponse } from '../../core/models/usuario.model';
 import {
+  CandidatoGerente,
   Ciudad,
   Sucursal,
   SucursalCreatePayload,
   SucursalUpdatePayload,
 } from '../../core/models/sucursal.model';
+import { UsuarioList } from '../../core/models/usuario.model';
 
 /**
  * CU17 — Gestión de Sucursales.
@@ -23,7 +25,22 @@ export class SucursalesService {
     return this.api.get<ApiResponse<Sucursal[]>>('/sucursales');
   }
 
-  /** POST /api/v1/sucursales — crea sucursal asignando ciudad existente. */
+  /** Atajo para obtener el arreglo directo de sucursales. */
+  listar(): Observable<Sucursal[]> {
+    return this.getSucursales().pipe(map((resp) => resp.data));
+  }
+
+  /** GET /api/v1/sucursales/candidatos-gerentes — gerentes disponibles o asignados. */
+  getCandidatosGerente(): Observable<ApiResponse<CandidatoGerente[]>> {
+    return this.api.get<ApiResponse<CandidatoGerente[]>>('/sucursales/candidatos-gerentes');
+  }
+
+  /** GET /api/v1/sucursales/{codigo}/personal — personal asignado a la sucursal. */
+  getPersonalSucursal(codigo: number): Observable<ApiResponse<UsuarioList[]>> {
+    return this.api.get<ApiResponse<UsuarioList[]>>(`/sucursales/${codigo}/personal`);
+  }
+
+  /** POST /api/v1/sucursales — crea sucursal asignando ciudad y gerente opcional. */
   createSucursal(payload: SucursalCreatePayload): Observable<ApiResponse<Sucursal>> {
     return this.api.post<ApiResponse<Sucursal>>('/sucursales', payload);
   }

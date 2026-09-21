@@ -20,6 +20,7 @@ export interface Proveedor {
   estado: EstadoProveedor;
   direccion: string | null;
   sucursal_id: number | null;
+  sucursal_nombre?: string | null;
   fecha_actualizacion?: string | null;
 }
 
