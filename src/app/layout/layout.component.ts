@@ -31,6 +31,8 @@ interface ModuleItem extends MenuItem {
  badge?: string;
  /** Roles específicos que pueden ver este ítem. */
  roles?: Rol[];
+ /** Código del caso de uso (CU) asociado para RBAC y trazabilidad. */
+ cus?: string;
 }
 
 /** Módulo del sistema: grupo desplegable con sus ítems. */

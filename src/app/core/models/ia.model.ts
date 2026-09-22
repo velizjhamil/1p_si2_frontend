@@ -45,6 +45,9 @@ export interface ChatRequestPayload {
  contenido: string;
  }[];
  id_sucursal?: number | null;
+ nombre_sucursal?: string | null;
+ genero_usuario?: string | null;
+ nombre_usuario?: string | null;
 }
 
 export interface ChatResponseData {

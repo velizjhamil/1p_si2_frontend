@@ -10,6 +10,10 @@ import {
  UsuarioUpdatePayload,
 } from '../../core/models/usuario.model';
 import { Sucursal } from '../../core/models/sucursal.model';
+import {
+  passwordSeguraValidator,
+  evaluarRequisitosPassword,
+} from '../../core/utils/password-validator';
 
 type FiltroEstado = 'todos' | 'activos' | 'inactivos';
 
@@ -111,9 +115,17 @@ export class UsersComponent implements OnInit {
  id_sucursal: [''],
  });
 
+ passwordValor = signal('');
+ requisitosPassword = computed(() =>
+ evaluarRequisitosPassword(this.passwordValor()),
+ );
+
  ngOnInit(): void {
  this.cargarUsuarios();
  this.cargarRoles();
+ this.usuarioForm.controls.password.valueChanges.subscribe((val) => {
+ this.passwordValor.set(val || '');
+ });
  if (!this.esGerente()) {
  this.sucursalesService.getSucursales().subscribe({
  next: (resp) => this.sucursales.set(resp.data),
@@ -198,10 +210,11 @@ export class UsersComponent implements OnInit {
  rol: defaultRol,
  id_sucursal: '',
  });
- // Password obligatorio SOLO al crear (mín. 6, igual que el backend)
+ this.passwordValor.set('');
+ // Password obligatorio con reglas estrictas SOLO al crear cuenta nueva
  this.usuarioForm.controls.password.setValidators([
  Validators.required,
- Validators.minLength(6),
+ passwordSeguraValidator(true),
  ]);
  this.usuarioForm.controls.password.updateValueAndValidity();
  this.errorMessage.set('');
@@ -218,8 +231,11 @@ export class UsersComponent implements OnInit {
  rol: usuario.rol_id,
  id_sucursal: usuario.id_sucursal ? String(usuario.id_sucursal) : '',
  });
- // En edición el password es opcional (solo se envía si se escribe)
- this.usuarioForm.controls.password.setValidators(Validators.minLength(6));
+ this.passwordValor.set('');
+ // En edición el password es opcional; si se escribe, debe cumplir las reglas estrictas
+ this.usuarioForm.controls.password.setValidators([
+ passwordSeguraValidator(false),
+ ]);
  this.usuarioForm.controls.password.updateValueAndValidity();
  this.errorMessage.set('');
  this.modalAbierto.set(true);
@@ -228,6 +244,7 @@ export class UsersComponent implements OnInit {
  cerrarModal(): void {
  this.modalAbierto.set(false);
  this.errorMessage.set('');
+ this.passwordValor.set('');
  }
 
  // ---------------------------------------------------------------- acciones

@@ -26,6 +26,9 @@ export class IaService {
  mensaje: string,
  historial: ChatMessage[] = [],
  idSucursal?: number | null,
+ generoUsuario?: string | null,
+ nombreUsuario?: string | null,
+ nombreSucursal?: string | null,
  ): Observable<ApiResponse<ChatResponseData>> {
  // Tomar los últimos 8 mensajes válidos para mantener contexto conversacional
  const historialPayload = historial
@@ -40,6 +43,9 @@ export class IaService {
  mensaje: mensaje.trim(),
  historial: historialPayload,
  id_sucursal: idSucursal || null,
+ genero_usuario: generoUsuario || null,
+ nombre_usuario: nombreUsuario || null,
+ nombre_sucursal: nombreSucursal || null,
  };
 
  return this.api.post<ApiResponse<ChatResponseData>>('/ia/chat', payload);

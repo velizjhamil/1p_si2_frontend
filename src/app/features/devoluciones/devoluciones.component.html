@@ -1,375 +1,904 @@
 <!-- Gestión de Devoluciones (ASU/GS/V) -->
 <section class="p-6 md:p-8 max-w-7xl mx-auto">
- <!-- Encabezado -->
- <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
- <div>
- <h1 class="text-2xl font-bold text-primary">Gestión de Devoluciones</h1>
- <p class="text-gray-600 mt-1">
- Revise, apruebe o rechace las solicitudes de devolución de los clientes.
- </p>
- </div>
- </div>
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gestión de Devoluciones</h1>
+      <p class="text-gray-600 mt-1">
+        Búsqueda de ventas, recepción de prendas y control de ciclo de vida con reposición automática de inventario.
+      </p>
+    </div>
+    <div>
+      <button
+        type="button"
+        (click)="abrirModalNuevaDevolucion()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 shadow-sm transition active:scale-[0.98]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Devolución
+      </button>
+    </div>
+  </div>
 
- <!-- KPI Cards -->
- <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
- <div class="bg-container rounded-xl p-4 border border-primary/10">
- <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
- Solicitadas
- </p>
- <p class="text-3xl font-bold text-primary mt-1">{{ totalSolicitadas() }}</p>
- </div>
- <div class="bg-container rounded-xl p-4 border border-primary/10">
- <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
- Aprobadas
- </p>
- <p class="text-3xl font-bold text-primary mt-1">{{ totalAprobadas() }}</p>
- </div>
- <div class="bg-container rounded-xl p-4 border border-primary/10">
- <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
- Completadas
- </p>
- <p class="text-3xl font-bold text-primary mt-1">{{ totalCompletadas() }}</p>
- </div>
- <div class="bg-container rounded-xl p-4 border border-primary/10">
- <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
- Rechazadas
- </p>
- <p class="text-3xl font-bold text-primary mt-1">{{ totalRechazadas() }}</p>
- </div>
- </div>
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-container rounded-xl p-4 border border-primary/10 shadow-sm">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Solicitadas
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ totalSolicitadas() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10 shadow-sm">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Aprobadas
+      </p>
+      <p class="text-3xl font-bold text-primary mt-1">{{ totalAprobadas() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10 shadow-sm">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Completadas
+      </p>
+      <p class="text-3xl font-bold text-emerald-700 mt-1">{{ totalCompletadas() }}</p>
+    </div>
+    <div class="bg-container rounded-xl p-4 border border-primary/10 shadow-sm">
+      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+        Rechazadas
+      </p>
+      <p class="text-3xl font-bold text-rose-700 mt-1">{{ totalRechazadas() }}</p>
+    </div>
+  </div>
 
- <!-- Alertas -->
- @if (exitoMessage()) {
- <div
- class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
- >
- {{ exitoMessage() }}
- </div>
- }
- @if (errorMessage() && !modalAbierto()) {
- <div
- class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
- >
- {{ errorMessage() }}
- </div>
- }
+  <!-- Alertas globales -->
+  @if (exitoMessage()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 shadow-sm"
+    >
+      <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>{{ exitoMessage() }}</span>
+    </div>
+  }
+  @if (errorMessage() && !modalAbierto()) {
+    <div
+      class="mb-4 px-4 py-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2"
+    >
+      <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
 
- <!-- Barra de filtros: estado -->
- <div
- class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
- >
- <div class="flex flex-wrap gap-2">
- @for (estado of estados; track estado) {
- <button
- type="button"
- (click)="onFiltroEstado(estado)"
- [class.bg-primary]="filtroEstado() === estado"
- [class.text-white]="filtroEstado() === estado"
- [class.bg-white]="filtroEstado() !== estado"
- [class.text-primary]="filtroEstado() !== estado"
- [class.border]="filtroEstado() !== estado"
- [class.border-primary]="filtroEstado() !== estado"
- class="px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 transition"
- >
- {{ etiquetaDe(estado) }}
- </button>
- }
- </div>
- </div>
+  <!-- Barra de búsqueda y filtros -->
+  <div
+    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between mb-4 shadow-sm"
+  >
+    <!-- Filtros de estado -->
+    <div class="flex flex-wrap gap-2">
+      @for (estado of estados; track estado) {
+        <button
+          type="button"
+          (click)="onFiltroEstado(estado)"
+          [class.bg-primary]="filtroEstado() === estado"
+          [class.text-white]="filtroEstado() === estado"
+          [class.bg-white]="filtroEstado() !== estado"
+          [class.text-primary]="filtroEstado() !== estado"
+          [class.border]="filtroEstado() !== estado"
+          [class.border-primary/30]="filtroEstado() !== estado"
+          class="px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium hover:opacity-90 transition shadow-xs"
+        >
+          {{ etiquetaDe(estado) }}
+        </button>
+      }
+    </div>
 
- <!-- Tabla -->
- <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
- <div class="overflow-x-auto">
- <table class="min-w-full divide-y divide-slate-200">
- <thead class="bg-container">
- <tr>
- <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
- #
- </th>
- <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
- Venta
- </th>
- <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
- Cliente
- </th>
- <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
- Estado
- </th>
- <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
- Solicitud
- </th>
- <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
- Monto
- </th>
- <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
- Acción
- </th>
- </tr>
- </thead>
- <tbody class="divide-y divide-slate-100 bg-white">
- @if (cargando()) {
- <tr>
- <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
- Cargando devoluciones...
- </td>
- </tr>
- } @else if (devoluciones().length === 0) {
- <tr>
- <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
- No hay devoluciones con el filtro actual.
- </td>
- </tr>
- } @else {
- @for (d of devoluciones(); track d.id_devolucion) {
- <tr class="hover:bg-slate-50/60 transition">
- <td class="px-4 py-3 text-sm text-slate-700 font-medium">
- #{{ d.id_devolucion }}
- </td>
- <td class="px-4 py-3 text-sm text-slate-700">
- {{ d.codigo_venta ?? ('Venta #' + d.id_venta) }}
- </td>
- <td class="px-4 py-3 text-sm text-slate-700">
- {{ d.cliente_nombre ?? '—' }}
- </td>
- <td class="px-4 py-3 text-sm">
- <app-badge
- [variant]="badgeVariante[d.estado]"
- [texto]="etiquetasEstado[d.estado]"
- />
- </td>
- <td class="px-4 py-3 text-sm text-slate-600">
- {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
- </td>
- <td class="px-4 py-3 text-sm text-right text-slate-700">
- Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
- </td>
- <td class="px-4 py-3 text-right">
- <button
- type="button"
- (click)="verDetalle(d)"
- class="text-primary hover:text-accent text-sm font-semibold transition"
- >
- Ver detalle
- </button>
- </td>
- </tr>
- }
- }
- </tbody>
- </table>
- </div>
+    <!-- Buscador en la tabla de devoluciones -->
+    <div class="flex items-center gap-2 max-w-md w-full lg:w-auto">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          [ngModel]="busquedaTabla()"
+          (ngModelChange)="busquedaTabla.set($event)"
+          (keyup.enter)="buscarEnTabla()"
+          placeholder="Buscar venta, cliente o motivo..."
+          class="w-full pl-9 pr-8 py-1.5 text-xs md:text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 text-slate-800"
+        />
+        <svg
+          class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        @if (busquedaTabla()) {
+          <button
+            type="button"
+            (click)="limpiarBusquedaTabla()"
+            class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs"
+            title="Limpiar búsqueda"
+          >
+            ✕
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        (click)="buscarEnTabla()"
+        class="px-3 py-1.5 bg-primary text-white rounded-lg text-xs md:text-sm font-medium hover:bg-primary/90 transition shrink-0"
+      >
+        Buscar
+      </button>
+    </div>
+  </div>
 
- <!-- Paginación -->
- @if (!cargando() && devoluciones().length > 0) {
- <div
- class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
- >
- <span class="text-sm text-slate-600">
- Página {{ pagina() }} de {{ pages() }} — {{ totalAcumulado() }} registro(s)
- </span>
- <div class="flex gap-2">
- <button
- type="button"
- (click)="paginaAnterior()"
- [disabled]="pagina() <= 1"
- class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
- >
- Anterior
- </button>
- <button
- type="button"
- (click)="paginaSiguiente()"
- [disabled]="pagina() >= pages()"
- class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
- >
- Siguiente
- </button>
- </div>
- </div>
- }
- </div>
+  <!-- Tabla de devoluciones -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-container">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+              #
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+              Venta
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+              Cliente
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+              Estado
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+              Solicitud
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
+              Monto
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          @if (cargando()) {
+            <tr>
+              <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
+                <div class="flex items-center justify-center gap-2">
+                  <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <span>Cargando devoluciones...</span>
+                </div>
+              </td>
+            </tr>
+          } @else if (devoluciones().length === 0) {
+            <tr>
+              <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
+                No hay devoluciones registradas con los filtros actuales.
+              </td>
+            </tr>
+          } @else {
+            @for (d of devoluciones(); track d.id_devolucion) {
+              <tr class="hover:bg-slate-50/70 transition">
+                <td class="px-4 py-3 text-sm text-slate-700 font-medium">
+                  #{{ d.id_devolucion }}
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-700 font-medium">
+                  {{ d.codigo_venta ?? ('Venta #' + d.id_venta) }}
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-700">
+                  {{ d.cliente_nombre ?? '—' }}
+                </td>
+                <td class="px-4 py-3 text-sm">
+                  <app-badge
+                    [variant]="badgeVariante[d.estado]"
+                    [texto]="etiquetasEstado[d.estado]"
+                  />
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600">
+                  {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="px-4 py-3 text-sm text-right font-medium text-slate-800">
+                  Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      (click)="verDetalle(d)"
+                      class="px-2.5 py-1 text-xs font-semibold text-primary hover:bg-container rounded-md transition"
+                    >
+                      Ver detalle
+                    </button>
+
+                    @if (d.estado === 'SOLICITADA') {
+                      <button
+                        type="button"
+                        (click)="ejecutarAccion('APROBAR', d)"
+                        [disabled]="guardando()"
+                        class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 rounded-md transition disabled:opacity-50"
+                        title="Aprobar solicitud de devolución"
+                      >
+                        Aprobar
+                      </button>
+                      <button
+                        type="button"
+                        (click)="ejecutarAccion('COMPLETAR', d)"
+                        [disabled]="guardando()"
+                        class="px-2 py-1 text-xs font-medium bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-md transition disabled:opacity-50"
+                        title="Completar y reintegrar stock a la sucursal"
+                      >
+                        Completar
+                      </button>
+                    }
+
+                    @if (d.estado === 'APROBADA') {
+                      <button
+                        type="button"
+                        (click)="ejecutarAccion('COMPLETAR', d)"
+                        [disabled]="guardando()"
+                        class="px-2 py-1 text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 rounded-md transition disabled:opacity-50"
+                        title="Reintegrar prendas al inventario"
+                      >
+                        Reintegrar Stock
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (!cargando() && devoluciones().length > 0) {
+      <div
+        class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
+      >
+        <span class="text-sm text-slate-600">
+          Página {{ pagina() }} de {{ pages() }} — {{ totalAcumulado() }} registro(s)
+        </span>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="paginaAnterior()"
+            [disabled]="pagina() <= 1"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            (click)="paginaSiguiente()"
+            [disabled]="pagina() >= pages()"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+  </div>
 </section>
 
-<!-- Modal de detalle -->
+<!-- ========================================================================= -->
+<!-- MODAL DE NUEVA DEVOLUCIÓN: BUSCADOR DE VENTAS Y SELECCIÓN DE PRENDAS      -->
+<!-- ========================================================================= -->
+@if (modalNuevaDevolucion()) {
+  <div
+    class="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-3 md:p-6 overflow-y-auto"
+    (click)="cerrarModalNuevaDevolucion()"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-6 flex flex-col max-h-[90vh] overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header modal -->
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-container/50">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center shadow-xs">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-primary">
+              Registrar Nueva Devolución
+            </h2>
+            <p class="text-xs text-slate-500">
+              Paso: {{ ventaSeleccionada() ? '2 de 2 (Selección de prendas y motivos)' : '1 de 2 (Buscar orden de venta)' }}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="cerrarModalNuevaDevolucion()"
+          class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 transition"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error de nueva devolución -->
+      @if (errorNuevaDevolucion()) {
+        <div class="mx-6 mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
+          <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ errorNuevaDevolucion() }}</span>
+        </div>
+      }
+
+      <!-- Contenido del modal scrolleable -->
+      <div class="px-6 py-5 overflow-y-auto space-y-6">
+
+        <!-- ============================================================ -->
+        <!-- PASO 1: BUSCADOR DE VENTAS / ÓRDENES                         -->
+        <!-- ============================================================ -->
+        @if (!ventaSeleccionada()) {
+          <div class="space-y-4">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                Buscar Venta o Transacción de la Sucursal
+              </label>
+              <p class="text-xs text-slate-500 mb-3">
+                Ingrese el código de la venta (ej. <span class="font-mono text-primary font-semibold">ATT-XXXXXX</span>) o el nombre del cliente para consultar la transacción.
+              </p>
+              <div class="flex gap-2">
+                <div class="relative flex-1">
+                  <input
+                    type="text"
+                    [ngModel]="busquedaVentaQuery()"
+                    (ngModelChange)="busquedaVentaQuery.set($event)"
+                    (keyup.enter)="buscarVentas()"
+                    placeholder="Ej. ATT-000123 o Juan Pérez..."
+                    class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 text-slate-800"
+                  />
+                  <svg
+                    class="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <button
+                  type="button"
+                  (click)="buscarVentas()"
+                  [disabled]="buscandoVentas() || !busquedaVentaQuery().trim()"
+                  class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition shrink-0 flex items-center gap-2"
+                >
+                  @if (buscandoVentas()) {
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  }
+                  Buscar Venta
+                </button>
+              </div>
+            </div>
+
+            <!-- Resultados de la búsqueda de ventas -->
+            @if (buscandoVentas()) {
+              <div class="py-12 text-center text-slate-500 text-sm">
+                <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                Buscando transacciones registradas...
+              </div>
+            } @else if (busquedaRealizada() && ventasEncontradas().length === 0) {
+              <div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                <p class="text-sm font-semibold text-slate-700">No se encontraron ventas pagadas</p>
+                <p class="text-xs text-slate-500 mt-1">
+                  Verifique que el código o nombre del cliente sea correcto y que la venta esté en estado <span class="font-medium text-slate-700">PAGADO</span>.
+                </p>
+              </div>
+            } @else if (ventasEncontradas().length > 0) {
+              <div class="space-y-3">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Ventas encontradas ({{ ventasEncontradas().length }})
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  @for (venta of ventasEncontradas(); track venta.id_venta) {
+                    <div
+                      class="border border-slate-200 hover:border-primary/50 hover:bg-slate-50/50 rounded-xl p-4 transition flex flex-col justify-between"
+                    >
+                      <div>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                          <span class="font-mono font-bold text-sm text-primary">
+                            {{ venta.codigo }}
+                          </span>
+                          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {{ venta.estado_pago }}
+                          </span>
+                        </div>
+                        <div class="text-xs text-slate-600 space-y-1">
+                          <p><strong class="text-slate-700">Cliente:</strong> {{ venta.nombre_cliente }}</p>
+                          <p><strong class="text-slate-700">Fecha:</strong> {{ venta.fecha_venta | date: 'dd/MM/yyyy HH:mm' }}</p>
+                          <p><strong class="text-slate-700">Método de pago:</strong> {{ venta.metodo_pago }} ({{ venta.tipo_venta }})</p>
+                        </div>
+                      </div>
+                      <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div>
+                          <p class="text-[10px] uppercase text-slate-400 font-semibold">Total Venta</p>
+                          <p class="text-sm font-bold text-slate-800">
+                            Bs. {{ venta.total | number: '1.2-2' }}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="seleccionarVenta(venta)"
+                          class="px-3.5 py-1.5 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/90 transition shadow-xs"
+                        >
+                          Seleccionar
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ============================================================ -->
+        <!-- PASO 2: SELECCIÓN DE PRENDAS Y MOTIVOS                       -->
+        <!-- ============================================================ -->
+        @if (ventaSeleccionada(); as venta) {
+          <div class="space-y-5">
+            <!-- Tarjeta resumen de venta seleccionada -->
+            <div class="bg-container/60 border border-primary/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-base text-primary">{{ venta.codigo }}</span>
+                  <span class="text-xs bg-white text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                    {{ venta.fecha_venta | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">
+                  Cliente: <strong class="text-slate-800">{{ venta.nombre_cliente }}</strong> · Total venta original: <strong class="text-slate-800">Bs. {{ venta.total | number: '1.2-2' }}</strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                (click)="cambiarVenta()"
+                class="text-xs font-semibold text-primary hover:text-accent underline shrink-0"
+              >
+                Cambiar venta
+              </button>
+            </div>
+
+            <!-- Cargando artículos elegibles -->
+            @if (cargandoElegibles()) {
+              <div class="py-8 text-center text-slate-500 text-sm">
+                <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                Cargando prendas elegibles de la venta...
+              </div>
+            } @else if (elegiblesVenta(); as elegibles) {
+
+              @if (!elegibles.en_ventana) {
+                <div class="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg flex items-center gap-2">
+                  <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span><strong>Aviso de Ventana:</strong> Han transcurrido más de 30 días desde la venta. El personal autorizado puede proceder bajo criterio de gerencia.</span>
+                </div>
+              }
+
+              <!-- Tabla de selección de prendas -->
+              <div>
+                <p class="text-xs font-semibold text-slate-600 uppercase mb-2">
+                  Seleccione las prendas a devolver:
+                </p>
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                  <table class="min-w-full divide-y divide-slate-200 text-xs md:text-sm">
+                    <thead class="bg-slate-50">
+                      <tr>
+                        <th class="px-3 py-2.5 text-left text-slate-600 font-semibold w-10">Sel.</th>
+                        <th class="px-3 py-2.5 text-left text-slate-600 font-semibold">Prenda / Producto</th>
+                        <th class="px-3 py-2.5 text-center text-slate-600 font-semibold">Disponibles</th>
+                        <th class="px-3 py-2.5 text-center text-slate-600 font-semibold">Cantidad a Devolver</th>
+                        <th class="px-3 py-2.5 text-right text-slate-600 font-semibold">Precio Unit.</th>
+                        <th class="px-3 py-2.5 text-right text-slate-600 font-semibold">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                      @for (item of elegibles.items; track item.detalle_venta_id) {
+                        @let sel = itemsSeleccionados()[item.detalle_venta_id];
+                        <tr
+                          [class.bg-slate-50/70]="sel?.seleccionado"
+                          class="hover:bg-slate-50/50 transition"
+                        >
+                          <!-- Checkbox -->
+                          <td class="px-3 py-3 text-center">
+                            <input
+                              type="checkbox"
+                              [checked]="sel?.seleccionado"
+                              [disabled]="item.disponible_para_devolver <= 0"
+                              (change)="toggleItemSeleccionado(item.detalle_venta_id)"
+                              class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary/40 cursor-pointer disabled:opacity-40"
+                            />
+                          </td>
+
+                          <!-- Prenda -->
+                          <td class="px-3 py-3">
+                            <p class="font-medium text-slate-800">{{ item.nombre }}</p>
+                            <p class="text-[11px] text-slate-500 mt-0.5">
+                              @if (item.talla) { <span>Talla: <strong>{{ item.talla }}</strong></span> }
+                              @if (item.color) { <span class="ml-2">Color: <strong>{{ item.color }}</strong></span> }
+                            </p>
+                          </td>
+
+                          <!-- Disponibilidad -->
+                          <td class="px-3 py-3 text-center">
+                            @if (item.disponible_para_devolver > 0) {
+                              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                                {{ item.disponible_para_devolver }} de {{ item.cantidad_original }}
+                              </span>
+                            } @else {
+                              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">
+                                Ya devuelto (0 disp.)
+                              </span>
+                            }
+                          </td>
+
+                          <!-- Control de cantidad -->
+                          <td class="px-3 py-3 text-center">
+                            @if (item.disponible_para_devolver > 0 && sel?.seleccionado) {
+                              <div class="inline-flex items-center border border-slate-300 rounded-lg overflow-hidden">
+                                <button
+                                  type="button"
+                                  (click)="modificarCantidad(item.detalle_venta_id, -1)"
+                                  [disabled]="(sel?.cantidad ?? 1) <= 1"
+                                  class="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-30"
+                                >
+                                  -
+                                </button>
+                                <span class="px-3 py-1 font-semibold text-slate-800 text-xs">
+                                  {{ sel?.cantidad }}
+                                </span>
+                                <button
+                                  type="button"
+                                  (click)="modificarCantidad(item.detalle_venta_id, 1)"
+                                  [disabled]="(sel?.cantidad ?? 1) >= item.disponible_para_devolver"
+                                  class="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-30"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            } @else {
+                              <span class="text-slate-400 text-xs">—</span>
+                            }
+                          </td>
+
+                          <!-- Precio Unitario -->
+                          <td class="px-3 py-3 text-right text-slate-600 text-xs">
+                            Bs. {{ item.precio_unitario | number: '1.2-2' }}
+                          </td>
+
+                          <!-- Subtotal -->
+                          <td class="px-3 py-3 text-right font-semibold text-slate-800 text-xs">
+                            @if (sel?.seleccionado) {
+                              Bs. {{ ((sel?.cantidad ?? 0) * item.precio_unitario) | number: '1.2-2' }}
+                            } @else {
+                              <span class="text-slate-400">Bs. 0.00</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Motivo de la Devolución -->
+              <div class="space-y-3">
+                <label class="block text-xs font-semibold text-slate-600 uppercase">
+                  Motivo de la Devolución
+                </label>
+                <!-- Chips de motivos -->
+                <div class="flex flex-wrap gap-2">
+                  @for (motivo of motivosPredefinidos; track motivo) {
+                    <button
+                      type="button"
+                      (click)="motivoCategoria.set(motivo)"
+                      [class.bg-primary]="motivoCategoria() === motivo"
+                      [class.text-white]="motivoCategoria() === motivo"
+                      [class.bg-slate-100]="motivoCategoria() !== motivo"
+                      [class.text-slate-700]="motivoCategoria() !== motivo"
+                      class="px-3 py-1 rounded-full text-xs font-medium hover:opacity-90 transition shadow-xs"
+                    >
+                      {{ motivo }}
+                    </button>
+                  }
+                </div>
+
+                <!-- Detalle adicional / Observaciones -->
+                <div>
+                  <textarea
+                    [ngModel]="motivoDetalle()"
+                    (ngModelChange)="motivoDetalle.set($event)"
+                    rows="2"
+                    placeholder="Detalles adicionales, descripción de falla o notas de recepción..."
+                    class="w-full text-xs md:text-sm border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Resumen de Reembolso -->
+              <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p class="text-xs text-slate-500">Prendas seleccionadas:</p>
+                  <p class="text-base font-bold text-slate-800">
+                    {{ totalPrendasADevolver() }} prenda(s)
+                  </p>
+                </div>
+                <div class="sm:text-right">
+                  <p class="text-xs text-slate-500">Monto total estimado a devolver:</p>
+                  <p class="text-xl font-extrabold text-primary">
+                    Bs. {{ montoTotalEstimadoDevolucion() | number: '1.2-2' }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer modal nueva devolución -->
+      <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          (click)="cerrarModalNuevaDevolucion()"
+          class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200/60 rounded-xl transition"
+        >
+          Cancelar
+        </button>
+        @if (ventaSeleccionada()) {
+          <button
+            type="button"
+            (click)="registrarDevolucion()"
+            [disabled]="!puedeCrearDevolucion() || creandoDevolucion()"
+            class="px-5 py-2 text-sm font-semibold bg-primary text-white hover:bg-primary/90 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (creandoDevolucion()) {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            }
+            Registrar Devolución
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ========================================================================= -->
+<!-- MODAL DE DETALLE Y GESTIÓN DE CICLO DE VIDA                               -->
+<!-- ========================================================================= -->
 @if (modalAbierto() && devolucionDetalle(); as d) {
- <div
- class="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 overflow-y-auto"
- (click)="cerrarModal()"
- >
- <div
- class="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8"
- (click)="$event.stopPropagation()"
- >
- <!-- Header del modal -->
- <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
- <div>
- <h2 class="text-lg font-bold text-primary">
- Devolución #{{ d.id_devolucion }}
- </h2>
- <p class="text-sm text-slate-600">
- Venta {{ d.codigo_venta ?? ('#' + d.id_venta) }} —
- {{ d.cliente_nombre ?? 'Cliente sin nombre' }}
- </p>
- </div>
- <app-badge [variant]="badgeVariante[d.estado]" [texto]="etiquetasEstado[d.estado]" />
- </div>
+  <div
+    class="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 overflow-y-auto"
+    (click)="cerrarModal()"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8 overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header del modal -->
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-container/40">
+        <div>
+          <h2 class="text-lg font-bold text-primary">
+            Devolución #{{ d.id_devolucion }}
+          </h2>
+          <p class="text-sm text-slate-600">
+            Venta {{ d.codigo_venta ?? ('#' + d.id_venta) }} —
+            {{ d.cliente_nombre ?? 'Cliente sin nombre' }}
+          </p>
+        </div>
+        <app-badge [variant]="badgeVariante[d.estado]" [texto]="etiquetasEstado[d.estado]" />
+      </div>
 
- <!-- Cuerpo del modal -->
- <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
- <!-- Info general -->
- <dl class="grid grid-cols-2 gap-4 text-sm">
- <div>
- <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha solicitud</dt>
- <dd class="text-slate-800">
- {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
- </dd>
- </div>
- <div>
- <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha procesado</dt>
- <dd class="text-slate-800">
- {{ d.fecha_procesado ? (d.fecha_procesado | date: 'dd/MM/yyyy HH:mm') : '—' }}
- </dd>
- </div>
- <div>
- <dt class="font-semibold text-slate-500 uppercase text-xs">Procesador</dt>
- <dd class="text-slate-800">{{ d.procesador_nombre ?? '—' }}</dd>
- </div>
- <div>
- <dt class="font-semibold text-slate-500 uppercase text-xs">Monto devuelto</dt>
- <dd class="text-slate-800">
- Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
- </dd>
- </div>
- </dl>
+      <!-- Cuerpo del modal -->
+      <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+        <!-- Info general -->
+        <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-slate-50 p-4 rounded-xl">
+          <div>
+            <dt class="font-semibold text-slate-500 uppercase text-[10px]">Fecha solicitud</dt>
+            <dd class="text-slate-800 text-xs mt-0.5">
+              {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-slate-500 uppercase text-[10px]">Fecha procesado</dt>
+            <dd class="text-slate-800 text-xs mt-0.5">
+              {{ d.fecha_procesado ? (d.fecha_procesado | date: 'dd/MM/yyyy HH:mm') : '—' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-slate-500 uppercase text-[10px]">Procesador</dt>
+            <dd class="text-slate-800 text-xs mt-0.5">{{ d.procesador_nombre ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold text-slate-500 uppercase text-[10px]">Monto devuelto</dt>
+            <dd class="text-slate-800 font-bold text-sm mt-0.5">
+              Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
+            </dd>
+          </div>
+        </dl>
 
- <!-- Motivo -->
- <div>
- <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Motivo de la solicitud</p>
- <p class="text-sm text-slate-800 bg-slate-50 rounded-lg p-3">{{ d.motivo }}</p>
- </div>
- @if (d.motivo_rechazo) {
- <div>
- <p class="text-xs font-semibold text-rose-600 uppercase mb-1">Motivo de rechazo</p>
- <p class="text-sm text-rose-800 bg-rose-50 rounded-lg p-3">{{ d.motivo_rechazo }}</p>
- </div>
- }
+        <!-- Motivo -->
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Motivo de la solicitud</p>
+          <p class="text-sm text-slate-800 bg-slate-50 rounded-xl p-3 border border-slate-100">{{ d.motivo }}</p>
+        </div>
 
- <!-- Items -->
- <div>
- <p class="text-xs font-semibold text-slate-500 uppercase mb-2">
- Ítems a devolver ({{ d.items.length }})
- </p>
- <div class="border border-slate-200 rounded-lg overflow-hidden">
- <table class="min-w-full divide-y divide-slate-200 text-sm">
- <thead class="bg-slate-50">
- <tr>
- <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">Producto</th>
- <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Cantidad</th>
- <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Precio unit.</th>
- <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Subtotal</th>
- </tr>
- </thead>
- <tbody class="divide-y divide-slate-100">
- @for (item of d.items; track item.id_detalle) {
- <tr>
- <td class="px-3 py-2 text-slate-800">
- {{ item.nombre_producto ?? ('Producto #' + item.id_producto) }}
- </td>
- <td class="px-3 py-2 text-right text-slate-700">{{ item.cantidad_devuelta }}</td>
- <td class="px-3 py-2 text-right text-slate-700">
- Bs. {{ item.precio_unitario | number: '1.2-2' }}
- </td>
- <td class="px-3 py-2 text-right font-medium text-slate-800">
- Bs. {{ item.subtotal | number: '1.2-2' }}
- </td>
- </tr>
- }
- </tbody>
- </table>
- </div>
- </div>
+        @if (d.estado === 'COMPLETADA') {
+          <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <p class="font-bold">Stock Reintegrado</p>
+              <p class="mt-0.5">Las prendas de esta devolución fueron reintegradas automáticamente al stock de la sucursal y registradas en el Kardex.</p>
+            </div>
+          </div>
+        }
 
- <!-- Motivo de rechazo (input solo cuando aplica) -->
- @if (d.estado === 'SOLICITADA') {
- <div>
- <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
- Motivo de rechazo (obligatorio para RECHAZAR)
- </label>
- <textarea
- [ngModel]="motivoRechazo()"
- (ngModelChange)="motivoRechazo.set($event)"
- rows="2"
- placeholder="Detalle por qué se rechaza la solicitud..."
- class="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
- ></textarea>
- </div>
- }
+        @if (d.motivo_rechazo) {
+          <div>
+            <p class="text-xs font-semibold text-rose-600 uppercase mb-1">Motivo de rechazo</p>
+            <p class="text-sm text-rose-800 bg-rose-50 rounded-xl p-3 border border-rose-100">{{ d.motivo_rechazo }}</p>
+          </div>
+        }
 
- @if (errorMessage()) {
- <div
- class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
- >
- {{ errorMessage() }}
- </div>
- }
- </div>
+        <!-- Items de la devolución -->
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase mb-2">
+            Prendas a devolver ({{ d.items.length }})
+          </p>
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">Prenda / Producto</th>
+                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Cantidad</th>
+                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Precio unit.</th>
+                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (item of d.items; track item.id_detalle) {
+                  <tr>
+                    <td class="px-3 py-2.5 text-slate-800 font-medium">
+                      {{ item.nombre_producto ?? ('Producto #' + item.id_producto) }}
+                    </td>
+                    <td class="px-3 py-2.5 text-right font-semibold text-slate-700">
+                      {{ item.cantidad_devuelta }}
+                    </td>
+                    <td class="px-3 py-2.5 text-right text-slate-600">
+                      Bs. {{ item.precio_unitario | number: '1.2-2' }}
+                    </td>
+                    <td class="px-3 py-2.5 text-right font-bold text-slate-800">
+                      Bs. {{ item.subtotal | number: '1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
 
- <!-- Footer del modal -->
- <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2">
- <button
- type="button"
- (click)="cerrarModal()"
- class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"
- >
- Cerrar
- </button>
- @if (d.estado === 'SOLICITADA') {
- <button
- type="button"
- (click)="ejecutarAccion('RECHAZAR')"
- [disabled]="guardando()"
- class="px-4 py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition"
- >
- Rechazar
- </button>
- <button
- type="button"
- (click)="ejecutarAccion('APROBAR')"
- [disabled]="guardando()"
- class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary disabled:opacity-50 transition"
- >
- Aprobar
- </button>
- }
- @if (d.estado === 'APROBADA') {
- <button
- type="button"
- (click)="ejecutarAccion('COMPLETAR')"
- [disabled]="guardando()"
- class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition"
- >
- Completar (reintegrar stock)
- </button>
- }
- </div>
- </div>
- </div>
+        <!-- Motivo de rechazo input si aplica -->
+        @if (d.estado === 'SOLICITADA' || d.estado === 'APROBADA') {
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
+              Motivo de rechazo (solo si decide RECHAZAR)
+            </label>
+            <textarea
+              [ngModel]="motivoRechazo()"
+              (ngModelChange)="motivoRechazo.set($event)"
+              rows="2"
+              placeholder="Detalle el motivo por el cual se rechaza la devolución (mínimo 10 caracteres)..."
+              class="w-full text-xs md:text-sm border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            ></textarea>
+          </div>
+        }
 
- <!-- ConfirmDialog: se renderiza por encima del modal (z-60 interno). -->
- @if (confirmarAccion(); as ctx) {
- <app-confirm-dialog
- [titulo]="'Confirmar acción'"
- [mensaje]="
- ctx.accion === 'RECHAZAR'
- ? '¿Rechazar esta devolución? El cliente verá el motivo de rechazo.'
- : ctx.accion === 'APROBAR'
- ? '¿Aprobar esta devolución? Pasará a estado APROBADA y luego podrá completarla.'
- : '¿Completar esta devolución? Se reintegrará el stock al inventario (kardex) en la misma transacción.'
- "
- [textoConfirmar]="accionLabel(ctx.accion)"
- [peligro]="ctx.accion === 'RECHAZAR'"
- (confirmado)="confirmarEjecucion()"
- (cancelado)="cancelarEjecucion()"
- />
- }
+        @if (errorMessage()) {
+          <div
+            class="px-4 py-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+      </div>
+
+      <!-- Footer del modal con acciones de ciclo de vida -->
+      <div class="px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
+        <button
+          type="button"
+          (click)="cerrarModal()"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200/60 transition"
+        >
+          Cerrar
+        </button>
+
+        <div class="flex items-center gap-2">
+          @if (d.estado === 'SOLICITADA') {
+            <button
+              type="button"
+              (click)="ejecutarAccion('RECHAZAR')"
+              [disabled]="guardando()"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition shadow-xs"
+            >
+              Rechazar
+            </button>
+            <button
+              type="button"
+              (click)="ejecutarAccion('APROBAR')"
+              [disabled]="guardando()"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 transition shadow-xs"
+            >
+              Aprobar Solicitud
+            </button>
+            <button
+              type="button"
+              (click)="ejecutarAccion('COMPLETAR')"
+              [disabled]="guardando()"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition shadow-xs"
+            >
+              Completar y Reintegrar Stock
+            </button>
+          }
+          @if (d.estado === 'APROBADA') {
+            <button
+              type="button"
+              (click)="ejecutarAccion('RECHAZAR')"
+              [disabled]="guardando()"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition shadow-xs"
+            >
+              Rechazar
+            </button>
+            <button
+              type="button"
+              (click)="ejecutarAccion('COMPLETAR')"
+              [disabled]="guardando()"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition shadow-xs"
+            >
+              Completar (Reintegrar Stock a Sucursal)
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ConfirmDialog para acciones de ciclo de vida -->
+@if (confirmarAccion(); as ctx) {
+  <app-confirm-dialog
+    [titulo]="'Confirmar acción'"
+    [mensaje]="
+      ctx.accion === 'RECHAZAR'
+        ? '¿Rechazar esta devolución? El cliente podrá consultar el motivo de rechazo ingresado.'
+        : ctx.accion === 'APROBAR'
+        ? '¿Aprobar esta solicitud de devolución? Pasará a estado APROBADA para la posterior recepción de las prendas en la sucursal.'
+        : '¿Confirmar y completar esta devolución? Se reintegrará automáticamente el stock al inventario de la sucursal y se generará el movimiento contable correspondiente en el Kardex.'
+    "
+    [textoConfirmar]="accionLabel(ctx.accion)"
+    [peligro]="ctx.accion === 'RECHAZAR'"
+    (confirmado)="confirmarEjecucion()"
+    (cancelado)="cancelarEjecucion()"
+  />
 }

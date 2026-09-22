@@ -47,6 +47,19 @@ export class AuthService {
  });
  }
 
+ register(payload: {
+ nombre: string;
+ apellido?: string;
+ correo: string;
+ password: string;
+ nombre_rol?: string;
+ }): Observable<ApiResponse<any>> {
+ return this.api.post<ApiResponse<any>>('/usuarios', {
+ ...payload,
+ nombre_rol: payload.nombre_rol || 'C',
+ });
+ }
+
  logout(): void {
  if (isPlatformBrowser(this.platformId)) {
  try {

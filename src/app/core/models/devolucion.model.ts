@@ -47,19 +47,20 @@ export interface Devolucion {
 
 /** Filtros del GET /api/v1/devoluciones. */
 export interface DevolucionFiltros {
- estado?: EstadoDevolucion;
- id_venta?: number;
- page?: number;
- limit?: number;
+  estado?: EstadoDevolucion;
+  id_venta?: number;
+  q?: string;
+  page?: number;
+  limit?: number;
 }
 
 /** Respuesta normalizada del listado (items + metadata de paginación). */
 export interface DevolucionListado {
- items: Devolucion[];
- total: number;
- page: number;
- limit: number;
- pages: number;
+  items: Devolucion[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
 }
 
 /**
@@ -67,6 +68,55 @@ export interface DevolucionListado {
  * motivo_rechazo es obligatorio SOLO cuando accion === 'RECHAZAR'.
  */
 export interface DevolucionProcesarPayload {
- accion: AccionDevolucion;
- motivo_rechazo?: string;
+  accion: AccionDevolucion;
+  motivo_rechazo?: string;
+}
+
+/** Ítem elegible para devolución de una venta (GET /api/v1/devoluciones/venta/{id}/elegibles). */
+export interface ItemElegibleDevolucion {
+  detalle_venta_id: number;
+  id_producto: number;
+  nombre: string;
+  talla: string | null;
+  color: string | null;
+  cantidad_original: number;
+  ya_devuelto: number;
+  disponible_para_devolver: number;
+  precio_unitario: number;
+}
+
+/** Detalle de venta con líneas elegibles para formular la devolución. */
+export interface VentaElegiblesDevolucion {
+  id_venta: number;
+  codigo: string;
+  fecha_venta: string;
+  en_ventana: boolean;
+  items: ItemElegibleDevolucion[];
+}
+
+/** Línea a devolver en la creación de una devolución (POST /api/v1/devoluciones). */
+export interface DevolucionCrearItemPayload {
+  detalle_venta_id: number;
+  cantidad_devuelta: number;
+}
+
+/** Payload completo de creación de devolución (POST /api/v1/devoluciones). */
+export interface DevolucionCrearPayload {
+  id_venta: number;
+  motivo: string;
+  items: DevolucionCrearItemPayload[];
+}
+
+/** Resumen de venta retornado por el buscador. */
+export interface VentaBusquedaResumen {
+  id_venta: number;
+  codigo: string;
+  fecha_venta: string;
+  total: number;
+  estado_pago: string;
+  metodo_pago: string;
+  nombre_cliente: string;
+  correo: string;
+  tipo_venta: string;
+  items_count?: number;
 }
