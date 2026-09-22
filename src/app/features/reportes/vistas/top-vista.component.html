@@ -1,41 +1,41 @@
-<!-- CU20 — Reporte de Productos más vendidos -->
+<!-- Reporte de Productos más vendidos -->
 @let d = datos();
 
 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-  <app-reporte-kpi etiqueta="Productos en el ranking" [valor]="d.items.length" [nota]="'Top solicitado: ' + d.top" />
-  <app-reporte-kpi etiqueta="Productos distintos vendidos" [valor]="d.total_productos_vendidos | number" nota="En el período, antes del top" />
+ <app-reporte-kpi etiqueta="Productos en el ranking" [valor]="d.items.length" [nota]="'Top solicitado: ' + d.top" />
+ <app-reporte-kpi etiqueta="Productos distintos vendidos" [valor]="d.total_productos_vendidos | number" nota="En el período, antes del top" />
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-  <h2 class="text-sm font-semibold text-primary mb-3">Unidades vendidas por producto</h2>
-  <app-reporte-chart [config]="grafico()" [alto]="alto()" descripcion="Unidades vendidas por producto del ranking" />
+ <h2 class="text-sm font-semibold text-primary mb-3">Unidades vendidas por producto</h2>
+ <app-reporte-chart [config]="grafico()" [alto]="alto()" descripcion="Unidades vendidas por producto del ranking" />
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-ranking">
-      <thead class="bg-container">
-        <tr>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">#</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Producto</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Cantidad vendida</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Total generado</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Nº de ventas</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 text-sm">
-        @for (i of d.items; track i.id_producto) {
-          <tr>
-            <td class="px-4 py-3 font-semibold text-primary">{{ i.posicion }}</td>
-            <td class="px-4 py-3">{{ i.producto }}</td>
-            <td class="px-4 py-3">{{ i.categoria }}</td>
-            <td class="px-4 py-3 text-right">{{ i.cantidad_vendida }}</td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ i.total_generado | number: '1.2-2' }}</td>
-            <td class="px-4 py-3 text-right">{{ i.num_ventas }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+ <div class="overflow-x-auto">
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-ranking">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">#</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Producto</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Cantidad vendida</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Total generado</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Nº de ventas</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (i of d.items; track i.id_producto) {
+ <tr>
+ <td class="px-4 py-3 font-semibold text-primary">{{ i.posicion }}</td>
+ <td class="px-4 py-3">{{ i.producto }}</td>
+ <td class="px-4 py-3">{{ i.categoria }}</td>
+ <td class="px-4 py-3 text-right">{{ i.cantidad_vendida }}</td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ i.total_generado | number: '1.2-2' }}</td>
+ <td class="px-4 py-3 text-right">{{ i.num_ventas }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
 </div>

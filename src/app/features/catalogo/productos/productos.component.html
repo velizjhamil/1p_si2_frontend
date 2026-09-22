@@ -1,660 +1,722 @@
-<!-- CU6 — Gestión de Productos de Ropa (gestión solo ASU; el resto consulta) — BACKEND REAL /api/v1/productos -->
+<!-- Gestión de Productos de Ropa (gestión solo ASU; el resto consulta) — BACKEND REAL /api/v1/productos -->
 <section class="p-6 md:p-8 max-w-7xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Productos de Ropa</h1>
-      <p class="text-gray-600 mt-1">
-        Catálogo de prendas del sistema.
-      </p>
-    </div>
-    <div class="flex items-center gap-2">
-      <!-- Toggle de vista: grid / tabla -->
-      <div class="flex rounded-lg border border-primary/20 overflow-hidden">
-        <button
-          type="button"
-          (click)="vista.set('grid')"
-          class="px-3 py-2.5 text-sm font-medium transition"
-          [class]="
-            vista() === 'grid'
-              ? 'bg-primary text-white'
-              : 'bg-white text-primary hover:bg-accent/40'
-          "
-          title="Vista de tarjetas"
-        >
-          ▦ Grid
-        </button>
-        <button
-          type="button"
-          (click)="vista.set('tabla')"
-          class="px-3 py-2.5 text-sm font-medium transition"
-          [class]="
-            vista() === 'tabla'
-              ? 'bg-primary text-white'
-              : 'bg-white text-primary hover:bg-accent/40'
-          "
-          title="Vista de tabla"
-        >
-          ☰ Tabla
-        </button>
-      </div>
-      @if (puedeGestionar) {
-      <button
-        type="button"
-        (click)="abrirModalCrear()"
-        class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-      >
-        + Nuevo Producto
-      </button>
-      }
-    </div>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Productos de Ropa</h1>
+ <p class="text-gray-600 mt-1">
+ Catálogo de prendas del sistema.
+ </p>
+ </div>
+ <div class="flex items-center gap-2">
+ <!-- Toggle de vista: grid / tabla -->
+ <div class="flex rounded-lg border border-primary/20 overflow-hidden">
+ <button
+ type="button"
+ (click)="vista.set('grid')"
+ class="px-3 py-2.5 text-sm font-medium transition"
+ [class]="
+ vista() === 'grid'
+ ? 'bg-primary text-white'
+ : 'bg-white text-primary hover:bg-accent/40'
+ "
+ title="Vista de tarjetas"
+ >
+ ▦ Grid
+ </button>
+ <button
+ type="button"
+ (click)="vista.set('tabla')"
+ class="px-3 py-2.5 text-sm font-medium transition"
+ [class]="
+ vista() === 'tabla'
+ ? 'bg-primary text-white'
+ : 'bg-white text-primary hover:bg-accent/40'
+ "
+ title="Vista de tabla"
+ >
+ ☰ Tabla
+ </button>
+ </div>
+ @if (puedeGestionar) {
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Nuevo Producto
+ </button>
+ }
+ </div>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de filtros: búsqueda + selects de categoría y estado -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-6"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por nombre o descripción..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    <!-- Filtro por categoría (catálogo real CU9) -->
-    <select
-      [ngModel]="filtroCategoriaId()"
-      (ngModelChange)="onFiltroCategoria($event)"
-      class="px-3 py-2.5 rounded-lg bg-white border border-primary/20 text-sm text-primary focus:outline-none focus:border-primary"
-    >
-      <option [ngValue]="'todas'">Todas las categorías</option>
-      @for (cat of categorias(); track cat.id_categoria) {
-        <option [ngValue]="cat.id_categoria">{{ cat.nombre }}</option>
-      }
-    </select>
-    <!-- Filtro por estado -->
-    <select
-      [ngModel]="filtroEstado()"
-      (ngModelChange)="onFiltroEstado($event)"
-      class="px-3 py-2.5 rounded-lg bg-white border border-primary/20 text-sm text-primary focus:outline-none focus:border-primary"
-    >
-      <option [ngValue]="'todos'">Todos los estados</option>
-      <option [ngValue]="'Activo'">Activo</option>
-      <option [ngValue]="'Inactivo'">Inactivo</option>
-      <option [ngValue]="'Agotado'">Agotado</option>
-    </select>
-  </div>
+ <!-- Barra de filtros: búsqueda + selects de categoría y estado -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-6"
+ >
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+ />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por nombre o descripción..."
+ class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ <!-- Filtro por categoría (catálogo real ) -->
+ <select
+ [ngModel]="filtroCategoriaId()"
+ (ngModelChange)="onFiltroCategoria($event)"
+ class="px-3 py-2.5 rounded-lg bg-white border border-primary/20 text-sm text-primary focus:outline-none focus:border-primary"
+ >
+ <option [ngValue]="'todas'">Todas las categorías</option>
+ @for (cat of categorias(); track cat.id_categoria) {
+ <option [ngValue]="cat.id_categoria">{{ cat.nombre }}</option>
+ }
+ </select>
+ <!-- Filtro por estado -->
+ <select
+ [ngModel]="filtroEstado()"
+ (ngModelChange)="onFiltroEstado($event)"
+ class="px-3 py-2.5 rounded-lg bg-white border border-primary/20 text-sm text-primary focus:outline-none focus:border-primary"
+ >
+ <option [ngValue]="'todos'">Todos los estados</option>
+ <option [ngValue]="'Activo'">Activo</option>
+ <option [ngValue]="'Inactivo'">Inactivo</option>
+ <option [ngValue]="'Agotado'">Agotado</option>
+ </select>
+ </div>
 
-  <!-- Contenido -->
-  @if (cargando()) {
-    <div class="bg-white rounded-xl border border-primary/10 p-10 text-center text-primary/60 text-sm">
-      Cargando catálogo de productos...
-    </div>
-  } @else if (productos().length === 0) {
-    <div class="bg-white rounded-xl border border-primary/10 p-12 text-center">
-      <p class="text-primary font-medium">No se encontraron productos</p>
-      <p class="text-gray-500 text-sm mt-1">
-        Ajuste los filtros de búsqueda o registre un nuevo producto.
-      </p>
-    </div>
-  } @else if (vista() === 'grid') {
-    <!-- Vista Grid / Tarjetas -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      @for (producto of productos(); track producto.id_producto) {
-        <article
-          class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10 hover:shadow-xl hover:-translate-y-0.5 transition"
-        >
-          <!-- Imagen del producto -->
-          <div class="relative aspect-[4/5] bg-container overflow-hidden">
-            @if (producto.imagen_url) {
-              <img
-                [src]="producto.imagen_url"
-                [alt]="producto.nombre"
-                loading="lazy"
-                class="w-full h-full object-cover"
-                [class.opacity-50]="producto.estado !== 'Activo'"
-              />
-            } @else {
-              <div class="flex items-center justify-center h-full text-primary/40 text-sm">
-                Sin imagen
-              </div>
-            }
-            <span class="absolute top-2 right-2">
-              <app-badge
-                [variant]="badgeEstado(producto.estado)"
-                [texto]="producto.estado"
-              />
-            </span>
-          </div>
-          <!-- Cuerpo de la tarjeta -->
-          <div class="p-4">
-            <div class="flex items-start justify-between gap-2">
-              <h3 class="font-semibold text-gray-800 text-sm leading-tight flex-1">
-                {{ producto.nombre }}
-              </h3>
-              <span class="font-bold text-primary whitespace-nowrap text-sm">
-                Bs {{ producto.precio_venta | number: '1.2-2' }}
-              </span>
-            </div>
-            <p class="text-xs text-gray-500 mt-0.5">
-              {{ producto.categoria?.nombre || '—' }}
-              @if (producto.nombre_proveedor) {
-                <span class="text-gray-400"> · {{ producto.nombre_proveedor }}</span>
-              }
-            </p>
-            <p class="text-xs text-gray-400 mt-1.5 line-clamp-2">
-              {{ producto.descripcion || 'Sin descripción.' }}
-            </p>
-            <!-- Tallas y colores (N:M reales) -->
-            <div class="flex flex-wrap gap-1 mt-2.5">
-              @for (talla of producto.tallas; track talla.id_talla) {
-                <span
-                  class="px-1.5 py-0.5 rounded bg-container text-primary text-[10px] font-semibold border border-primary/10"
-                >
-                  {{ talla.nombre_talla }}
-                </span>
-              }
-              @for (color of producto.colores; track color.id_color) {
-                <span
-                  class="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
-                  [style.background]="color.codigo_hex"
-                  [class.text-primary]="color.codigo_hex === '#ffffff'"
-                >
-                  {{ color.nombre_color }}
-                </span>
-              }
-            </div>
-            <!-- Disponibilidad en Sucursales -->
-            @if (producto.disponibilidad_sucursales && producto.disponibilidad_sucursales.length > 0) {
-              <div class="mt-2.5 pt-2 border-t border-dashed border-primary/10">
-                <p class="text-[11px] font-semibold text-gray-700 mb-1">Por Sucursal:</p>
-                <div class="flex flex-wrap gap-1">
-                  @for (suc of producto.disponibilidad_sucursales; track suc.id_sucursal) {
-                    <span
-                      class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border"
-                      [class]="
-                        suc.stock === 0
-                          ? 'bg-gray-100 text-gray-500 border-gray-200'
-                          : suc.stock <= 5
-                            ? 'bg-amber-50 text-amber-800 border-amber-300 font-bold'
-                            : 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                      "
-                      [title]="suc.nombre_sucursal + ': ' + suc.stock + ' unidades'"
-                    >
-                      <span class="w-1.5 h-1.5 rounded-full" [class]="suc.stock === 0 ? 'bg-gray-400' : (suc.stock <= 5 ? 'bg-amber-500' : 'bg-emerald-500')"></span>
-                      {{ suc.nombre_sucursal }}: {{ suc.stock }}
-                    </span>
-                  }
-                </div>
-              </div>
-            }
+ <!-- Contenido -->
+ @if (cargando()) {
+ <div class="bg-white rounded-xl border border-primary/10 p-10 text-center text-primary/60 text-sm">
+ Cargando catálogo de productos...
+ </div>
+ } @else if (productos().length === 0) {
+ <div class="bg-white rounded-xl border border-primary/10 p-12 text-center">
+ <p class="text-primary font-medium">No se encontraron productos</p>
+ <p class="text-gray-500 text-sm mt-1">
+ Ajuste los filtros de búsqueda o registre un nuevo producto.
+ </p>
+ </div>
+ } @else if (vista() === 'grid') {
+ <!-- Vista Grid / Tarjetas -->
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+ @for (producto of productos(); track producto.id_producto) {
+ <article
+ class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10 hover:shadow-xl hover:-translate-y-0.5 transition"
+ >
+ <!-- Imagen del producto -->
+ <div class="relative aspect-[4/5] bg-container overflow-hidden">
+ @if (producto.imagen_url) {
+ <img
+ [src]="producto.imagen_url"
+ [alt]="producto.nombre"
+ loading="lazy"
+ class="w-full h-full object-cover"
+ [class.opacity-50]="producto.estado !== 'Activo'"
+ />
+ } @else {
+ <div class="flex items-center justify-center h-full text-primary/40 text-sm">
+ Sin imagen
+ </div>
+ }
+ <span class="absolute top-2 right-2">
+ <app-badge
+ [variant]="badgeEstado(producto.estado)"
+ [texto]="producto.estado"
+ />
+ </span>
+ </div>
+ <!-- Cuerpo de la tarjeta minimalista (Imagen, Nombre y Precio) -->
+ <div class="p-4">
+ <div class="flex items-start justify-between gap-2">
+ <h3 class="font-semibold text-gray-800 text-sm leading-tight flex-1 line-clamp-1">
+ {{ producto.nombre }}
+ </h3>
+ <span class="font-bold text-primary whitespace-nowrap text-sm">
+ Bs {{ producto.precio_venta | number: '1.2-2' }}
+ </span>
+ </div>
+ <p class="text-xs text-gray-400 mt-1">
+ {{ producto.categoria?.nombre || 'General' }}
+ </p>
 
-            <!-- Stock -->
-            <div class="flex items-center justify-between mt-3 pt-3 border-t border-primary/10">
-              <span class="text-xs font-medium text-gray-600">
-                Stock total:
-                <span
-                  [class]="
-                    producto.stock_total === 0
-                      ? 'text-red-600 font-bold'
-                      : producto.stock_total <= 5
-                        ? 'text-yellow-600 font-bold'
-                        : 'text-green-600 font-bold'
-                  "
-                >
-                  {{ producto.stock_total }}
-                </span>
-              </span>
-              @if (puedeGestionar) {
-              <div class="flex gap-2 text-xs">
-                <button
-                  type="button"
-                  (click)="abrirModalEditar(producto)"
-                  class="text-primary hover:text-primary/70 font-medium transition"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  (click)="pedirEliminar(producto)"
-                  class="text-red-600 hover:text-red-400 font-medium transition"
-                >
-                  Eliminar
-                </button>
-              </div>
-              }
-</div>
-          </div>
-        </article>
-      }
-    </div>
-  } @else {
-    <!-- Vista Tabla / Datatable -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">Producto</th>
-              <th class="text-left px-4 py-3 font-semibold">Categoría</th>
-                <th class="text-right px-4 py-3 font-semibold">Precio</th>
-              <th class="text-center px-4 py-3 font-semibold">Stock</th>
-              <th class="text-left px-4 py-3 font-semibold">Tallas / Colores</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              @if (puedeGestionar) {
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (producto of productos(); track producto.id_producto) {
-              <tr
-                class="border-b border-primary/10 hover:bg-container/60 transition"
-                [class.opacity-60]="producto.estado !== 'Activo'"
-              >
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    @if (producto.imagen_url) {
-                      <img
-                        [src]="producto.imagen_url"
-                        [alt]="producto.nombre"
-                        loading="lazy"
-                        class="w-10 h-12 rounded object-cover border border-primary/10"
-                      />
-                    }
-                    <div>
-                      <p class="font-medium text-gray-800">{{ producto.nombre }}</p>
-                      <p class="text-xs text-gray-400">
-                        {{ producto.nombre_proveedor || 'Sin proveedor' }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  {{ producto.categoria?.nombre || '—' }}
-                </td>
-                <td class="px-4 py-3 text-right font-semibold text-primary">
-                  Bs {{ producto.precio_venta | number: '1.2-2' }}
-                </td>
-                <td class="px-4 py-3 text-center font-semibold">
-                  <span
-                    [class]="
-                      producto.stock_total === 0
-                        ? 'text-red-600'
-                        : producto.stock_total <= 5
-                          ? 'text-yellow-600'
-                          : 'text-green-600'
-                    "
-                  >
-                    {{ producto.stock_total }}
-                  </span>
-                  @if (producto.disponibilidad_sucursales && producto.disponibilidad_sucursales.length > 0) {
-                    <div class="text-[10px] text-gray-500 mt-1 space-y-0.5 font-normal text-left">
-                      @for (suc of producto.disponibilidad_sucursales; track suc.id_sucursal) {
-                        <div [class.text-amber-700]="suc.stock > 0 && suc.stock <= 5" [class.font-bold]="suc.stock > 0 && suc.stock <= 5" [class.text-red-600]="suc.stock === 0">
-                          • {{ suc.nombre_sucursal }}: {{ suc.stock }}
-                        </div>
-                      }
-                    </div>
-                  }
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex flex-wrap gap-1">
-                    @for (talla of producto.tallas; track talla.id_talla) {
-                      <span
-                        class="px-1.5 py-0.5 rounded bg-container text-primary text-[10px] font-semibold border border-primary/10"
-                      >
-                        {{ talla.nombre_talla }}
-                      </span>
-                    }
-                    @for (color of producto.colores; track color.id_color) {
-                      <span
-                        class="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
-                        [style.background]="color.codigo_hex"
-                        [class.text-primary]="color.codigo_hex === '#ffffff'"
-                      >
-                        {{ color.nombre_color }}
-                      </span>
-                    }
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <app-badge
-                    [variant]="badgeEstado(producto.estado)"
-                    [texto]="producto.estado"
-                  />
-                </td>
-                @if (puedeGestionar) {
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    (click)="abrirModalEditar(producto)"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    (click)="pedirEliminar(producto)"
-                    class="text-red-600 hover:text-red-400 font-medium transition"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-                }
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron productos con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginación server-side -->
-      <div
-        class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
-      >
-        <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} productos</span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    </div>
-  }
+ <!-- Acciones y Detalle -->
+ <div class="flex items-center justify-between mt-3 pt-3 border-t border-primary/10">
+ <button
+ type="button"
+ (click)="abrirModalDetalle(producto)"
+ class="text-xs font-semibold text-primary hover:text-primary/70 flex items-center gap-1 transition"
+ >
+ <span>🔍</span> Ver detalles
+ </button>
+ @if (puedeGestionar) {
+ <div class="flex gap-2 text-xs">
+ <button
+ type="button"
+ (click)="abrirModalEditar(producto)"
+ class="text-primary hover:text-primary/70 font-medium transition"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="pedirEliminar(producto)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ >
+ Eliminar
+ </button>
+ </div>
+ }
+ </div>
+ </div>
+ </article>
+ }
+ </div>
+ } @else {
+ <!-- Vista Tabla / Datatable -->
+ <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-primary text-white">
+ <tr>
+ <th class="text-left px-4 py-3 font-semibold">Producto</th>
+ <th class="text-left px-4 py-3 font-semibold">Categoría</th>
+ <th class="text-right px-4 py-3 font-semibold">Precio</th>
+ <th class="text-center px-4 py-3 font-semibold">Stock</th>
+ <th class="text-left px-4 py-3 font-semibold">Tallas / Colores</th>
+ <th class="text-center px-4 py-3 font-semibold">Estado</th>
+ @if (puedeGestionar) {
+ <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+ }
+ </tr>
+ </thead>
+ <tbody>
+ @for (producto of productos(); track producto.id_producto) {
+ <tr
+ class="border-b border-primary/10 hover:bg-container/60 transition"
+ [class.opacity-60]="producto.estado !== 'Activo'"
+ >
+ <td class="px-4 py-3">
+ <div class="flex items-center gap-3">
+ @if (producto.imagen_url) {
+ <img
+ [src]="producto.imagen_url"
+ [alt]="producto.nombre"
+ loading="lazy"
+ class="w-10 h-12 rounded object-cover border border-primary/10"
+ />
+ }
+ <div>
+ <p class="font-medium text-gray-800">{{ producto.nombre }}</p>
+ <p class="text-xs text-gray-400">
+ {{ producto.nombre_proveedor || 'Sin proveedor' }}
+ </p>
+ </div>
+ </div>
+ </td>
+ <td class="px-4 py-3 text-gray-600">
+ {{ producto.categoria?.nombre || '—' }}
+ </td>
+ <td class="px-4 py-3 text-right font-semibold text-primary">
+ Bs {{ producto.precio_venta | number: '1.2-2' }}
+ </td>
+ <td class="px-4 py-3 text-center font-semibold">
+ <span
+ [class]="
+ producto.stock_total === 0
+ ? 'text-red-600'
+ : producto.stock_total <= 5
+ ? 'text-yellow-600'
+ : 'text-green-600'
+ "
+ >
+ {{ producto.stock_total }}
+ </span>
+ @if (producto.disponibilidad_sucursales && producto.disponibilidad_sucursales.length > 0) {
+ <div class="text-[10px] text-gray-500 mt-1 space-y-0.5 font-normal text-left">
+ @for (suc of producto.disponibilidad_sucursales; track suc.id_sucursal) {
+ <div [class.text-amber-700]="suc.stock > 0 && suc.stock <= 5" [class.font-bold]="suc.stock > 0 && suc.stock <= 5" [class.text-red-600]="suc.stock === 0">
+ • {{ suc.nombre_sucursal }}: {{ suc.stock }}
+ </div>
+ }
+ </div>
+ }
+ </td>
+ <td class="px-4 py-3">
+ <div class="flex flex-wrap gap-1">
+ @for (talla of producto.tallas; track talla.id_talla) {
+ <span
+ class="px-1.5 py-0.5 rounded bg-container text-primary text-[10px] font-semibold border border-primary/10"
+ >
+ {{ talla.nombre_talla }}
+ </span>
+ }
+ @for (color of producto.colores; track color.id_color) {
+ <span
+ class="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
+ [style.background]="color.codigo_hex"
+ [class.text-primary]="color.codigo_hex === '#ffffff'"
+ >
+ {{ color.nombre_color }}
+ </span>
+ }
+ </div>
+ </td>
+ <td class="px-4 py-3 text-center">
+ <app-badge
+ [variant]="badgeEstado(producto.estado)"
+ [texto]="producto.estado"
+ />
+ </td>
+ @if (puedeGestionar) {
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <button
+ type="button"
+ (click)="abrirModalEditar(producto)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="pedirEliminar(producto)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ >
+ Eliminar
+ </button>
+ </td>
+ }
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron productos con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <!-- Paginación server-side -->
+ <div
+ class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
+ >
+ <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} productos</span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ </div>
+ }
 </section>
 
 <!-- Modal Registrar / Editar Producto -->
 @if (puedeGestionar && modalAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModal()"
-    ></div>
-    <div
-      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoId() ? 'Editar Producto' : 'Nuevo Producto' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          {{
-            editandoId()
-              ? 'Actualice los datos de la prenda.'
-              : 'Registre una nueva prenda de vestir en el catálogo.'
-          }}
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModal()"
+ ></div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoId() ? 'Editar Producto' : 'Nuevo Producto' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ {{
+ editandoId()
+ ? 'Actualice los datos de la prenda.'
+ : 'Registre una nueva prenda de vestir en el catálogo.'
+ }}
+ </p>
+ </div>
 
-      <form [formGroup]="productoForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <form [formGroup]="productoForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <!-- Nombre + Categoría -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="nombre">
-              Nombre de la Prenda *
-            </label>
-            <input
-              id="nombre"
-              type="text"
-              formControlName="nombre"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              [class.border-red-400]="productoForm.controls.nombre.touched && productoForm.controls.nombre.invalid"
-              placeholder="Ej: Camisa Oxford Formal"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="id_categoria">
-              Categoría *
-            </label>
-            <select
-              id="id_categoria"
-              formControlName="id_categoria"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-              [class.border-red-400]="productoForm.controls.id_categoria.touched && productoForm.controls.id_categoria.invalid"
-            >
-              <option [ngValue]="null" disabled>Seleccione una categoría...</option>
-              @for (cat of categorias(); track cat.id_categoria) {
-                <option [ngValue]="cat.id_categoria">{{ cat.nombre }}</option>
-              }
-            </select>
-          </div>
-        </div>
+ <!-- Nombre + Categoría -->
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="nombre">
+ Nombre de la Prenda *
+ </label>
+ <input
+ id="nombre"
+ type="text"
+ formControlName="nombre"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ [class.border-red-400]="productoForm.controls.nombre.touched && productoForm.controls.nombre.invalid"
+ placeholder="Ej: Camisa Oxford Formal"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="id_categoria">
+ Categoría *
+ </label>
+ <select
+ id="id_categoria"
+ formControlName="id_categoria"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ [class.border-red-400]="productoForm.controls.id_categoria.touched && productoForm.controls.id_categoria.invalid"
+ >
+ <option [ngValue]="null" disabled>Seleccione una categoría...</option>
+ @for (cat of categorias(); track cat.id_categoria) {
+ <option [ngValue]="cat.id_categoria">{{ cat.nombre }}</option>
+ }
+ </select>
+ </div>
+ </div>
 
-        <!-- Precio + Stock -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="precio_venta">
-              Precio de Venta (Bs) *
-            </label>
-            <input
-              id="precio_venta"
-              type="number"
-              formControlName="precio_venta"
-              min="0.01"
-              step="0.01"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              [class.border-red-400]="productoForm.controls.precio_venta.touched && productoForm.controls.precio_venta.invalid"
-              placeholder="Ej: 189.90"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="stock_total">
-              Stock Total *
-            </label>
-            <input
-              id="stock_total"
-              type="number"
-              formControlName="stock_total"
-              min="0"
-              step="1"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              [class.border-red-400]="productoForm.controls.stock_total.touched && productoForm.controls.stock_total.invalid"
-              placeholder="Ej: 42"
-            />
-          </div>
-        </div>
+ <!-- Precio + Stock -->
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="precio_venta">
+ Precio de Venta (Bs) *
+ </label>
+ <input
+ id="precio_venta"
+ type="number"
+ formControlName="precio_venta"
+ min="0.01"
+ step="0.01"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ [class.border-red-400]="productoForm.controls.precio_venta.touched && productoForm.controls.precio_venta.invalid"
+ placeholder="Ej: 189.90"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="stock_total">
+ Stock Total *
+ </label>
+ <input
+ id="stock_total"
+ type="number"
+ formControlName="stock_total"
+ min="0"
+ step="1"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ [class.border-red-400]="productoForm.controls.stock_total.touched && productoForm.controls.stock_total.invalid"
+ placeholder="Ej: 42"
+ />
+ </div>
+ </div>
 
-        <!-- URL de Imagen del Producto -->
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="imagen_url">
-            URL de la Imagen de la Prenda
-          </label>
-          <input
-            id="imagen_url"
-            type="url"
-            formControlName="imagen_url"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="https://ejemplo.com/imagenes/prenda.jpg"
-          />
-          @if (productoForm.controls.imagen_url.value) {
-            <div class="mt-2 flex items-center gap-3">
-              <img
-                [src]="productoForm.controls.imagen_url.value"
-                alt="Vista previa"
-                class="w-12 h-14 object-cover rounded border border-primary/20 shadow-sm"
-              />
-              <span class="text-xs text-gray-500">Vista previa de la prenda</span>
-            </div>
-          }
-        </div>
+ <!-- URL de Imagen del Producto -->
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="imagen_url">
+ URL de la Imagen de la Prenda
+ </label>
+ <input
+ id="imagen_url"
+ type="url"
+ formControlName="imagen_url"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="https://ejemplo.com/imagenes/prenda.jpg"
+ />
+ @if (productoForm.controls.imagen_url.value) {
+ <div class="mt-2 flex items-center gap-3">
+ <img
+ [src]="productoForm.controls.imagen_url.value"
+ alt="Vista previa"
+ class="w-12 h-14 object-cover rounded border border-primary/20 shadow-sm"
+ />
+ <span class="text-xs text-gray-500">Vista previa de la prenda</span>
+ </div>
+ }
+ </div>
 
-        <!-- Descripción -->
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="descripcion">
-            Descripción
-          </label>
-          <textarea
-            id="descripcion"
-            formControlName="descripcion"
-            rows="2"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm resize-none"
-            placeholder="Ej: Camisa de algodón con cuello inglés"
-          ></textarea>
-        </div>
+ <!-- Descripción -->
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="descripcion">
+ Descripción
+ </label>
+ <textarea
+ id="descripcion"
+ formControlName="descripcion"
+ rows="2"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm resize-none"
+ placeholder="Ej: Camisa de algodón con cuello inglés"
+ ></textarea>
+ </div>
 
-        <!-- Tallas (chips multi-select por id de catálogo) -->
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1">
-            Selección de Talla *
-            <span class="text-xs font-normal text-gray-400">
-              (click para seleccionar varias)
-            </span>
-          </label>
-          <div class="flex flex-wrap gap-2">
-            @for (talla of tallas(); track talla.id_talla) {
-              <button
-                type="button"
-                (click)="toggleChip('tallas', talla.id_talla)"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
-                [class]="
-                  chipActivo('tallas', talla.id_talla)
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
-                "
-              >
-                {{ talla.nombre_talla }}
-              </button>
-             }
-          </div>
-        </div>
+ <!-- Tallas (chips multi-select por id de catálogo) -->
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1">
+ Selección de Talla *
+ <span class="text-xs font-normal text-gray-400">
+ (click para seleccionar varias)
+ </span>
+ </label>
+ <div class="flex flex-wrap gap-2">
+ @for (talla of tallas(); track talla.id_talla) {
+ <button
+ type="button"
+ (click)="toggleChip('tallas', talla.id_talla)"
+ class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
+ [class]="
+ chipActivo('tallas', talla.id_talla)
+ ? 'bg-primary text-white border-primary shadow-sm'
+ : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
+ "
+ >
+ {{ talla.nombre_talla }}
+ </button>
+ }
+ </div>
+ </div>
 
-        <!-- Colores (chips multi-select por id de catálogo) -->
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1">
-            Selección de Color *
-            <span class="text-xs font-normal text-gray-400">
-              (click para seleccionar varios)
-            </span>
-          </label>
-          <div class="flex flex-wrap gap-2">
-            @for (color of colores(); track color.id_color) {
-              <button
-                type="button"
-                (click)="toggleChip('colores', color.id_color)"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center gap-1.5"
-                [class]="
-                  chipActivo('colores', color.id_color)
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
-                "
-              >
-                <span
-                  class="w-3 h-3 rounded-full border border-primary/20"
-                  [style.background]="color.codigo_hex"
-                ></span>
-                {{ color.nombre_color }}
-              </button>
-            }
-          </div>
-        </div>
+ <!-- Colores (chips multi-select por id de catálogo) -->
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1">
+ Selección de Color *
+ <span class="text-xs font-normal text-gray-400">
+ (click para seleccionar varios)
+ </span>
+ </label>
+ <div class="flex flex-wrap gap-2">
+ @for (color of colores(); track color.id_color) {
+ <button
+ type="button"
+ (click)="toggleChip('colores', color.id_color)"
+ class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center gap-1.5"
+ [class]="
+ chipActivo('colores', color.id_color)
+ ? 'bg-primary text-white border-primary shadow-sm'
+ : 'bg-white text-primary border-primary/20 hover:bg-accent/40'
+ "
+ >
+ <span
+ class="w-3 h-3 rounded-full border border-primary/20"
+ [style.background]="color.codigo_hex"
+ ></span>
+ {{ color.nombre_color }}
+ </button>
+ }
+ </div>
+ </div>
 
-        <!-- Proveedor -->
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="id_proveedor">
-            Proveedor
-          </label>
-          <select
-            id="id_proveedor"
-            formControlName="id_proveedor"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-          >
-            <option [ngValue]="null">Sin proveedor (fabricación interna)</option>
-            @for (prov of proveedores(); track prov.id_proveedor) {
-              <option [ngValue]="prov.id_proveedor">{{ prov.nombre }}</option>
-            }
-          </select>
-        </div>
+ <!-- Proveedor -->
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="id_proveedor">
+ Proveedor
+ </label>
+ <select
+ id="id_proveedor"
+ formControlName="id_proveedor"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option [ngValue]="null">Sin proveedor (fabricación interna)</option>
+ @for (prov of proveedores(); track prov.id_proveedor) {
+ <option [ngValue]="prov.id_proveedor">{{ prov.nombre }}</option>
+ }
+ </select>
+ </div>
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModal()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardando()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{
-              guardando()
-                ? 'Guardando...'
-                : (editandoId() ? 'Guardar Cambios' : 'Registrar Producto')
-            }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardando()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {{
+ guardando()
+ ? 'Guardando...'
+ : (editandoId() ? 'Guardar Cambios' : 'Registrar Producto')
+ }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }
 
 <!-- ConfirmDialog de eliminación -->
 @if (puedeGestionar && confirmarEliminar(); as producto) {
-  <app-confirm-dialog
-    titulo="Eliminar Producto"
-    [mensaje]="mensajeEliminar(producto)"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar Producto"
+ [mensaje]="mensajeEliminar(producto)"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ ></app-confirm-dialog>
+}
+
+<!-- Modal Detalle Limpio de Producto -->
+@if (productoDetalle(); as prod) {
+ <div
+ class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+ (click)="cerrarModalDetalle()"
+ >
+ <div
+ class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-200"
+ (click)="$event.stopPropagation()"
+ >
+ <!-- Cerrar -->
+ <button
+ type="button"
+ (click)="cerrarModalDetalle()"
+ class="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-white/90 hover:bg-gray-100 text-gray-600 hover:text-gray-900 flex items-center justify-center shadow-md transition-all"
+ >
+ ✕
+ </button>
+
+ <!-- Imagen -->
+ <div class="w-full md:w-1/2 bg-container relative overflow-hidden flex items-center justify-center min-h-[220px]">
+ @if (prod.imagen_url) {
+ <img [src]="prod.imagen_url" [alt]="prod.nombre" class="h-full w-full object-cover" />
+ } @else {
+ <div class="text-primary/40 text-sm font-semibold">Sin imagen</div>
+ }
+ <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-primary text-xs font-bold shadow-xs">
+ {{ prod.categoria?.nombre || 'General' }}
+ </span>
+ </div>
+
+ <!-- Información detallada -->
+ <div class="w-full md:w-1/2 p-6 overflow-y-auto space-y-4">
+ <div>
+ <h2 class="text-xl font-bold text-gray-900">{{ prod.nombre }}</h2>
+ <p class="text-2xl font-black text-primary mt-1">
+ Bs {{ prod.precio_venta | number: '1.2-2' }}
+ </p>
+ <p class="text-xs text-gray-500 mt-2">
+ {{ prod.descripcion || 'Sin descripción detallada.' }}
+ </p>
+ </div>
+
+ <!-- Tallas -->
+ <div>
+ <span class="text-xs font-bold text-gray-700 block mb-1.5">TALLAS DISPONIBLES:</span>
+ <div class="flex flex-wrap gap-1.5">
+ @for (t of prod.tallas; track t.id_talla) {
+ <span class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-bold text-xs">
+ {{ t.nombre_talla }}
+ </span>
+ } @empty {
+ <span class="text-xs text-gray-400">Talla única</span>
+ }
+ </div>
+ </div>
+
+ <!-- Colores -->
+ <div>
+ <span class="text-xs font-bold text-gray-700 block mb-1.5">COLORES:</span>
+ <div class="flex flex-wrap gap-2">
+ @for (c of prod.colores; track c.id_color) {
+ <div class="flex items-center gap-1.5 text-xs bg-gray-50 px-2 py-1 rounded-full border border-gray-200">
+ <span
+ class="w-3.5 h-3.5 rounded-full border border-gray-300"
+ [style.background]="c.codigo_hex"
+ ></span>
+ <span class="font-medium text-gray-700">{{ c.nombre_color }}</span>
+ </div>
+ } @empty {
+ <span class="text-xs text-gray-400">Color estándar</span>
+ }
+ </div>
+ </div>
+
+ <!-- Stock por Sucursal -->
+ <div class="pt-2 border-t border-gray-100">
+ <span class="text-xs font-bold text-gray-700 block mb-2">INVENTARIO POR SUCURSAL:</span>
+ <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+ @for (suc of prod.disponibilidad_sucursales || []; track suc.id_sucursal) {
+ <div class="p-2 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between text-xs">
+ <div>
+ <div class="font-semibold text-gray-800">{{ suc.nombre_sucursal }}</div>
+ <div class="text-[10px] text-gray-400">{{ suc.ciudad || 'Sucursal física' }}</div>
+ </div>
+ <span
+ class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+ [class]="
+ suc.stock === 0
+ ? 'bg-gray-100 text-gray-400 border-gray-200'
+ : suc.stock <= 3
+ ? 'bg-amber-50 text-amber-800 border-amber-300'
+ : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+ "
+ >
+ {{ suc.stock === 0 ? 'Agotado' : suc.stock <= 3 ? '¡Últimas ' + suc.stock + '!' : suc.stock + ' unids' }}
+ </span>
+ </div>
+ } @empty {
+ <div class="text-xs text-gray-400">Stock total: {{ prod.stock_total }} unidades</div>
+ }
+ </div>
+ </div>
+
+ <div class="pt-3 border-t border-gray-100 flex justify-end">
+ <button
+ type="button"
+ (click)="cerrarModalDetalle()"
+ class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-accent hover:text-primary transition"
+ >
+ Entendido
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
 }

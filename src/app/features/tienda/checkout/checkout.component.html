@@ -1,495 +1,618 @@
-<!-- CU21 — Checkout: Confirmación de Compra con Pasarela de Pagos (AttentionPay) -->
-<section class="p-6 md:p-8 max-w-4xl mx-auto">
-  <!-- Encabezado -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-primary flex items-center gap-2">
-      <span>Checkout — Pasarela de Pagos</span>
-      <span class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-mono font-medium">CU15 / CU21</span>
-    </h1>
-    <p class="text-gray-600 mt-1 text-sm">
-      Revise su orden, seleccione su método de pago y procese la transacción de forma segura.
-    </p>
-  </div>
+<!-- Checkout: Confirmación de Compra Simplificada en 1 Paso (AttentionPay) -->
+<section class="p-6 md:p-8 max-w-5xl mx-auto">
+ <!-- Encabezado -->
+ <div class="mb-6">
+ <h1 class="text-2xl font-bold text-primary flex items-center gap-2">
+ <span>Checkout — Pasarela de Pagos</span>
+ <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-semibold">1 Solo Paso · Sin Formularios</span>
+ </h1>
+ <p class="text-gray-600 mt-1 text-sm">
+ Seleccione su método de pago preferido para liquidar su pedido de forma directa e inmediata.
+ </p>
+ </div>
 
-  @if (carrito.vacio() && !ventaConfirmada()) {
-    <!-- Carrito vacío -->
-    <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-12 text-center">
-      <h2 class="text-lg font-bold text-primary">No hay prendas para pagar</h2>
-      <p class="text-gray-600 text-sm mt-1 mb-6">Agregue prendas al carrito para continuar.</p>
-      <a
-        routerLink="/tienda/home"
-        class="inline-block bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium text-sm"
-      >
-        Ir al Catálogo
-      </a>
-    </div>
-  } @else if (!ventaConfirmada()) {
-    <form [formGroup]="datosForm" (ngSubmit)="confirmarYpagar()">
-      <!-- Alertas de error -->
-      @if (errorMessage()) {
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
-          <span class="text-lg">⚠️</span>
-          <span>{{ errorMessage() }}</span>
-        </div>
-      }
+ @if (carrito.vacio() && !ventaConfirmada() && !pedidoEfectivo()) {
+ <!-- Carrito vacío -->
+ <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-12 text-center">
+ <h2 class="text-lg font-bold text-primary">No hay prendas para pagar</h2>
+ <p class="text-gray-600 text-sm mt-1 mb-6">Agregue prendas al carrito para continuar.</p>
+ <a
+ routerLink="/tienda/home"
+ class="inline-block bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium text-sm"
+ >
+ Ir al Catálogo
+ </a>
+ </div>
+ } @else {
+ <form [formGroup]="datosForm" (ngSubmit)="confirmarYpagar()">
+ <!-- Alertas de error -->
+ @if (errorMessage()) {
+ <div class="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2.5 shadow-xs">
+ <span class="text-lg">⚠️</span>
+ <span class="font-medium">{{ errorMessage() }}</span>
+ </div>
+ }
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <!-- Columna izquierda: resumen + datos de entrega + formulario tarjeta -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Resumen de la orden -->
-          <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
-            <div class="bg-primary text-white px-5 py-3 flex items-center justify-between">
-              <h2 class="font-bold text-sm">1. Resumen de la Orden</h2>
-              <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium">
-                {{ carrito.items().length }} prendas
-              </span>
-            </div>
-            <ul class="divide-y divide-primary/10">
-              @for (item of carrito.items(); track $index) {
-                <li class="px-5 py-3 flex items-center justify-between text-sm">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <span
-                      class="inline-block h-4 w-4 rounded-full border border-primary/20 shrink-0"
-                      [style.background]="item.color_hex"
-                    ></span>
-                    <div>
-                      <span class="font-medium text-gray-800 block truncate">{{ item.nombre }}</span>
-                      <span class="text-gray-500 text-xs">
-                        Talla: {{ item.talla }} · Cantidad: {{ item.cantidad }}
-                      </span>
-                    </div>
-                  </div>
-                  <span class="font-semibold text-primary">{{ formatBs(item.subtotal) }}</span>
-                </li>
-              }
-            </ul>
-            <div class="px-5 py-3 bg-container/50 space-y-1.5 text-sm">
-              <div class="flex justify-between text-gray-600">
-                <span>Subtotal</span>
-                <span class="font-semibold text-gray-800">{{ formatBs(carrito.subtotal()) }}</span>
-              </div>
-              <div class="flex justify-between text-gray-600">
-                <span>Costo de Envío</span>
-                <span class="font-semibold" [class.text-green-600]="carrito.envio() === 0">
-                  @if (carrito.envio() === 0) { ¡GRATIS! } @else { {{ formatBs(carrito.envio()) }} }
-                </span>
-              </div>
-              <div class="flex justify-between border-t border-primary/10 pt-2 text-base">
-                <span class="font-bold text-primary">Total a Liquidar</span>
-                <span class="font-bold text-primary text-lg">{{ formatBs(carrito.total()) }}</span>
-              </div>
-            </div>
-          </div>
+ <!-- 1. PASO 1: SELECTOR PRINCIPAL DEL MÉTODO DE PAGO (INTERACTIVO Y RESPONSIVO) -->
+ <div class="mb-6 bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
+ <div class="bg-primary text-white px-5 py-3.5 flex items-center justify-between flex-wrap gap-2">
+ <div class="flex items-center gap-2">
+ <span class="text-base">⚡</span>
+ <h2 class="font-bold text-sm">Paso 1: Seleccione su Método de Pago</h2>
+ </div>
+ <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium">
+ Procesamiento directo sin fricción
+ </span>
+ </div>
 
-          <!-- Datos de facturación/entrega -->
-          <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
-            <div class="bg-primary text-white px-5 py-3">
-              <h2 class="font-bold text-sm">2. Datos de Facturación y Entrega</h2>
-            </div>
-            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-primary mb-1" for="nombre">
-                  Nombre completo *
-                </label>
-                <input
-                  id="nombre"
-                  type="text"
-                  formControlName="nombre_cliente"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-primary mb-1" for="correo">
-                  Correo electrónico *
-                </label>
-                <input
-                  id="correo"
-                  type="email"
-                  formControlName="correo"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-primary mb-1" for="telefono">
-                  Teléfono de contacto *
-                </label>
-                <input
-                  id="telefono"
-                  type="tel"
-                  formControlName="telefono"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-                  placeholder="Ej: 77123456"
-                />
-              </div>
-              <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-primary mb-1" for="direccion">
-                  Dirección de entrega a domicilio *
-                </label>
-                <input
-                  id="direccion"
-                  type="text"
-                  formControlName="direccion"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-                  placeholder="Ej: Av. Monseñor Rivero #123"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-primary mb-1" for="ciudad">
-                  Ciudad *
-                </label>
-                <select
-                  id="ciudad"
-                  formControlName="ciudad"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option value="Santa Cruz">Santa Cruz de la Sierra</option>
-                  <option value="La Paz">La Paz</option>
-                  <option value="Cochabamba">Cochabamba</option>
-                  <option value="Sucre">Sucre</option>
-                  <option value="Tarija">Tarija</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-primary mb-1" for="referencia">
-                  Referencia (opcional)
-                </label>
-                <input
-                  id="referencia"
-                  type="text"
-                  formControlName="referencia"
-                  class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-                  placeholder="Ej: Casa de dos pisos, portón negro"
-                />
-              </div>
-            </div>
-          </div>
+ <div class="p-5">
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+ @for (metodo of metodosPago; track metodo.id) {
+ <button
+ type="button"
+ (click)="elegirMetodo(metodo.id)"
+ class="group relative flex flex-col p-4 rounded-xl border-2 text-left transition-all cursor-pointer"
+ [class]="
+ metodoSeleccionado() === metodo.id
+ ? metodo.id === 'TARJETA'
+ ? 'border-[#635BFF] bg-indigo-50/70 shadow-md ring-2 ring-[#635BFF]/30'
+ : metodo.id === 'EFECTIVO'
+ ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-600/30'
+ : 'border-primary bg-container shadow-md ring-2 ring-primary/30'
+ : 'border-gray-200 hover:border-primary/40 bg-white hover:bg-gray-50/80'
+ "
+ >
+ <div class="flex items-center justify-between w-full mb-2">
+ <span class="text-3xl transition-transform group-hover:scale-110">{{ metodo.icono }}</span>
+ <span
+ class="h-5 w-5 rounded-full border-2 flex items-center justify-center transition"
+ [class]="
+ metodoSeleccionado() === metodo.id
+ ? metodo.id === 'TARJETA'
+ ? 'border-[#635BFF] bg-[#635BFF]'
+ : metodo.id === 'EFECTIVO'
+ ? 'border-emerald-600 bg-emerald-600'
+ : 'border-primary bg-primary'
+ : 'border-gray-300'
+ "
+ >
+ @if (metodoSeleccionado() === metodo.id) {
+ <span class="text-white text-[10px] font-bold">✓</span>
+ }
+ </span>
+ </div>
+ <span class="block font-bold text-gray-900 text-sm mb-1">{{ metodo.label }}</span>
+ <span class="block text-xs text-gray-500 leading-relaxed">{{ metodo.descripcion }}</span>
 
-          <!-- Panel Informativo Oficial de Stripe Checkout si el método es TARJETA -->
-          @if (metodoSeleccionado() === 'TARJETA') {
-            <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
-              <div class="bg-[#635BFF] text-white px-5 py-3.5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <h2 class="font-bold text-sm">3. Pasarela Oficial Stripe Checkout</h2>
-                </div>
-                <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1">
-                  <span>🔒</span> Cifrado TLS 256-bit
-                </span>
-              </div>
-              <div class="p-6 space-y-5">
-                <!-- Banner Visual Stripe Oficial con marcas aceptadas -->
-                <div class="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-[#1a1f36] to-[#635BFF] text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div class="space-y-1 text-center md:text-left">
-                    <div class="flex items-center justify-center md:justify-start gap-2">
-                      <span class="text-2xl font-black tracking-wider text-white">stripe</span>
-                      <span class="text-[11px] bg-white/20 px-2 py-0.5 rounded text-white font-semibold tracking-wider">CHECKOUT OFICIAL</span>
-                    </div>
-                    <p class="text-xs text-slate-200">
-                      Entorno de pago alojado, cifrado y certificado por Stripe Inc.
-                    </p>
-                  </div>
-                  <!-- Marcas de tarjetas admitidas -->
-                  <div class="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl backdrop-blur-xs">
-                    <span class="text-xs font-bold px-2.5 py-1 bg-white text-blue-900 rounded shadow-xs font-mono">VISA</span>
-                    <span class="text-xs font-bold px-2.5 py-1 bg-white text-red-600 rounded shadow-xs font-mono">MC</span>
-                    <span class="text-xs font-bold px-2.5 py-1 bg-white text-blue-600 rounded shadow-xs font-mono">AMEX</span>
-                  </div>
-                </div>
+ @if (metodo.id === 'TARJETA') {
+ <div class="mt-3 pt-2 border-t border-gray-200/70 flex items-center gap-1.5 text-[11px] text-indigo-700 font-semibold">
+ <span class="px-1.5 py-0.5 rounded bg-white shadow-2xs font-mono font-bold text-[#635BFF]">STRIPE</span>
+ <span>1 Clic · Redirección oficial inmediata</span>
+ </div>
+ } @else if (metodo.id === 'QR') {
+ <div class="mt-3 pt-2 border-t border-gray-200/70 flex items-center gap-1.5 text-[11px] text-primary font-semibold">
+ <span class="px-1.5 py-0.5 rounded bg-white shadow-2xs font-mono font-bold">QR SIMPLE</span>
+ <span>Código único de entrega para delivery</span>
+ </div>
+ } @else if (metodo.id === 'EFECTIVO') {
+ <div class="mt-3 pt-2 border-t border-gray-200/70 flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
+ <span class="px-1.5 py-0.5 rounded bg-white shadow-2xs font-mono font-bold">YANGO / DESTINO</span>
+ <span>Código de verificación contra entrega</span>
+ </div>
+ }
+ </button>
+ }
+ </div>
+ </div>
+ </div>
 
-                <!-- Pilares de Seguridad Bancaria Internacional -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
-                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>🛡️</span> PCI-DSS Nivel 1
-                    </div>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">
-                      El estándar más riguroso de la industria financiera mundial. Sus datos bancarios nunca se almacenan en nuestros servidores.
-                    </p>
-                  </div>
-                  <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
-                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>⚡</span> 3D Secure 2.0
-                    </div>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">
-                      Autenticación reforzada con su banco emisor (vía SMS o app bancaria) para prevenir fraudes y cobros duplicados.
-                    </p>
-                  </div>
-                  <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
-                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>📦</span> Liquidación Inmediata
-                    </div>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">
-                      Al completar el pago en Stripe, el stock de la sucursal se descuenta en tiempo real y se emite su comprobante fiscal.
-                    </p>
-                  </div>
-                </div>
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+ <!-- Columna izquierda: Adaptación Dinámica según Método Seleccionado (Cero formularios molestos) -->
+ <div class="lg:col-span-2 space-y-6">
 
-                <!-- Caja informativa del flujo de redirección seguro -->
-                <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-xs text-indigo-950 flex items-start gap-3">
-                  <span class="text-xl shrink-0">ℹ️</span>
-                  <div class="space-y-1">
-                    <p class="font-bold text-indigo-950">¿Cómo se procesará su pago?</p>
-                    <p class="text-[11px] text-indigo-900 leading-relaxed">
-                      Al pulsar <strong>"Pagar con Stripe Checkout Oficial"</strong>, se creará una sesión segura en nuestro servidor y será transferido a la pasarela alojada de <strong>Stripe</strong>. Al finalizar la transacción, retornará automáticamente con su pedido confirmado y su factura formal generada.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
+ <!-- CASO 1: TARJETA -> REDIRECCIÓN INMEDIATA A STRIPE CHECKOUT -->
+ @if (metodoSeleccionado() === 'TARJETA') {
+ <div class="bg-white rounded-2xl shadow-lg border border-[#635BFF]/30 overflow-hidden">
+ <div class="bg-gradient-to-r from-slate-900 via-[#1a1f36] to-[#635BFF] text-white p-6 sm:p-8 space-y-4">
+ <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+ <div class="space-y-1.5 text-center sm:text-left">
+ <div class="flex items-center justify-center sm:justify-start gap-2">
+ <span class="text-3xl font-black tracking-wider text-white">stripe</span>
+ <span class="text-xs bg-white/20 px-2 py-0.5 rounded text-white font-semibold tracking-wider">CHECKOUT OFICIAL</span>
+ </div>
+ <p class="text-sm text-slate-200 max-w-lg leading-relaxed">
+ Entorno de pago bancario internacional seguro y cifrado. No necesitas ingresar ningún dato ni formulario en nuestra web.
+ </p>
+ </div>
+ <div class="flex items-center gap-2 bg-white/10 px-3.5 py-2.5 rounded-xl backdrop-blur-xs">
+ <span class="text-xs font-bold px-2.5 py-1 bg-white text-blue-900 rounded font-mono shadow-xs">VISA</span>
+ <span class="text-xs font-bold px-2.5 py-1 bg-white text-red-600 rounded font-mono shadow-xs">MC</span>
+ <span class="text-xs font-bold px-2.5 py-1 bg-white text-blue-600 rounded font-mono shadow-xs">AMEX</span>
+ </div>
+ </div>
 
-        <!-- Columna derecha: método de pago + QR activo + confirmar -->
-        <aside class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6 lg:sticky lg:top-24 space-y-4">
-          <h2 class="font-bold text-primary text-sm">3. Método de Pago</h2>
+ <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-3">
+ <div class="p-3.5 rounded-xl bg-white/10 border border-white/10 text-white space-y-1">
+ <div class="font-bold flex items-center gap-1.5 text-sm">🛡️ PCI-DSS Nivel 1</div>
+ <p class="text-[11px] text-slate-300">Máximo estándar de seguridad bancaria global.</p>
+ </div>
+ <div class="p-3.5 rounded-xl bg-white/10 border border-white/10 text-white space-y-1">
+ <div class="font-bold flex items-center gap-1.5 text-sm">⚡ 3D Secure 2.0</div>
+ <p class="text-[11px] text-slate-300">Autenticación bancaria directa y segura.</p>
+ </div>
+ <div class="p-3.5 rounded-xl bg-white/10 border border-white/10 text-white space-y-1">
+ <div class="font-bold flex items-center gap-1.5 text-sm">🚀 Cero Fricción</div>
+ <p class="text-[11px] text-slate-300">Redirección en 1 solo clic sin preguntas.</p>
+ </div>
+ </div>
+ </div>
 
-          <!-- Opciones de pago -->
-          <div class="space-y-2.5">
-            @for (metodo of metodosPago; track metodo.id) {
-              <button
-                type="button"
-                (click)="elegirMetodo(metodo.id)"
-                class="w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition"
-                [class]="
-                  metodoSeleccionado() === metodo.id
-                    ? 'border-primary bg-container shadow-sm'
-                    : 'border-primary/15 hover:border-primary/40 bg-white'
-                "
-              >
-                <span class="text-2xl">{{ metodo.icono }}</span>
-                <span class="flex-1">
-                  <span class="block font-semibold text-gray-800 text-sm">{{ metodo.label }}</span>
-                  <span class="block text-xs text-gray-500">{{ metodo.descripcion }}</span>
-                </span>
-                <span
-                  class="h-4 w-4 rounded-full border-2 shrink-0"
-                  [class]="
-                    metodoSeleccionado() === metodo.id
-                      ? 'border-primary bg-primary'
-                      : 'border-primary/30'
-                  "
-                ></span>
-              </button>
-            }
-          </div>
+ <div class="p-6 bg-indigo-50/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+ <div class="text-xs text-indigo-950 flex items-center gap-2">
+ <span class="text-2xl">⚡</span>
+ <div>
+ <span class="font-bold block text-sm">Listo para transferirte a Stripe</span>
+ <span class="text-indigo-800">Total a liquidar: <strong>{{ formatBs(carrito.total()) }}</strong></span>
+ </div>
+ </div>
+ <button
+ type="submit"
+ [disabled]="procesando()"
+ class="w-full sm:w-auto px-7 py-3.5 bg-[#635BFF] hover:bg-[#534be0] text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+ >
+ @if (procesando()) {
+ <span class="animate-spin text-base">⏳</span>
+ <span>Conectando con Stripe...</span>
+ } @else {
+ <span>💳 Pagar con Stripe</span>
+ <span>→</span>
+ }
+ </button>
+ </div>
+ </div>
+ }
 
-          <!-- Vista QR Activo con Webhook Live Status e Imagen Institucional qr.jpeg -->
-          @if (metodoSeleccionado() === 'QR') {
-            @if (transaccionIniciada(); as txn) {
-              <div class="bg-white rounded-2xl p-5 border border-gray-300 text-center space-y-3 shadow-sm">
-                <div class="flex justify-between items-center text-xs text-gray-700 font-mono">
-                  <span>Txn: {{ txn.codigo_transaccion }}</span>
-                  <span class="px-2 py-0.5 rounded bg-gray-100 text-black font-mono font-bold border border-gray-300">
-                    ⏱ {{ tiempoRestanteQR() }}
-                  </span>
-                </div>
+ <!-- CASO 2: CÓDIGO QR SIMPLE (QR EN PANTALLA + CÓDIGO ÚNICO DE PEDIDO PARA DELIVERY) -->
+ @if (metodoSeleccionado() === 'QR') {
+ <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
+ <div class="bg-primary text-white px-5 py-3.5 flex items-center justify-between">
+ <div class="flex items-center gap-2">
+ <span class="text-base">📱</span>
+ <h3 class="font-bold text-sm">Pago por Código QR Simple Interoperable</h3>
+ </div>
+ <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1">
+ Red Bancaria Nacional
+ </span>
+ </div>
 
-                <!-- Imagen del QR oficial de la empresa (src/public/qr.jpeg) -->
-                <div class="mx-auto w-52 h-52 bg-white p-2 rounded-xl border border-gray-300 shadow-xs flex items-center justify-center">
-                  <img src="/qr.jpeg" alt="Código QR Simple Institucional" class="max-w-full max-h-full object-contain rounded-lg" />
-                </div>
+ <div class="p-6 space-y-5">
+ @if (transaccionIniciada(); as txn) {
+ <!-- 1. BLOQUE DESTACADO: CÓDIGO ÚNICO DE PEDIDO PARA EL DELIVERY -->
+ <div class="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500 text-center space-y-2">
+ <span class="text-xs uppercase font-extrabold text-amber-900 tracking-wider flex items-center justify-center gap-1.5">
+ <span>📢</span> Código Único de Pedido para Entrega
+ </span>
+ <div class="flex items-center justify-center gap-2.5 flex-wrap">
+ <span class="text-3xl sm:text-4xl font-black font-mono tracking-widest text-amber-950 bg-white px-6 py-2 rounded-xl border border-amber-300 shadow-sm">
+ {{ codigoPedidoQR() }}
+ </span>
+ <button
+ type="button"
+ (click)="copiarCodigo(codigoPedidoQR())"
+ class="px-3.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+ title="Copiar código al portapapeles"
+ >
+ <span>{{ copiado() ? '✓ Copiado' : '📋 Copiar' }}</span>
+ </button>
+ </div>
+ <p class="text-xs font-semibold text-amber-950 max-w-md mx-auto">
+ ⚠️ <strong>Dicta este código al repartidor de delivery</strong> al momento de recibir tus prendas para confirmar la entrega.
+ </p>
+ </div>
 
-                <div class="text-xs text-gray-700">
-                  <p class="font-bold text-black text-sm">Escanee desde su aplicación bancaria</p>
-                  <p class="text-xs text-gray-800 mt-1">Monto exacto: <span class="font-bold font-mono text-black">{{ formatBs(carrito.total()) }}</span></p>
-                  <p class="text-[11px] text-gray-500 mt-0.5">QR Simple Interoperable · BCP / BNB / Banco Unión / Fassil</p>
-                </div>
+ <!-- 2. QR INTEROPERABLE EN PANTALLA -->
+ <div class="bg-gray-50 rounded-2xl p-5 border border-gray-300 text-center space-y-3">
+ <div class="flex justify-between items-center text-xs text-gray-700 font-mono">
+ <span>Txn Pasarela: {{ txn.codigo_transaccion }}</span>
+ <span class="px-2.5 py-1 rounded bg-gray-200 text-black font-mono font-bold">
+ ⏱ Vigencia: {{ tiempoRestanteQR() }}
+ </span>
+ </div>
 
-                <!-- Live Polling Webhook Indicator -->
-                <div class="flex items-center justify-center gap-2 text-xs text-neutral-700 pt-1">
-                  <span class="inline-block h-2 w-2 rounded-full bg-black animate-ping"></span>
-                  <span class="text-[11px] font-mono">Esperando confirmación de abono bancario...</span>
-                </div>
+ <div class="mx-auto w-60 h-60 bg-white p-3 rounded-2xl border border-gray-300 shadow-sm flex items-center justify-center">
+ <img src="/qr.jpeg" alt="Código QR Simple Institucional" class="max-w-full max-h-full object-contain rounded-xl" />
+ </div>
 
-                <!-- Botón para validar abono / subir comprobante -->
-                <button
-                  type="button"
-                  (click)="confirmarAbonoManual()"
-                  [disabled]="procesando()"
-                  class="w-full mt-2 bg-black hover:bg-neutral-800 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
-                >
-                  <span>✔</span>
-                  <span>Confirmar Validación de Abono</span>
-                </button>
-              </div>
-            } @else {
-              <div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
-                <div class="text-3xl mb-1">📱</div>
-                <h3 class="font-bold text-xs text-black">Pago por QR Simple Institucional</h3>
-                <p class="text-[11px] text-gray-600 mt-1">
-                  Al pulsar "Generar Código QR" se desplegará el código oficial de Attention para escanear y abonar directamente desde cualquier app bancaria de Bolivia.
-                </p>
-              </div>
-            }
-          }
+ <div class="text-xs text-gray-700 space-y-1">
+ <p class="font-bold text-black text-sm">Escanee el código con cualquier app bancaria</p>
+ <p class="text-xs text-gray-800">Monto exacto: <span class="font-bold font-mono text-black text-sm">{{ formatBs(carrito.total()) }}</span></p>
+ <p class="text-[11px] text-gray-500">Compatible con BCP, Banco Unión, BNB, GanaMóvil y todas las apps financieras de Bolivia</p>
+ </div>
 
-          @if (metodoSeleccionado() === 'TARJETA') {
-            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-900 space-y-1.5 shadow-xs">
-              <p class="font-bold flex items-center gap-1.5 text-indigo-950">
-                <span>🔒</span> Stripe Checkout Oficial
-              </p>
-              <p class="text-[11px] text-indigo-800 leading-relaxed">
-                Redirección protegida por cifrado bancario TLS 256-bit y certificación PCI-DSS Nivel 1 internacional.
-              </p>
-            </div>
-          }
+ <div class="flex items-center justify-center gap-2 text-xs text-neutral-700 pt-1">
+ <span class="inline-block h-2.5 w-2.5 rounded-full bg-black animate-ping"></span>
+ <span class="text-[11px] font-mono font-semibold">Esperando confirmación de abono bancario...</span>
+ </div>
 
-          @if (metodoSeleccionado() === 'EFECTIVO') {
-            <div class="bg-container rounded-xl p-3 text-xs text-primary/80 space-y-1">
-              <p class="font-semibold">💵 Contra Entrega</p>
-              <p class="text-[11px]">Prepare el importe exacto de {{ formatBs(carrito.total()) }} al momento de recibir su pedido.</p>
-            </div>
-          }
+ <div class="flex flex-col sm:flex-row gap-2 pt-2">
+ <button
+ type="button"
+ (click)="confirmarAbonoManual()"
+ [disabled]="procesando()"
+ class="flex-1 bg-primary hover:bg-accent hover:text-primary text-white font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+ >
+ <span>✔</span>
+ <span>Confirmar Validación de Abono</span>
+ </button>
+ <button
+ type="button"
+ (click)="simularConfirmacionBancaria()"
+ [disabled]="procesando()"
+ class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl text-xs transition cursor-pointer"
+ title="Simulación rápida para entorno de pruebas"
+ >
+ <span>⚡ Simular Demo</span>
+ </button>
+ </div>
+ </div>
+ } @else {
+ <!-- Botón Directo para Generar QR en 1 Clic -->
+ <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-4">
+ <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl">
+ 📱
+ </div>
+ <div class="space-y-1.5">
+ <h4 class="font-bold text-base text-gray-900">Transferencia Instantánea vía Código QR Simple</h4>
+ <p class="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+ Al presionar el botón se generará inmediatamente el código QR oficial por <strong>{{ formatBs(carrito.total()) }}</strong> junto con su <strong>código único de pedido</strong> para la entrega.
+ </p>
+ </div>
 
-          <!-- Botón de Pago / Generación -->
-          @if (!(metodoSeleccionado() === 'QR' && transaccionIniciada())) {
-            <div class="border-t border-primary/10 pt-4">
-              <div class="flex justify-between items-baseline mb-3">
-                <span class="text-sm text-gray-600">Total</span>
-                <span class="text-xl font-bold text-primary">{{ formatBs(carrito.total()) }}</span>
-              </div>
-              <button
-                type="submit"
-                [disabled]="procesando()"
-                class="w-full bg-primary text-white px-5 py-3.5 rounded-lg hover:bg-accent hover:text-primary transition font-bold text-sm shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                @if (procesando()) {
-                  <span class="animate-spin text-base">⏳</span>
-                  <span>Conectando con pasarela segura...</span>
-                } @else {
-                  @if (metodoSeleccionado() === 'TARJETA') {
-                    <span>💳 Pagar con Stripe Checkout Oficial</span>
-                  } @else if (metodoSeleccionado() === 'QR') {
-                    <span>📲 Generar Código QR</span>
-                  } @else {
-                    <span>✔ Confirmar Pedido en Efectivo</span>
-                  }
-                }
-              </button>
-              <p class="text-[10px] text-gray-400 text-center mt-2">
-                🔒 Pasarela Oficial Stripe • Cifrado TLS 256-bit y PCI-DSS Nivel 1
-              </p>
-            </div>
-          }
-        </aside>
-      </div>
-    </form>
-  }
+ <div class="flex justify-center gap-3 text-[11px] text-gray-500 font-mono">
+ <span>✓ Sin comisiones</span>
+ <span>•</span>
+ <span>✓ Código único para delivery</span>
+ <span>•</span>
+ <span>✓ Factura oficial</span>
+ </div>
 
-  <!-- Modal Ticket / Comprobante de la venta confirmada (PAGADO) -->
-  <!-- Modal Factura / Nota Fiscal Seria Monocromática (Todo Blanco / Serio) -->
-  @if (ventaConfirmada(); as venta) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto border border-gray-400 text-black">
-        <!-- Documento Factura Fiscal -->
-        <div class="p-8 bg-white" id="seccion-factura-imprimible">
-          <!-- Cabecera Fiscal Formal -->
-          <div class="border-b-2 border-black pb-4 mb-4 text-center">
-            <h2 class="text-xl font-bold tracking-widest uppercase font-mono text-black">ATTENTION S.R.L.</h2>
-            <p class="text-xs text-neutral-600 font-mono">CASA MATRIZ: Av. San Martín #450 · Santa Cruz, Bolivia</p>
-            <p class="text-xs text-neutral-600 font-mono">NIT: 1028374029 · N° AUTORIZACIÓN: 29040011007</p>
-            <div class="mt-3 inline-block border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase tracking-wider">
-              FACTURA / NOTA FISCAL N° {{ venta.codigo }}
-            </div>
-          </div>
+ <button
+ type="submit"
+ [disabled]="procesando()"
+ class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-primary hover:bg-accent hover:text-primary text-white font-bold text-xs rounded-xl shadow-md transition disabled:opacity-50 cursor-pointer"
+ >
+ @if (procesando()) {
+ <span class="animate-spin text-sm">⏳</span>
+ <span>Generando código QR...</span>
+ } @else {
+ <span>📲 Ver QR de Pago y Código de Pedido</span>
+ <span>({{ formatBs(carrito.total()) }})</span>
+ }
+ </button>
+ </div>
+ }
+ </div>
+ </div>
+ }
 
-          <!-- Metadatos de la Factura -->
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono border-b border-gray-300 pb-3 mb-4 text-neutral-800">
-            <div>
-              <span class="font-bold">FECHA:</span> {{ fechaLegible(venta.fecha) }}
-            </div>
-            <div class="text-right">
-              <span class="font-bold">ESTADO:</span>
-              <span class="font-bold uppercase ml-1" [class.text-neutral-900]="venta.estado_pago === 'PAGADO'">
-                {{ venta.estado_pago === 'PAGADO' ? 'PAGADO / EMITIDA' : 'PENDIENTE DE COBRO' }}
-              </span>
-            </div>
-            <div>
-              <span class="font-bold">CLIENTE:</span> {{ venta.datos_entrega.nombre_cliente | uppercase }}
-            </div>
-            <div class="text-right">
-              <span class="font-bold">MÉTODO:</span> {{ venta.metodo_pago }}
-            </div>
-            <div class="col-span-2">
-              <span class="font-bold">DESTINO:</span> {{ venta.datos_entrega.direccion }}, {{ venta.datos_entrega.ciudad }} (Tel: {{ venta.datos_entrega.telefono }})
-            </div>
-            @if (venta.stripe_id) {
-              <div class="col-span-2 text-[11px] text-neutral-600">
-                <span class="font-bold">N° AUTORIZACIÓN / TRANSACCIÓN:</span> {{ venta.stripe_id }}
-              </div>
-            }
-          </div>
+ <!-- CASO 3: EFECTIVO -> PROCESADO DE INMEDIATO + CÓDIGO DE VERIFICACIÓN YANGO -->
+ @if (metodoSeleccionado() === 'EFECTIVO') {
+ <div class="bg-white rounded-2xl shadow-lg border border-emerald-600/30 overflow-hidden">
+ <div class="bg-emerald-700 text-white px-5 py-3.5 flex items-center justify-between">
+ <div class="flex items-center gap-2">
+ <span class="text-lg">💵</span>
+ <h3 class="font-bold text-sm">Pago en Efectivo Contra Entrega (Yango / Tienda)</h3>
+ </div>
+ <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-mono font-medium">
+ Pago en Destino
+ </span>
+ </div>
 
-          <!-- Tabla de Prendas -->
-          <table class="w-full text-xs font-mono mb-4 border-collapse">
-            <thead>
-              <tr class="border-b-2 border-black text-left">
-                <th class="py-1.5 font-bold">CANT.</th>
-                <th class="py-1.5 font-bold">DETALLE DE LA PRENDA</th>
-                <th class="py-1.5 text-right font-bold">P. UNIT</th>
-                <th class="py-1.5 text-right font-bold">SUBTOTAL</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of venta.items; track $index) {
-                <tr class="border-b border-gray-200">
-                  <td class="py-2 text-center align-top">{{ item.cantidad }}</td>
-                  <td class="py-2 pr-2">
-                    <span class="font-bold text-black block">{{ item.nombre }}</span>
-                    <span class="text-neutral-500 text-[11px]">Talla: {{ item.talla }} · Color: {{ item.color }}</span>
-                  </td>
-                  <td class="py-2 text-right align-top">{{ formatBs(item.precio) }}</td>
-                  <td class="py-2 text-right font-bold align-top">{{ formatBs(item.subtotal) }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+ <div class="p-6 space-y-4">
+ @if (pedidoEfectivo(); as pedido) {
+ <!-- CÓDIGO DE VERIFICACIÓN CONTRA ENTREGA (YANGO) GENERADO -->
+ <div class="p-6 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500 text-center space-y-4 shadow-sm">
+ <div class="text-4xl">🛵💵</div>
+ <div>
+ <h3 class="text-lg font-black text-emerald-950">¡Pedido Registrado con Éxito!</h3>
+ <p class="text-xs text-emerald-800 mt-0.5">Modalidad de pago contra entrega (Yango / Mostrador)</p>
+ </div>
 
-          <!-- Liquidación y Totales -->
-          <div class="space-y-1.5 text-xs font-mono border-t-2 border-black pt-3 mb-4">
-            <div class="flex justify-between">
-              <span>SUBTOTAL:</span>
-              <span class="font-bold">{{ formatBs(carrito.subtotal()) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>COSTO DE ENVÍO:</span>
-              <span class="font-bold">{{ carrito.envio() === 0 ? 'BS. 0.00 (GRATIS)' : formatBs(carrito.envio()) }}</span>
-            </div>
-            <div class="flex justify-between text-sm border-t border-black pt-2 font-bold">
-              <span>TOTAL FACTURADO:</span>
-              <span class="text-base">{{ formatBs(venta.total) }}</span>
-            </div>
-          </div>
+ <div class="space-y-1.5">
+ <span class="text-xs uppercase font-extrabold text-emerald-900 tracking-wider block">
+ Código de Verificación Yango
+ </span>
+ <div class="flex items-center justify-center gap-2.5 flex-wrap">
+ <span class="text-3xl sm:text-4xl font-black font-mono tracking-widest text-emerald-950 bg-white px-6 py-2.5 rounded-xl border border-emerald-300 shadow-sm">
+ {{ codigoVerificacionEfectivo() }}
+ </span>
+ <button
+ type="button"
+ (click)="copiarCodigo(codigoVerificacionEfectivo())"
+ class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+ title="Copiar código al portapapeles"
+ >
+ <span>{{ copiado() ? '✓ Copiado' : '📋 Copiar' }}</span>
+ </button>
+ </div>
+ </div>
 
-          <!-- Pie Fiscal Serio -->
-          <div class="border-t border-dashed border-gray-400 pt-3 text-center space-y-1 font-mono text-[10px] text-neutral-600">
-            <p class="font-bold text-black uppercase">
-              "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY"
-            </p>
-            <p>Ley N° 453: El proveedor deberá suministrar el servicio en las condiciones ofertadas.</p>
-            <p class="text-[9px] text-neutral-400 mt-1">CÓDIGO DE CONTROL FISCAL: {{ venta.codigo }}-ATT-2026</p>
-          </div>
-        </div>
+ <p class="text-xs font-semibold text-emerald-950 max-w-md mx-auto leading-relaxed">
+ 📢 <strong>Dicta este código de verificación</strong> al repartidor de Yango cuando llegue con tu paquete para que te entregue el pedido y le pagues el monto exacto de <strong>{{ formatBs(pedido.total) }}</strong> en efectivo.
+ </p>
 
-        <!-- Acciones -->
-        <div class="p-5 bg-neutral-50 border-t border-gray-300 flex gap-3">
-          <button
-            type="button"
-            (click)="imprimirTicket()"
-            class="flex-1 px-4 py-2.5 bg-white border-2 border-black text-black hover:bg-neutral-100 transition text-xs font-bold font-mono uppercase shadow-xs flex items-center justify-center gap-2"
-          >
-            <span>🖨</span>
-            <span>Imprimir Factura</span>
-          </button>
-          <a
-            routerLink="/tienda/home"
-            (click)="cerrarTicket()"
-            class="flex-1 text-center bg-black text-white px-4 py-2.5 hover:bg-neutral-800 transition text-xs font-bold font-mono uppercase shadow-xs flex items-center justify-center gap-2"
-          >
-            <span>Volver a la Tienda</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  }
+ <div class="pt-3 flex flex-wrap justify-center gap-3">
+ <button
+ type="button"
+ (click)="mostrarModalTicket.set(true)"
+ class="px-4 py-2.5 bg-white border border-emerald-600 text-emerald-900 rounded-xl text-xs font-bold font-mono hover:bg-emerald-50 transition cursor-pointer shadow-2xs"
+ >
+ 🖨 Ver Factura Fiscal
+ </button>
+ <a
+ routerLink="/tienda/home"
+ class="px-5 py-2.5 bg-emerald-700 text-white rounded-xl text-xs font-bold font-mono hover:bg-emerald-800 transition shadow-xs"
+ >
+ Volver a la Tienda
+ </a>
+ </div>
+ </div>
+ } @else {
+ <!-- Botón Directo para Confirmar en 1 Clic -->
+ <div class="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-3">
+ <p class="text-xs text-emerald-900 leading-relaxed font-medium">
+ Su pedido se registrará de inmediato como <strong>"Pendiente de pago contra entrega"</strong>. No necesita ingresar datos de tarjeta ni realizar transferencias anticipadas. Al confirmar, se generará su <strong>Código de Verificación Yango</strong>.
+ </p>
+ <p class="text-xs font-bold text-emerald-950">
+ Total a abonar en efectivo al recibir: {{ formatBs(carrito.total()) }}
+ </p>
+ </div>
+
+ <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+ <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
+ <div class="font-bold text-slate-900 flex items-center gap-1.5">
+ <span>🛡️</span> Cero Riesgo
+ </div>
+ <p class="text-[11px] text-slate-500 leading-relaxed">
+ Paga únicamente cuando tenga sus prendas en sus manos.
+ </p>
+ </div>
+ <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
+ <div class="font-bold text-slate-900 flex items-center gap-1.5">
+ <span>📦</span> Reserva Inmediata
+ </div>
+ <p class="text-[11px] text-slate-500 leading-relaxed">
+ Las prendas se separan inmediatamente en inventario.
+ </p>
+ </div>
+ <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
+ <div class="font-bold text-slate-900 flex items-center gap-1.5">
+ <span>🧾</span> Verificación Yango
+ </div>
+ <p class="text-[11px] text-slate-500 leading-relaxed">
+ Entrega segura con código de validación al chofer.
+ </p>
+ </div>
+ </div>
+
+ <div class="pt-2">
+ <button
+ type="submit"
+ [disabled]="procesando()"
+ class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+ >
+ @if (procesando()) {
+ <span class="animate-spin text-sm">⏳</span>
+ <span>Registrando orden...</span>
+ } @else {
+ <span>✔ Confirmar Pedido en Efectivo (Generar Código)</span>
+ }
+ </button>
+ </div>
+ }
+ </div>
+ </div>
+ }
+ </div>
+
+ <!-- Columna derecha: Resumen de Prendas y Liquidación Directa -->
+ <aside class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6 lg:sticky lg:top-24 space-y-5">
+ <div class="flex items-center justify-between border-b border-primary/10 pb-3">
+ <h2 class="font-bold text-primary text-sm uppercase tracking-wider">Resumen de Orden</h2>
+ <span class="text-xs px-2.5 py-0.5 rounded-full font-mono font-semibold"
+ [class]="
+ metodoSeleccionado() === 'TARJETA'
+ ? 'bg-indigo-100 text-[#635BFF]'
+ : metodoSeleccionado() === 'EFECTIVO'
+ ? 'bg-emerald-100 text-emerald-800'
+ : 'bg-primary/10 text-primary'
+ "
+ >
+ {{ metodoSeleccionado() === 'TARJETA' ? 'Stripe Checkout' : (metodoSeleccionado() === 'EFECTIVO' ? 'Contra Entrega' : 'QR Simple') }}
+ </span>
+ </div>
+
+ <!-- Lista Compacta de Prendas -->
+ <ul class="divide-y divide-gray-100 max-h-56 overflow-y-auto pr-1">
+ @for (item of carrito.items(); track $index) {
+ <li class="py-2.5 flex items-center justify-between text-xs">
+ <div class="flex items-center gap-2.5 min-w-0">
+ <span
+ class="inline-block h-3.5 w-3.5 rounded-full border border-primary/20 shrink-0"
+ [style.background]="item.color_hex"
+ ></span>
+ <div class="truncate">
+ <span class="font-semibold text-gray-800 block truncate">{{ item.nombre }}</span>
+ <span class="text-gray-500 text-[10px]">Talla {{ item.talla }} · Cant: {{ item.cantidad }}</span>
+ </div>
+ </div>
+ <span class="font-bold text-primary shrink-0 ml-2">{{ formatBs(item.subtotal) }}</span>
+ </li>
+ }
+ </ul>
+
+ <!-- Resumen de Costos -->
+ <div class="space-y-2 text-sm border-t border-gray-100 pt-3">
+ <div class="flex justify-between text-gray-600 text-xs">
+ <span>Subtotal</span>
+ <span class="font-semibold text-gray-800">{{ formatBs(carrito.subtotal()) }}</span>
+ </div>
+ <div class="flex justify-between text-gray-600 text-xs">
+ <span>Costo de envío</span>
+ <span class="font-semibold" [class.text-green-600]="carrito.envio() === 0">
+ @if (carrito.envio() === 0) { ¡GRATIS! } @else { {{ formatBs(carrito.envio()) }} }
+ </span>
+ </div>
+ <div class="flex justify-between border-t border-primary/10 pt-3 text-base">
+ <span class="font-bold text-primary">Total a Liquidar</span>
+ <span class="font-bold text-primary text-xl">{{ formatBs(carrito.total()) }}</span>
+ </div>
+ </div>
+
+ <!-- Botón de Acción Principal con Texto y Comportamiento Dinámico -->
+ <div class="border-t border-primary/10 pt-4 space-y-2">
+ <button
+ type="submit"
+ [disabled]="procesando()"
+ class="w-full px-5 py-3.5 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+ [class]="
+ metodoSeleccionado() === 'TARJETA'
+ ? 'bg-[#635BFF] hover:bg-[#534be0] text-white shadow-indigo-200'
+ : metodoSeleccionado() === 'EFECTIVO'
+ ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+ : 'bg-primary hover:bg-accent hover:text-primary text-white shadow-primary/20'
+ "
+ >
+ @if (procesando()) {
+ <span class="animate-spin text-base">⏳</span>
+ <span>Procesando...</span>
+ } @else {
+ <span>{{ textoBotonPago() }}</span>
+ }
+ </button>
+
+ <p class="text-[10px] text-gray-400 text-center font-mono">
+ 🔒 Transacción Segura • AttentionPay v2.5
+ </p>
+ </div>
+ </aside>
+ </div>
+ </form>
+ }
+
+ <!-- Modal Factura / Nota Fiscal Formal Monocromática -->
+ @if (mostrarModalTicket() && (ventaConfirmada() || pedidoEfectivo()); as venta) {
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+ <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto border border-gray-400 text-black">
+ <!-- Documento Factura Fiscal -->
+ <div class="p-8 bg-white" id="seccion-factura-imprimible">
+ <!-- Cabecera Fiscal Formal -->
+ <div class="border-b-2 border-black pb-4 mb-4 text-center">
+ <h2 class="text-xl font-bold tracking-widest uppercase font-mono text-black">ATTENTION S.R.L.</h2>
+ <p class="text-xs text-neutral-600 font-mono">CASA MATRIZ: Av. San Martín #450 · Santa Cruz, Bolivia</p>
+ <p class="text-xs text-neutral-600 font-mono">NIT: 1028374029 · N° AUTORIZACIÓN: 29040011007</p>
+ <div class="mt-3 inline-block border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase tracking-wider">
+ FACTURA / NOTA FISCAL N° {{ venta.codigo }}
+ </div>
+ </div>
+
+ <!-- Metadatos de la Factura -->
+ <div class="grid grid-cols-2 gap-2 text-xs font-mono border-b border-gray-300 pb-3 mb-4 text-neutral-800">
+ <div>
+ <span class="font-bold">FECHA:</span> {{ fechaLegible(venta.fecha) }}
+ </div>
+ <div class="text-right">
+ <span class="font-bold">ESTADO:</span>
+ <span class="font-bold uppercase ml-1" [class.text-neutral-900]="venta.estado_pago === 'PAGADO'">
+ {{ estadoPagoLegible(venta.estado_pago, venta.metodo_pago) }}
+ </span>
+ </div>
+ <div>
+ <span class="font-bold">CLIENTE:</span> {{ venta.datos_entrega.nombre_cliente | uppercase }}
+ </div>
+ <div class="text-right">
+ <span class="font-bold">MÉTODO:</span> {{ venta.metodo_pago }}
+ </div>
+ <div class="col-span-2">
+ <span class="font-bold">DESTINO:</span> {{ venta.datos_entrega.direccion }}, {{ venta.datos_entrega.ciudad }}
+ </div>
+ @if (venta.stripe_id) {
+ <div class="col-span-2 text-[11px] text-neutral-600">
+ <span class="font-bold">N° AUTORIZACIÓN STRIPE:</span> {{ venta.stripe_id }}
+ </div>
+ }
+ </div>
+
+ <!-- Tabla de Prendas -->
+ <table class="w-full text-xs font-mono mb-4 border-collapse">
+ <thead>
+ <tr class="border-b-2 border-black text-left">
+ <th class="py-1.5 font-bold">CANT.</th>
+ <th class="py-1.5 font-bold">DETALLE DE LA PRENDA</th>
+ <th class="py-1.5 text-right font-bold">P. UNIT</th>
+ <th class="py-1.5 text-right font-bold">SUBTOTAL</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (item of venta.items; track $index) {
+ <tr class="border-b border-gray-200">
+ <td class="py-2 text-center align-top">{{ item.cantidad }}</td>
+ <td class="py-2 pr-2">
+ <span class="font-bold text-black block">{{ item.nombre }}</span>
+ <span class="text-neutral-500 text-[11px]">Talla: {{ item.talla }} · Color: {{ item.color }}</span>
+ </td>
+ <td class="py-2 text-right align-top">{{ formatBs(item.precio) }}</td>
+ <td class="py-2 text-right font-bold align-top">{{ formatBs(item.subtotal) }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+
+ <!-- Liquidación y Totales -->
+ <div class="space-y-1.5 text-xs font-mono border-t-2 border-black pt-3 mb-4">
+ <div class="flex justify-between">
+ <span>SUBTOTAL:</span>
+ <span class="font-bold">{{ formatBs(carrito.subtotal()) }}</span>
+ </div>
+ <div class="flex justify-between">
+ <span>COSTO DE ENVÍO:</span>
+ <span class="font-bold">{{ carrito.envio() === 0 ? 'BS. 0.00 (GRATIS)' : formatBs(carrito.envio()) }}</span>
+ </div>
+ <div class="flex justify-between text-sm border-t border-black pt-2 font-bold">
+ <span>TOTAL FACTURADO:</span>
+ <span class="text-base">{{ formatBs(venta.total) }}</span>
+ </div>
+ </div>
+
+ <!-- Pie Fiscal Serio -->
+ <div class="border-t border-dashed border-gray-400 pt-3 text-center space-y-1 font-mono text-[10px] text-neutral-600">
+ <p class="font-bold text-black uppercase">
+ "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY"
+ </p>
+ <p>Ley N° 453: El proveedor deberá suministrar el servicio en las condiciones ofertadas.</p>
+ <p class="text-[9px] text-neutral-400 mt-1">CÓDIGO DE CONTROL FISCAL: {{ venta.codigo }}-ATT-2026</p>
+ </div>
+ </div>
+
+ <!-- Acciones -->
+ <div class="p-5 bg-neutral-50 border-t border-gray-300 flex gap-3">
+ <button
+ type="button"
+ (click)="imprimirTicket()"
+ class="flex-1 px-4 py-2.5 bg-white border-2 border-black text-black hover:bg-neutral-100 transition text-xs font-bold font-mono uppercase shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+ >
+ <span>🖨</span>
+ <span>Imprimir Factura</span>
+ </button>
+ <a
+ routerLink="/tienda/home"
+ (click)="cerrarTicket()"
+ class="flex-1 text-center bg-black text-white px-4 py-2.5 hover:bg-neutral-800 transition text-xs font-bold font-mono uppercase shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+ >
+ <span>Volver a la Tienda</span>
+ </a>
+ </div>
+ </div>
+ </div>
+ }
 </section>

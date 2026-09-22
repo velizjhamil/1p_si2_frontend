@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '../../core/guards/auth.guard';
 
 /**
- * Rutas del módulo Envíos (CU18 — Gestión de Envío).
+ * Rutas del módulo Envíos.
  * Montadas bajo /envios desde app.routes.ts.
  *
  * Roles: GS y D (Encargado de Delivery); ASU pasa siempre por el authGuard.
@@ -11,10 +11,10 @@ import { authGuard } from '../../core/guards/auth.guard';
  * cada operación la valida FastAPI; este guard es solo de navegación.
  */
 export const ENVIOS_ROUTES: Routes = [
-  {
-    path: '',
-    loadComponent: () => import('./envios.component').then((m) => m.EnviosComponent),
-    canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS', 'D'] },
-  },
+ {
+ path: '',
+ loadComponent: () => import('./envios.component').then((m) => m.EnviosComponent),
+ canActivate: [authGuard],
+ data: { roles: ['ASU', 'GS', 'D'] },
+ },
 ];

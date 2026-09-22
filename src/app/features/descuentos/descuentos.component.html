@@ -1,479 +1,479 @@
-<!-- CU12 — Gestión de Descuentos / Cupones (ASU/GS) -->
+<!-- Gestión de Descuentos / Cupones (ASU/GS) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Gestión de Descuentos</h1>
-      <p class="text-gray-600 mt-1">
-        Cree y administre descuentos automáticos y cupones tipeables para los
-        clientes.
-      </p>
-    </div>
-    <button
-      type="button"
-      (click)="abrirModalCrear()"
-      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-    >
-      + Nuevo Descuento
-    </button>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Gestión de Descuentos</h1>
+ <p class="text-gray-600 mt-1">
+ Cree y administre descuentos automáticos y cupones tipeables para los
+ clientes.
+ </p>
+ </div>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Nuevo Descuento
+ </button>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de filtros: búsqueda + tabs por tipo y estado -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por código o nombre..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
+ <!-- Barra de filtros: búsqueda + tabs por tipo y estado -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+ >
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+ />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por código o nombre..."
+ class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
 
-    <!-- Tabs tipo -->
-    <div class="flex gap-2">
-      <button
-        type="button"
-        (click)="onFiltroTipo('TODOS')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroTipo() === 'TODOS'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroTipo('PORCENTAJE')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroTipo() === 'PORCENTAJE'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Porcentaje
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroTipo('MONTO_FIJO')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroTipo() === 'MONTO_FIJO'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Monto fijo
-      </button>
-    </div>
+ <!-- Tabs tipo -->
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="onFiltroTipo('TODOS')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroTipo() === 'TODOS'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todos
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroTipo('PORCENTAJE')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroTipo() === 'PORCENTAJE'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Porcentaje
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroTipo('MONTO_FIJO')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroTipo() === 'MONTO_FIJO'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Monto fijo
+ </button>
+ </div>
 
-    <!-- Tabs estado -->
-    <div class="flex gap-2">
-      <button
-        type="button"
-        (click)="onFiltroEstado('TODOS')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'TODOS'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('activos')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'activos'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Activos
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('inactivos')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'inactivos'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Inactivos
-      </button>
-    </div>
-  </div>
+ <!-- Tabs estado -->
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="onFiltroEstado('TODOS')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'TODOS'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todos
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('activos')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'activos'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Activos
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('inactivos')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'inactivos'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Inactivos
+ </button>
+ </div>
+ </div>
 
-  <!-- Tabla de descuentos -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-    @if (cargando()) {
-      <div
-        class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse"
-      >
-        Cargando descuentos...
-      </div>
-    } @else if (descuentos().length === 0) {
-      <div class="p-12 text-center">
-        <p class="text-slate-500 text-sm font-medium">
-          No hay descuentos con los filtros aplicados.
-        </p>
-        <button
-          type="button"
-          (click)="abrirModalCrear()"
-          class="mt-4 bg-primary text-white px-5 py-2 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
-        >
-          + Crear el primero
-        </button>
-      </div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-          <thead
-            class="bg-slate-50/75 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold"
-          >
-            <tr>
-              <th class="px-6 py-3.5">Código / Nombre</th>
-              <th class="px-6 py-3.5 text-center">Tipo</th>
-              <th class="px-6 py-3.5 text-right">Valor</th>
-              <th class="px-6 py-3.5">Vigencia</th>
-              <th class="px-6 py-3.5 text-center">Usos</th>
-              <th class="px-6 py-3.5 text-center">Estado</th>
-              <th class="px-6 py-3.5 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            @for (d of descuentos(); track d.id_descuento) {
-              <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="px-6 py-4">
-                  @if (d.codigo) {
-                    <p class="font-mono font-bold text-primary">{{ d.codigo }}</p>
-                  } @else {
-                    <p class="text-xs text-slate-400 italic">regla automática</p>
-                  }
-                  <p class="text-slate-800 font-medium mt-0.5">{{ d.nombre }}</p>
-                  @if (d.descripcion) {
-                    <p class="text-xs text-slate-500 mt-0.5">{{ d.descripcion }}</p>
-                  }
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <app-badge
-                    [variant]="badgeTipo(d.tipo)"
-                    [texto]="etiquetaTipo(d.tipo)"
-                  />
-                </td>
-                <td class="px-6 py-4 text-right font-bold text-slate-800">
-                  {{ etiquetaValor(d) }}
-                </td>
-                <td class="px-6 py-4 text-xs text-slate-600">
-                  <p>{{ d.fecha_inicio }}</p>
-                  @if (d.fecha_fin) {
-                    <p class="text-slate-500">hasta {{ d.fecha_fin }}</p>
-                  } @else {
-                    <p class="text-slate-400 italic">sin vencimiento</p>
-                  }
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span
-                    class="text-xs"
-                    [class.text-slate-700]="!agotado(d)"
-                    [class.text-red-600]="agotado(d)"
-                    [class.font-semibold]="agotado(d)"
-                  >
-                    {{ textoUsos(d) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <app-badge
-                    [variant]="estadoVigencia(d).variant"
-                    [texto]="estadoVigencia(d).label"
-                  />
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-3">
-                    <button
-                      type="button"
-                      (click)="abrirModalEditar(d)"
-                      class="text-primary hover:text-accent font-semibold text-xs underline underline-offset-2 transition"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      (click)="toggleActivo(d)"
-                      class="text-slate-600 hover:text-slate-800 font-semibold text-xs underline underline-offset-2 transition"
-                    >
-                      {{ d.activo ? 'Desactivar' : 'Activar' }}
-                    </button>
-                    <button
-                      type="button"
-                      (click)="pedirEliminar(d)"
-                      class="text-red-600 hover:text-red-800 font-semibold text-xs underline underline-offset-2 transition"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+ <!-- Tabla de descuentos -->
+ <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+ @if (cargando()) {
+ <div
+ class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse"
+ >
+ Cargando descuentos...
+ </div>
+ } @else if (descuentos().length === 0) {
+ <div class="p-12 text-center">
+ <p class="text-slate-500 text-sm font-medium">
+ No hay descuentos con los filtros aplicados.
+ </p>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="mt-4 bg-primary text-white px-5 py-2 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
+ >
+ + Crear el primero
+ </button>
+ </div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm text-left">
+ <thead
+ class="bg-slate-50/75 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold"
+ >
+ <tr>
+ <th class="px-6 py-3.5">Código / Nombre</th>
+ <th class="px-6 py-3.5 text-center">Tipo</th>
+ <th class="px-6 py-3.5 text-right">Valor</th>
+ <th class="px-6 py-3.5">Vigencia</th>
+ <th class="px-6 py-3.5 text-center">Usos</th>
+ <th class="px-6 py-3.5 text-center">Estado</th>
+ <th class="px-6 py-3.5 text-right">Acciones</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (d of descuentos(); track d.id_descuento) {
+ <tr class="hover:bg-slate-50/80 transition-colors">
+ <td class="px-6 py-4">
+ @if (d.codigo) {
+ <p class="font-mono font-bold text-primary">{{ d.codigo }}</p>
+ } @else {
+ <p class="text-xs text-slate-400 italic">regla automática</p>
+ }
+ <p class="text-slate-800 font-medium mt-0.5">{{ d.nombre }}</p>
+ @if (d.descripcion) {
+ <p class="text-xs text-slate-500 mt-0.5">{{ d.descripcion }}</p>
+ }
+ </td>
+ <td class="px-6 py-4 text-center">
+ <app-badge
+ [variant]="badgeTipo(d.tipo)"
+ [texto]="etiquetaTipo(d.tipo)"
+ />
+ </td>
+ <td class="px-6 py-4 text-right font-bold text-slate-800">
+ {{ etiquetaValor(d) }}
+ </td>
+ <td class="px-6 py-4 text-xs text-slate-600">
+ <p>{{ d.fecha_inicio }}</p>
+ @if (d.fecha_fin) {
+ <p class="text-slate-500">hasta {{ d.fecha_fin }}</p>
+ } @else {
+ <p class="text-slate-400 italic">sin vencimiento</p>
+ }
+ </td>
+ <td class="px-6 py-4 text-center">
+ <span
+ class="text-xs"
+ [class.text-slate-700]="!agotado(d)"
+ [class.text-red-600]="agotado(d)"
+ [class.font-semibold]="agotado(d)"
+ >
+ {{ textoUsos(d) }}
+ </span>
+ </td>
+ <td class="px-6 py-4 text-center">
+ <app-badge
+ [variant]="estadoVigencia(d).variant"
+ [texto]="estadoVigencia(d).label"
+ />
+ </td>
+ <td class="px-6 py-4 text-right">
+ <div class="flex items-center justify-end gap-3">
+ <button
+ type="button"
+ (click)="abrirModalEditar(d)"
+ class="text-primary hover:text-accent font-semibold text-xs underline underline-offset-2 transition"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="toggleActivo(d)"
+ class="text-slate-600 hover:text-slate-800 font-semibold text-xs underline underline-offset-2 transition"
+ >
+ {{ d.activo ? 'Desactivar' : 'Activar' }}
+ </button>
+ <button
+ type="button"
+ (click)="pedirEliminar(d)"
+ class="text-red-600 hover:text-red-800 font-semibold text-xs underline underline-offset-2 transition"
+ >
+ Eliminar
+ </button>
+ </div>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
 
-      <!-- Paginación -->
-      <div
-        class="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-      >
-        <p class="text-xs text-slate-500">
-          Página {{ pagina() }} de {{ pages() }} — {{ total() }} descuentos
-        </p>
-        <div class="flex items-center gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-4 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-container disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-4 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-container disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Paginación -->
+ <div
+ class="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+ >
+ <p class="text-xs text-slate-500">
+ Página {{ pagina() }} de {{ pages() }} — {{ total() }} descuentos
+ </p>
+ <div class="flex items-center gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-4 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-container disabled:opacity-40 disabled:cursor-not-allowed transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-4 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-container disabled:opacity-40 disabled:cursor-not-allowed transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal: crear / editar descuento -->
 @if (modalAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModal()"
-    ></div>
-    <div
-      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoId() !== null ? 'Editar descuento' : 'Nuevo descuento' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          Complete los datos. Los campos marcados con * son obligatorios.
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModal()"
+ ></div>
+ <div
+ class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoId() !== null ? 'Editar descuento' : 'Nuevo descuento' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ Complete los datos. Los campos marcados con * son obligatorios.
+ </p>
+ </div>
 
-      <div class="p-6" [formGroup]="descuentoForm">
-        @if (errorMessage()) {
-          <div
-            class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <div class="p-6" [formGroup]="descuentoForm">
+ @if (errorMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Código del cupón (opcional)
-            </label>
-            <input
-              type="text"
-              formControlName="codigo"
-              placeholder="Ej: BIENVENIDO20"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200 uppercase"
-              style="text-transform: uppercase;"
-            />
-            <p class="text-xs text-slate-400 mt-1">
-              Vacío = regla automática. Si lo completa, será único y en MAYÚSCULAS.
-            </p>
-          </div>
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Código del cupón (opcional)
+ </label>
+ <input
+ type="text"
+ formControlName="codigo"
+ placeholder="Ej: BIENVENIDO20"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200 uppercase"
+ style="text-transform: uppercase;"
+ />
+ <p class="text-xs text-slate-400 mt-1">
+ Vacío = regla automática. Si lo completa, será único y en MAYÚSCULAS.
+ </p>
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Nombre *
-            </label>
-            <input
-              type="text"
-              formControlName="nombre"
-              placeholder="Ej: 20% de descuento"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Nombre *
+ </label>
+ <input
+ type="text"
+ formControlName="nombre"
+ placeholder="Ej: 20% de descuento"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
 
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Descripción
-            </label>
-            <input
-              type="text"
-              formControlName="descripcion"
-              placeholder="Descripción interna del descuento"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            />
-          </div>
+ <div class="sm:col-span-2">
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Descripción
+ </label>
+ <input
+ type="text"
+ formControlName="descripcion"
+ placeholder="Descripción interna del descuento"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Tipo *
-            </label>
-            <select
-              formControlName="tipo"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            >
-              <option value="PORCENTAJE">Porcentaje</option>
-              <option value="MONTO_FIJO">Monto fijo (Bs.)</option>
-            </select>
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Tipo *
+ </label>
+ <select
+ formControlName="tipo"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ >
+ <option value="PORCENTAJE">Porcentaje</option>
+ <option value="MONTO_FIJO">Monto fijo (Bs.)</option>
+ </select>
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Valor * <span class="text-slate-400">({{ descuentoForm.get('tipo')?.value === 'PORCENTAJE' ? '% (0-100)' : 'en Bs.' }})</span>
-            </label>
-            <input
-              type="number"
-              formControlName="valor"
-              min="0.01"
-              step="0.01"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Valor * <span class="text-slate-400">({{ descuentoForm.get('tipo')?.value === 'PORCENTAJE' ? '% (0-100)' : 'en Bs.' }})</span>
+ </label>
+ <input
+ type="number"
+ formControlName="valor"
+ min="0.01"
+ step="0.01"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Fecha de inicio *
-            </label>
-            <input
-              type="date"
-              formControlName="fecha_inicio"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Fecha de inicio *
+ </label>
+ <input
+ type="date"
+ formControlName="fecha_inicio"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Fecha de fin (opcional)
-            </label>
-            <input
-              type="date"
-              formControlName="fecha_fin"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Fecha de fin (opcional)
+ </label>
+ <input
+ type="date"
+ formControlName="fecha_fin"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Usos máximos (opcional)
-            </label>
-            <input
-              type="number"
-              formControlName="usos_maximos"
-              min="1"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-              placeholder="Ilimitado"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Usos máximos (opcional)
+ </label>
+ <input
+ type="number"
+ formControlName="usos_maximos"
+ min="1"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ placeholder="Ilimitado"
+ />
+ </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">
-              Compra mínima (Bs., opcional)
-            </label>
-            <input
-              type="number"
-              formControlName="monto_minimo_compra"
-              min="0"
-              step="0.01"
-              class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-              placeholder="Sin mínimo"
-            />
-          </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-700 mb-1">
+ Compra mínima (Bs., opcional)
+ </label>
+ <input
+ type="number"
+ formControlName="monto_minimo_compra"
+ min="0"
+ step="0.01"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ placeholder="Sin mínimo"
+ />
+ </div>
 
-          <div class="sm:col-span-2 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="activo"
-              formControlName="activo"
-              class="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary/20"
-            />
-            <label for="activo" class="text-sm text-slate-700">
-              Descuento activo
-            </label>
-          </div>
-        </div>
-      </div>
+ <div class="sm:col-span-2 flex items-center gap-2">
+ <input
+ type="checkbox"
+ id="activo"
+ formControlName="activo"
+ class="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary/20"
+ />
+ <label for="activo" class="text-sm text-slate-700">
+ Descuento activo
+ </label>
+ </div>
+ </div>
+ </div>
 
-      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          (click)="cerrarModal()"
-          class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200 transition"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          (click)="guardar()"
-          [disabled]="guardando()"
-          class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {{ guardando() ? 'Guardando...' : 'Guardar' }}
-        </button>
-      </div>
-    </div>
-  </div>
+ <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200 transition"
+ >
+ Cancelar
+ </button>
+ <button
+ type="button"
+ (click)="guardar()"
+ [disabled]="guardando()"
+ class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
+ >
+ {{ guardando() ? 'Guardando...' : 'Guardar' }}
+ </button>
+ </div>
+ </div>
+ </div>
 }
 
 <!-- ConfirmDialog: eliminación -->
 @if (confirmarEliminar(); as d) {
-  <app-confirm-dialog
-    titulo="Eliminar descuento"
-    [mensaje]="'¿Eliminar el descuento \'' + d.nombre + '\'? Esta acción no se puede deshacer.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  />
+ <app-confirm-dialog
+ titulo="Eliminar descuento"
+ [mensaje]="'¿Eliminar el descuento \'' + d.nombre + '\'? Esta acción no se puede deshacer.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ />
 }

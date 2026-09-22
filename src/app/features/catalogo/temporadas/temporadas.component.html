@@ -1,419 +1,419 @@
-<!-- CU24 — Gestión de Temporadas y Colecciones (Administrador super usuario, ASU) -->
+<!-- Gestión de Temporadas y Colecciones (Administrador super usuario, ASU) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Temporadas y Colecciones</h1>
-      <p class="text-gray-600 mt-1">
-        Administre las ventanas de vigencia del catálogo por colección.
-      </p>
-    </div>
-    <div class="flex flex-col sm:flex-row gap-3">
-      <button
-        type="button"
-        (click)="abrirModalColeccion()"
-        class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition font-medium text-sm"
-      >
-        + Nueva Colección
-      </button>
-      <button
-        type="button"
-        (click)="abrirModalCrear()"
-        class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-      >
-        + Nueva Temporada
-      </button>
-    </div>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Temporadas y Colecciones</h1>
+ <p class="text-gray-600 mt-1">
+ Administre las ventanas de vigencia del catálogo por colección.
+ </p>
+ </div>
+ <div class="flex flex-col sm:flex-row gap-3">
+ <button
+ type="button"
+ (click)="abrirModalColeccion()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition font-medium text-sm"
+ >
+ + Nueva Colección
+ </button>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Nueva Temporada
+ </button>
+ </div>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalTemporadaAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalTemporadaAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de filtros: búsqueda + tabs de vigencia -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por nombre de temporada..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    <div class="flex gap-2">
-      <button
-        type="button"
-        (click)="onFiltroVigencia('todas')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroVigencia() === 'todas'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todas
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroVigencia('vigentes')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroVigencia() === 'vigentes'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Vigentes
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroVigencia('finalizadas')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroVigencia() === 'finalizadas'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Finalizadas
-      </button>
-    </div>
-  </div>
+ <!-- Barra de filtros: búsqueda + tabs de vigencia -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+ >
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+ />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por nombre de temporada..."
+ class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="onFiltroVigencia('todas')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroVigencia() === 'todas'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todas
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroVigencia('vigentes')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroVigencia() === 'vigentes'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Vigentes
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroVigencia('finalizadas')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroVigencia() === 'finalizadas'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Finalizadas
+ </button>
+ </div>
+ </div>
 
-  <!-- Datatable de temporadas -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando temporadas...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">ID</th>
-              <th class="text-left px-4 py-3 font-semibold">Temporada</th>
-              <th class="text-left px-4 py-3 font-semibold">Colección</th>
-              <th class="text-left px-4 py-3 font-semibold">Inicio</th>
-              <th class="text-left px-4 py-3 font-semibold">Fin</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (temporada of temporadas(); track temporada.id_temporada) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3 text-primary font-semibold">
-                  #{{ temporada.id_temporada }}
-                </td>
-                <td class="px-4 py-3 font-medium text-gray-800">
-                  {{ temporada.nombre_temporada }}
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  @if (temporada.nombre_coleccion) {
-                    {{ temporada.nombre_coleccion }}
-                  } @else {
-                    <span class="italic text-gray-400">General</span>
-                  }
-                </td>
-                <td class="px-4 py-3 text-gray-600">{{ fecha(temporada.fecha_inicio) }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ fecha(temporada.fecha_fin) }}</td>
-                <td class="px-4 py-3 text-center">
-                  <app-badge [variant]="badgeEstado(temporada)" [texto]="textoEstado(temporada)" />
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    (click)="abrirModalEditar(temporada)"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                    title="Editar temporada"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    (click)="pedirEliminar(temporada)"
-                    class="text-red-600 hover:text-red-400 font-medium transition"
-                    title="Eliminar temporada"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron temporadas con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginación server-side -->
-      <div
-        class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
-      >
-        <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} temporadas</span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Datatable de temporadas -->
+ <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+ @if (cargando()) {
+ <div class="p-10 text-center text-primary/60 text-sm">Cargando temporadas...</div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-primary text-white">
+ <tr>
+ <th class="text-left px-4 py-3 font-semibold">ID</th>
+ <th class="text-left px-4 py-3 font-semibold">Temporada</th>
+ <th class="text-left px-4 py-3 font-semibold">Colección</th>
+ <th class="text-left px-4 py-3 font-semibold">Inicio</th>
+ <th class="text-left px-4 py-3 font-semibold">Fin</th>
+ <th class="text-center px-4 py-3 font-semibold">Estado</th>
+ <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (temporada of temporadas(); track temporada.id_temporada) {
+ <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+ <td class="px-4 py-3 text-primary font-semibold">
+ #{{ temporada.id_temporada }}
+ </td>
+ <td class="px-4 py-3 font-medium text-gray-800">
+ {{ temporada.nombre_temporada }}
+ </td>
+ <td class="px-4 py-3 text-gray-600">
+ @if (temporada.nombre_coleccion) {
+ {{ temporada.nombre_coleccion }}
+ } @else {
+ <span class="italic text-gray-400">General</span>
+ }
+ </td>
+ <td class="px-4 py-3 text-gray-600">{{ fecha(temporada.fecha_inicio) }}</td>
+ <td class="px-4 py-3 text-gray-600">{{ fecha(temporada.fecha_fin) }}</td>
+ <td class="px-4 py-3 text-center">
+ <app-badge [variant]="badgeEstado(temporada)" [texto]="textoEstado(temporada)" />
+ </td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <button
+ type="button"
+ (click)="abrirModalEditar(temporada)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ title="Editar temporada"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="pedirEliminar(temporada)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ title="Eliminar temporada"
+ >
+ Eliminar
+ </button>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron temporadas con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <!-- Paginación server-side -->
+ <div
+ class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
+ >
+ <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} temporadas</span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal Registrar / Editar Temporada -->
 @if (modalTemporadaAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModalTemporada()"
-    ></div>
-    <div
-      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoTemporadaId() ? 'Editar Temporada' : 'Nueva Temporada' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          {{
-            editandoTemporadaId()
-              ? 'Actualice la ventana de vigencia de la temporada.'
-              : 'Defina la ventana de vigencia del catálogo.'
-          }}
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModalTemporada()"
+ ></div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoTemporadaId() ? 'Editar Temporada' : 'Nueva Temporada' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ {{
+ editandoTemporadaId()
+ ? 'Actualice la ventana de vigencia de la temporada.'
+ : 'Defina la ventana de vigencia del catálogo.'
+ }}
+ </p>
+ </div>
 
-      <form
-        [formGroup]="temporadaForm"
-        (ngSubmit)="guardarTemporada()"
-        class="p-6 space-y-4"
-      >
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <form
+ [formGroup]="temporadaForm"
+ (ngSubmit)="guardarTemporada()"
+ class="p-6 space-y-4"
+ >
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <div>
-          <label
-            class="block text-sm font-medium text-primary mb-1"
-            for="nombre_temporada"
-          >
-            Nombre de la Temporada *
-          </label>
-          <input
-            id="nombre_temporada"
-            type="text"
-            formControlName="nombre_temporada"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: Verano 2027"
-          />
-        </div>
+ <div>
+ <label
+ class="block text-sm font-medium text-primary mb-1"
+ for="nombre_temporada"
+ >
+ Nombre de la Temporada *
+ </label>
+ <input
+ id="nombre_temporada"
+ type="text"
+ formControlName="nombre_temporada"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Verano 2027"
+ />
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="id_coleccion">
-            Colección
-          </label>
-          <select
-            id="id_coleccion"
-            formControlName="id_coleccion"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-          >
-            <option value="">
-              General (sin colección)
-            </option>
-            @for (coleccion of colecciones(); track coleccion.id_coleccion) {
-              <option [value]="coleccion.id_coleccion">
-                {{ coleccion.nombre_coleccion }}
-              </option>
-            }
-          </select>
-          <p class="text-xs text-gray-500 mt-1">
-            Las temporadas generales aplican a toda la tienda.
-          </p>
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="id_coleccion">
+ Colección
+ </label>
+ <select
+ id="id_coleccion"
+ formControlName="id_coleccion"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option value="">
+ General (sin colección)
+ </option>
+ @for (coleccion of colecciones(); track coleccion.id_coleccion) {
+ <option [value]="coleccion.id_coleccion">
+ {{ coleccion.nombre_coleccion }}
+ </option>
+ }
+ </select>
+ <p class="text-xs text-gray-500 mt-1">
+ Las temporadas generales aplican a toda la tienda.
+ </p>
+ </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label
-              class="block text-sm font-medium text-primary mb-1"
-              for="fecha_inicio"
-            >
-              Fecha de Inicio *
-            </label>
-            <input
-              id="fecha_inicio"
-              type="date"
-              formControlName="fecha_inicio"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="fecha_fin">
-              Fecha de Fin *
-            </label>
-            <input
-              id="fecha_fin"
-              type="date"
-              formControlName="fecha_fin"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            />
-          </div>
-        </div>
-        @if (temporadaForm.hasError('rangoInvalido')) {
-          <p class="text-xs text-red-600">
-            La fecha de fin no puede ser anterior a la fecha de inicio.
-          </p>
-        }
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label
+ class="block text-sm font-medium text-primary mb-1"
+ for="fecha_inicio"
+ >
+ Fecha de Inicio *
+ </label>
+ <input
+ id="fecha_inicio"
+ type="date"
+ formControlName="fecha_inicio"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="fecha_fin">
+ Fecha de Fin *
+ </label>
+ <input
+ id="fecha_fin"
+ type="date"
+ formControlName="fecha_fin"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ </div>
+ @if (temporadaForm.hasError('rangoInvalido')) {
+ <p class="text-xs text-red-600">
+ La fecha de fin no puede ser anterior a la fecha de inicio.
+ </p>
+ }
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModalTemporada()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardando()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{
-              guardando()
-                ? 'Guardando...'
-                : editandoTemporadaId()
-                  ? 'Guardar Cambios'
-                  : 'Registrar Temporada'
-            }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModalTemporada()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardando()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {{
+ guardando()
+ ? 'Guardando...'
+ : editandoTemporadaId()
+ ? 'Guardar Cambios'
+ : 'Registrar Temporada'
+ }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }
 
 <!-- Modal Nueva Colección -->
 @if (modalColeccionAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModalColeccion()"
-    ></div>
-    <div
-      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">Nueva Colección</h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          Línea de diseño que agrupa temporadas del catálogo.
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModalColeccion()"
+ ></div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">Nueva Colección</h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ Línea de diseño que agrupa temporadas del catálogo.
+ </p>
+ </div>
 
-      <form
-        [formGroup]="coleccionForm"
-        (ngSubmit)="guardarColeccion()"
-        class="p-6 space-y-4"
-      >
-        @if (errorColeccion()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorColeccion() }}
-          </div>
-        }
+ <form
+ [formGroup]="coleccionForm"
+ (ngSubmit)="guardarColeccion()"
+ class="p-6 space-y-4"
+ >
+ @if (errorColeccion()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorColeccion() }}
+ </div>
+ }
 
-        <div>
-          <label
-            class="block text-sm font-medium text-primary mb-1"
-            for="nombre_coleccion"
-          >
-            Nombre de la Colección *
-          </label>
-          <input
-            id="nombre_coleccion"
-            type="text"
-            formControlName="nombre_coleccion"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: Línea Urbana"
-          />
-        </div>
+ <div>
+ <label
+ class="block text-sm font-medium text-primary mb-1"
+ for="nombre_coleccion"
+ >
+ Nombre de la Colección *
+ </label>
+ <input
+ id="nombre_coleccion"
+ type="text"
+ formControlName="nombre_coleccion"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Línea Urbana"
+ />
+ </div>
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModalColeccion()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardandoColeccion()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ guardandoColeccion() ? 'Guardando...' : 'Registrar Colección' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModalColeccion()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardandoColeccion()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {{ guardandoColeccion() ? 'Guardando...' : 'Registrar Colección' }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }
 
 <!-- ConfirmDialog de eliminación de temporada -->
 @if (confirmarEliminar(); as temporada) {
-  <app-confirm-dialog
-    titulo="Eliminar Temporada"
-    [mensaje]="'¿Eliminar la temporada ' + temporada.nombre_temporada + '? Esta acción no se puede deshacer.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar Temporada"
+ [mensaje]="'¿Eliminar la temporada ' + temporada.nombre_temporada + '? Esta acción no se puede deshacer.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ ></app-confirm-dialog>
 }

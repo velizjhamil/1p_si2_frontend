@@ -1,326 +1,326 @@
-<!-- CU9 — Gestión de Categorías (ASU/GS) -->
+<!-- Gestión de Categorías (ASU/GS) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Gestión de Categorías</h1>
-      <p class="text-gray-600 mt-1">
-        Clasifique las prendas del catálogo por línea y tipo.
-      </p>
-    </div>
-    <button
-      type="button"
-      (click)="abrirModalCrear()"
-      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-    >
-      + Nueva Categoría
-    </button>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Gestión de Categorías</h1>
+ <p class="text-gray-600 mt-1">
+ Clasifique las prendas del catálogo por línea y tipo.
+ </p>
+ </div>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Nueva Categoría
+ </button>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de filtros: búsqueda + tabs por línea -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por nombre o descripción..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    <div class="flex gap-2">
-      <button
-        type="button"
-        (click)="onFiltroLinea('todas')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroLinea() === 'todas'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroLinea('Hombre')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroLinea() === 'Hombre'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Hombre
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroLinea('Mujer')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroLinea() === 'Mujer'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Mujer
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroLinea('Unisex')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroLinea() === 'Unisex'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Unisex
-      </button>
-    </div>
-  </div>
+ <!-- Barra de filtros: búsqueda + tabs por línea -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+ >
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+ />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por nombre o descripción..."
+ class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="onFiltroLinea('todas')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroLinea() === 'todas'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todos
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroLinea('Hombre')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroLinea() === 'Hombre'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Hombre
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroLinea('Mujer')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroLinea() === 'Mujer'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Mujer
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroLinea('Unisex')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroLinea() === 'Unisex'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Unisex
+ </button>
+ </div>
+ </div>
 
-  <!-- Tabla de categorías -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando categorías...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">ID</th>
-              <th class="text-left px-4 py-3 font-semibold">Nombre</th>
-              <th class="text-left px-4 py-3 font-semibold">Línea / Sección</th>
-              <th class="text-left px-4 py-3 font-semibold">Descripción</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (categoria of categorias(); track categoria.id_categoria) {
-              <tr
-                class="border-b border-primary/10 hover:bg-container/60 transition"
-                [class.opacity-60]="!categoria.activo"
-              >
-                <td class="px-4 py-3 text-primary font-semibold">
-                  #{{ categoria.id_categoria }}
-                </td>
-                <td class="px-4 py-3 font-medium text-gray-800">{{ categoria.nombre }}</td>
-                <td class="px-4 py-3">
-                  <app-badge [variant]="badgeLinea(categoria.linea)" [texto]="categoria.linea" />
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  {{ categoria.descripcion || '—' }}
-                </td>
-                <td class="px-4 py-3 text-center">
-                  @if (categoria.activo) {
-                    <app-badge variant="success" texto="Activo" />
-                  } @else {
-                    <app-badge variant="danger" texto="Inactivo" />
-                  }
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    (click)="abrirModalEditar(categoria)"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                    title="Editar categoría"
-                  >
-                    Editar
-                  </button>
-                  @if (categoria.activo) {
-                    <button
-                      type="button"
-                      (click)="desactivar(categoria)"
-                      class="text-primary/60 hover:text-primary font-medium mr-3 transition text-sm"
-                      title="Desactivar categoría"
-                    >
-                      Desactivar
-                    </button>
-                  }
-                  <button
-                    type="button"
-                    (click)="pedirEliminar(categoria)"
-                    class="text-red-600 hover:text-red-400 font-medium transition"
-                    title="Eliminar categoría"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron categorías con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginación server-side -->
-      <div
-        class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
-      >
-        <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} categorías</span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Tabla de categorías -->
+ <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+ @if (cargando()) {
+ <div class="p-10 text-center text-primary/60 text-sm">Cargando categorías...</div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-primary text-white">
+ <tr>
+ <th class="text-left px-4 py-3 font-semibold">ID</th>
+ <th class="text-left px-4 py-3 font-semibold">Nombre</th>
+ <th class="text-left px-4 py-3 font-semibold">Línea / Sección</th>
+ <th class="text-left px-4 py-3 font-semibold">Descripción</th>
+ <th class="text-center px-4 py-3 font-semibold">Estado</th>
+ <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (categoria of categorias(); track categoria.id_categoria) {
+ <tr
+ class="border-b border-primary/10 hover:bg-container/60 transition"
+ [class.opacity-60]="!categoria.activo"
+ >
+ <td class="px-4 py-3 text-primary font-semibold">
+ #{{ categoria.id_categoria }}
+ </td>
+ <td class="px-4 py-3 font-medium text-gray-800">{{ categoria.nombre }}</td>
+ <td class="px-4 py-3">
+ <app-badge [variant]="badgeLinea(categoria.linea)" [texto]="categoria.linea" />
+ </td>
+ <td class="px-4 py-3 text-gray-600">
+ {{ categoria.descripcion || '—' }}
+ </td>
+ <td class="px-4 py-3 text-center">
+ @if (categoria.activo) {
+ <app-badge variant="success" texto="Activo" />
+ } @else {
+ <app-badge variant="danger" texto="Inactivo" />
+ }
+ </td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <button
+ type="button"
+ (click)="abrirModalEditar(categoria)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ title="Editar categoría"
+ >
+ Editar
+ </button>
+ @if (categoria.activo) {
+ <button
+ type="button"
+ (click)="desactivar(categoria)"
+ class="text-primary/60 hover:text-primary font-medium mr-3 transition text-sm"
+ title="Desactivar categoría"
+ >
+ Desactivar
+ </button>
+ }
+ <button
+ type="button"
+ (click)="pedirEliminar(categoria)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ title="Eliminar categoría"
+ >
+ Eliminar
+ </button>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron categorías con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <!-- Paginación server-side -->
+ <div
+ class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
+ >
+ <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} categorías</span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal Registrar / Editar Categoría -->
 @if (modalAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModal()"
-    ></div>
-    <div
-      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoId() ? 'Editar Categoría' : 'Nueva Categoría' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          {{
-            editandoId()
-              ? 'Actualice los datos de la categoría.'
-              : 'Clasifique una nueva línea de prendas del catálogo.'
-          }}
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModal()"
+ ></div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoId() ? 'Editar Categoría' : 'Nueva Categoría' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ {{
+ editandoId()
+ ? 'Actualice los datos de la categoría.'
+ : 'Clasifique una nueva línea de prendas del catálogo.'
+ }}
+ </p>
+ </div>
 
-      <form [formGroup]="categoriaForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <form [formGroup]="categoriaForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="nombre">
-            Nombre de Categoría *
-          </label>
-          <input
-            id="nombre"
-            type="text"
-            formControlName="nombre"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: Camisas"
-          />
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="nombre">
+ Nombre de Categoría *
+ </label>
+ <input
+ id="nombre"
+ type="text"
+ formControlName="nombre"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Camisas"
+ />
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="linea">
-            Línea de Prenda *
-          </label>
-          <select
-            id="linea"
-            formControlName="linea"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-          >
-            <option value="" disabled>Seleccione una línea...</option>
-            <option value="Hombre">Hombre</option>
-            <option value="Mujer">Mujer</option>
-            <option value="Unisex">Unisex</option>
-          </select>
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="linea">
+ Línea de Prenda *
+ </label>
+ <select
+ id="linea"
+ formControlName="linea"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option value="" disabled>Seleccione una línea...</option>
+ <option value="Hombre">Hombre</option>
+ <option value="Mujer">Mujer</option>
+ <option value="Unisex">Unisex</option>
+ </select>
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="descripcion">
-            Descripción (opcional)
-          </label>
-          <textarea
-            id="descripcion"
-            formControlName="descripcion"
-            rows="3"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm resize-none"
-            placeholder="Ej: Camisas formales y casuales de algodón"
-          ></textarea>
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="descripcion">
+ Descripción (opcional)
+ </label>
+ <textarea
+ id="descripcion"
+ formControlName="descripcion"
+ rows="3"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm resize-none"
+ placeholder="Ej: Camisas formales y casuales de algodón"
+ ></textarea>
+ </div>
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModal()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardando()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Categoría') }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardando()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Categoría') }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }
 
-<!-- ConfirmDialog de eliminación (CU9: 409 si tiene productos) -->
+<!-- ConfirmDialog de eliminación -->
 @if (confirmarEliminar(); as categoria) {
-  <app-confirm-dialog
-    titulo="Eliminar Categoría"
-    [mensaje]="'¿Eliminar la categoría ' + categoria.nombre + '? Si tiene productos asociados, el sistema impedirá la eliminación y solo podrá desactivarla.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar Categoría"
+ [mensaje]="'¿Eliminar la categoría ' + categoria.nombre + '? Si tiene productos asociados, el sistema impedirá la eliminación y solo podrá desactivarla.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ ></app-confirm-dialog>
 }

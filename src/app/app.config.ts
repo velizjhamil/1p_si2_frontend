@@ -7,11 +7,11 @@ import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-  ],
+ providers: [
+ provideZoneChangeDetection({ eventCoalescing: true }),
+ provideRouter(routes),
+ provideHttpClient(withInterceptorsFromDi()),
+ { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+ { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+ ],
 };

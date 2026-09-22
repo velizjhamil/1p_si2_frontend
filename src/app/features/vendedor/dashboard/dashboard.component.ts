@@ -2,15 +2,15 @@ import { Component, inject } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  imports: [],
-  selector: 'app-vendedor-dashboard',
-  templateUrl: './dashboard.component.html',
+ imports: [],
+ selector: 'app-vendedor-dashboard',
+ templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-  protected readonly authService = inject(AuthService);
-  protected readonly usuario = this.authService.getCurrentUser();
+ protected readonly authService = inject(AuthService);
+ protected readonly usuario = this.authService.getCurrentUser();
 
-  protected cerrarSesion(): void {
-    this.authService.logout();
-  }
+ protected cerrarSesion(): void {
+ this.authService.logout();
+ }
 }

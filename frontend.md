@@ -28,18 +28,18 @@ src/
 │   │   ├── models/          # Interfaces TypeScript (entidades)
 │   │   └── services/        # AuthService, ApiService base
 │   ├── features/            # Un módulo por CU o grupo de CUs
-│   │   ├── auth/            # CU1, CU2 — login, logout
-│   │   ├── usuarios/        # CU3 — gestión de usuarios
-│   │   ├── roles/           # CU4, CU5 — roles y permisos
-│   │   ├── empresa/         # CU16 — datos de empresa
-│   │   ├── sucursales/      # CU17 — sucursales
-│   │   ├── proveedores/     # CU23 — proveedores
-│   │   ├── productos/       # CU6, CU7, CU9, CU24
-│   │   ├── inventario/      # CU22
-│   │   ├── reservas/        # CU14
-│   │   ├── carrito/         # CU15
-│   │   ├── ventas/          # CU11, CU21
-│   │   └── reportes/        # CU20
+│   │   ├── auth/            # login, logout
+│   │   ├── usuarios/        # gestión de usuarios
+│   │   ├── roles/           # roles y permisos
+│   │   ├── empresa/         # datos de empresa
+│   │   ├── sucursales/      # sucursales
+│   │   ├── proveedores/     # proveedores
+│   │   ├── productos/       # , , , 
+│   │   ├── inventario/      # 
+│   │   ├── reservas/        # 
+│   │   ├── carrito/         # 
+│   │   ├── ventas/          # , 
+│   │   └── reportes/        # 
 │   ├── shared/
 │   │   ├── components/      # Componentes reutilizables (tabla, modal, botón)
 │   │   ├── pipes/           # Pipes custom

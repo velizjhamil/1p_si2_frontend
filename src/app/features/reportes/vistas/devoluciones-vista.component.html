@@ -1,119 +1,119 @@
-<!-- CU20 — Reporte de Devoluciones -->
+<!-- Reporte de Devoluciones -->
 @let d = datos();
 
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
-  <app-reporte-kpi etiqueta="Devoluciones" [valor]="d.num_devoluciones | number" nota="Todos los estados" />
-  <app-reporte-kpi etiqueta="Unidades devueltas" [valor]="d.unidades_devueltas | number" nota="Sin rechazadas" />
-  <app-reporte-kpi etiqueta="Importe devuelto" [valor]="'Bs. ' + (d.importe_total | number: '1.2-2')" nota="Sin rechazadas" />
-  <app-reporte-kpi etiqueta="Importe completado" [valor]="'Bs. ' + (d.importe_completado | number: '1.2-2')" nota="Solo completadas" />
+ <app-reporte-kpi etiqueta="Devoluciones" [valor]="d.num_devoluciones | number" nota="Todos los estados" />
+ <app-reporte-kpi etiqueta="Unidades devueltas" [valor]="d.unidades_devueltas | number" nota="Sin rechazadas" />
+ <app-reporte-kpi etiqueta="Importe devuelto" [valor]="'Bs. ' + (d.importe_total | number: '1.2-2')" nota="Sin rechazadas" />
+ <app-reporte-kpi etiqueta="Importe completado" [valor]="'Bs. ' + (d.importe_completado | number: '1.2-2')" nota="Solo completadas" />
 </div>
 <p class="text-xs text-gray-500 mb-6">
-  Las devoluciones rechazadas cuentan en el número de devoluciones y en el desglose por estado, pero no en unidades ni importes (no hubo reembolso).
-  Las fechas corresponden a la solicitud (UTC).
+ Las devoluciones rechazadas cuentan en el número de devoluciones y en el desglose por estado, pero no en unidades ni importes (no hubo reembolso).
+ Las fechas corresponden a la solicitud (UTC).
 </p>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-    <h2 class="text-sm font-semibold text-primary mb-3">Devoluciones por estado</h2>
-    <app-reporte-chart [config]="graficoEstado()" descripcion="Devoluciones por estado" />
-  </div>
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 lg:col-span-2">
-    <h2 class="text-sm font-semibold text-primary mb-3">Importe devuelto por día</h2>
-    <app-reporte-chart [config]="graficoFecha()" descripcion="Importe devuelto por día" />
-  </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+ <h2 class="text-sm font-semibold text-primary mb-3">Devoluciones por estado</h2>
+ <app-reporte-chart [config]="graficoEstado()" descripcion="Devoluciones por estado" />
+ </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 lg:col-span-2">
+ <h2 class="text-sm font-semibold text-primary mb-3">Importe devuelto por día</h2>
+ <app-reporte-chart [config]="graficoFecha()" descripcion="Importe devuelto por día" />
+ </div>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-    <h2 class="text-sm font-semibold text-primary mb-3">Unidades devueltas por producto</h2>
-    @if (graficoProducto().hayDatos) {
-      <app-reporte-chart [config]="graficoProducto().config" [alto]="graficoProducto().alto" descripcion="Unidades devueltas por producto" />
-    } @else {
-      <p class="text-sm text-gray-500 py-8 text-center">Sin unidades devueltas (solo hay devoluciones rechazadas).</p>
-    }
-  </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+ <h2 class="text-sm font-semibold text-primary mb-3">Unidades devueltas por producto</h2>
+ @if (graficoProducto().hayDatos) {
+ <app-reporte-chart [config]="graficoProducto().config" [alto]="graficoProducto().alto" descripcion="Unidades devueltas por producto" />
+ } @else {
+ <p class="text-sm text-gray-500 py-8 text-center">Sin unidades devueltas (solo hay devoluciones rechazadas).</p>
+ }
+ </div>
 
-  <div class="space-y-6">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por estado</h2>
-      <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-estado">
-        <thead class="bg-container">
-          <tr>
-            <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Estado</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Devoluciones</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Importe</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 text-sm">
-          @for (e of d.por_estado; track e.estado) {
-            <tr>
-              <td class="px-4 py-2"><app-badge [variant]="varianteEstado(e.estado)" [texto]="etiquetaEstado(e.estado)" /></td>
-              <td class="px-4 py-2 text-right">{{ e.num_devoluciones }}</td>
-              <td class="px-4 py-2 text-right">{{ e.unidades }}</td>
-              <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ e.importe | number: '1.2-2' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+ <div class="space-y-6">
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por estado</h2>
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-estado">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Estado</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Devoluciones</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Importe</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (e of d.por_estado; track e.estado) {
+ <tr>
+ <td class="px-4 py-2"><app-badge [variant]="varianteEstado(e.estado)" [texto]="etiquetaEstado(e.estado)" /></td>
+ <td class="px-4 py-2 text-right">{{ e.num_devoluciones }}</td>
+ <td class="px-4 py-2 text-right">{{ e.unidades }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ e.importe | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por categoría</h2>
-      @if (d.por_categoria.length > 0) {
-        <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-categoria">
-          <thead class="bg-container">
-            <tr>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Importe</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            @for (c of d.por_categoria; track c.id_categoria) {
-              <tr>
-                <td class="px-4 py-2">{{ c.categoria }}</td>
-                <td class="px-4 py-2 text-right">{{ c.unidades }}</td>
-                <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.importe | number: '1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      } @else {
-        <p class="text-sm text-gray-500 p-4">Sin unidades devueltas.</p>
-      }
-    </div>
-  </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por categoría</h2>
+ @if (d.por_categoria.length > 0) {
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-categoria">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Importe</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (c of d.por_categoria; track c.id_categoria) {
+ <tr>
+ <td class="px-4 py-2">{{ c.categoria }}</td>
+ <td class="px-4 py-2 text-right">{{ c.unidades }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.importe | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ } @else {
+ <p class="text-sm text-gray-500 p-4">Sin unidades devueltas.</p>
+ }
+ </div>
+ </div>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-  <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Detalle de devoluciones</h2>
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-detalle">
-      <thead class="bg-container">
-        <tr>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">#</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Solicitud (UTC)</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Venta</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Estado</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Motivo</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Importe solicitado</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 text-sm">
-        @for (x of d.detalle; track x.id_devolucion) {
-          <tr>
-            <td class="px-4 py-3">{{ x.id_devolucion }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ x.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' : 'UTC' }}</td>
-            <td class="px-4 py-3">{{ x.codigo_venta }}</td>
-            <td class="px-4 py-3"><app-badge [variant]="varianteEstado(x.estado)" [texto]="etiquetaEstado(x.estado)" /></td>
-            <td class="px-4 py-3">{{ x.motivo }}</td>
-            <td class="px-4 py-3 text-right">{{ x.unidades }}</td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ x.importe | number: '1.2-2' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Detalle de devoluciones</h2>
+ <div class="overflow-x-auto">
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-detalle">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">#</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Solicitud (UTC)</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Venta</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Estado</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Motivo</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Importe solicitado</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (x of d.detalle; track x.id_devolucion) {
+ <tr>
+ <td class="px-4 py-3">{{ x.id_devolucion }}</td>
+ <td class="px-4 py-3 whitespace-nowrap">{{ x.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' : 'UTC' }}</td>
+ <td class="px-4 py-3">{{ x.codigo_venta }}</td>
+ <td class="px-4 py-3"><app-badge [variant]="varianteEstado(x.estado)" [texto]="etiquetaEstado(x.estado)" /></td>
+ <td class="px-4 py-3">{{ x.motivo }}</td>
+ <td class="px-4 py-3 text-right">{{ x.unidades }}</td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ x.importe | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
 </div>

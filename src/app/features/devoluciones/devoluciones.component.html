@@ -1,375 +1,375 @@
-<!-- CU13 — Gestión de Devoluciones (ASU/GS/V) -->
+<!-- Gestión de Devoluciones (ASU/GS/V) -->
 <section class="p-6 md:p-8 max-w-7xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Gestión de Devoluciones</h1>
-      <p class="text-gray-600 mt-1">
-        Revise, apruebe o rechace las solicitudes de devolución de los clientes.
-      </p>
-    </div>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Gestión de Devoluciones</h1>
+ <p class="text-gray-600 mt-1">
+ Revise, apruebe o rechace las solicitudes de devolución de los clientes.
+ </p>
+ </div>
+ </div>
 
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Solicitadas
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalSolicitadas() }}</p>
-    </div>
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Aprobadas
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalAprobadas() }}</p>
-    </div>
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Completadas
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalCompletadas() }}</p>
-    </div>
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Rechazadas
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalRechazadas() }}</p>
-    </div>
-  </div>
+ <!-- KPI Cards -->
+ <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Solicitadas
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalSolicitadas() }}</p>
+ </div>
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Aprobadas
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalAprobadas() }}</p>
+ </div>
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Completadas
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalCompletadas() }}</p>
+ </div>
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Rechazadas
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalRechazadas() }}</p>
+ </div>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de filtros: estado -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="flex flex-wrap gap-2">
-      @for (estado of estados; track estado) {
-        <button
-          type="button"
-          (click)="onFiltroEstado(estado)"
-          [class.bg-primary]="filtroEstado() === estado"
-          [class.text-white]="filtroEstado() === estado"
-          [class.bg-white]="filtroEstado() !== estado"
-          [class.text-primary]="filtroEstado() !== estado"
-          [class.border]="filtroEstado() !== estado"
-          [class.border-primary]="filtroEstado() !== estado"
-          class="px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 transition"
-        >
-          {{ etiquetaDe(estado) }}
-        </button>
-      }
-    </div>
-  </div>
+ <!-- Barra de filtros: estado -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
+ >
+ <div class="flex flex-wrap gap-2">
+ @for (estado of estados; track estado) {
+ <button
+ type="button"
+ (click)="onFiltroEstado(estado)"
+ [class.bg-primary]="filtroEstado() === estado"
+ [class.text-white]="filtroEstado() === estado"
+ [class.bg-white]="filtroEstado() !== estado"
+ [class.text-primary]="filtroEstado() !== estado"
+ [class.border]="filtroEstado() !== estado"
+ [class.border-primary]="filtroEstado() !== estado"
+ class="px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 transition"
+ >
+ {{ etiquetaDe(estado) }}
+ </button>
+ }
+ </div>
+ </div>
 
-  <!-- Tabla -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-slate-200">
-        <thead class="bg-container">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
-              #
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
-              Venta
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
-              Cliente
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
-              Estado
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
-              Solicitud
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
-              Monto
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
-              Acción
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 bg-white">
-          @if (cargando()) {
-            <tr>
-              <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
-                Cargando devoluciones...
-              </td>
-            </tr>
-          } @else if (devoluciones().length === 0) {
-            <tr>
-              <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
-                No hay devoluciones con el filtro actual.
-              </td>
-            </tr>
-          } @else {
-            @for (d of devoluciones(); track d.id_devolucion) {
-              <tr class="hover:bg-slate-50/60 transition">
-                <td class="px-4 py-3 text-sm text-slate-700 font-medium">
-                  #{{ d.id_devolucion }}
-                </td>
-                <td class="px-4 py-3 text-sm text-slate-700">
-                  {{ d.codigo_venta ?? ('Venta #' + d.id_venta) }}
-                </td>
-                <td class="px-4 py-3 text-sm text-slate-700">
-                  {{ d.cliente_nombre ?? '—' }}
-                </td>
-                <td class="px-4 py-3 text-sm">
-                  <app-badge
-                    [variant]="badgeVariante[d.estado]"
-                    [texto]="etiquetasEstado[d.estado]"
-                  />
-                </td>
-                <td class="px-4 py-3 text-sm text-slate-600">
-                  {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
-                </td>
-                <td class="px-4 py-3 text-sm text-right text-slate-700">
-                  Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    (click)="verDetalle(d)"
-                    class="text-primary hover:text-accent text-sm font-semibold transition"
-                  >
-                    Ver detalle
-                  </button>
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
+ <!-- Tabla -->
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <div class="overflow-x-auto">
+ <table class="min-w-full divide-y divide-slate-200">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+ #
+ </th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+ Venta
+ </th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+ Cliente
+ </th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+ Estado
+ </th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase tracking-wider">
+ Solicitud
+ </th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
+ Monto
+ </th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase tracking-wider">
+ Acción
+ </th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 bg-white">
+ @if (cargando()) {
+ <tr>
+ <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
+ Cargando devoluciones...
+ </td>
+ </tr>
+ } @else if (devoluciones().length === 0) {
+ <tr>
+ <td colspan="7" class="px-4 py-12 text-center text-slate-500 text-sm">
+ No hay devoluciones con el filtro actual.
+ </td>
+ </tr>
+ } @else {
+ @for (d of devoluciones(); track d.id_devolucion) {
+ <tr class="hover:bg-slate-50/60 transition">
+ <td class="px-4 py-3 text-sm text-slate-700 font-medium">
+ #{{ d.id_devolucion }}
+ </td>
+ <td class="px-4 py-3 text-sm text-slate-700">
+ {{ d.codigo_venta ?? ('Venta #' + d.id_venta) }}
+ </td>
+ <td class="px-4 py-3 text-sm text-slate-700">
+ {{ d.cliente_nombre ?? '—' }}
+ </td>
+ <td class="px-4 py-3 text-sm">
+ <app-badge
+ [variant]="badgeVariante[d.estado]"
+ [texto]="etiquetasEstado[d.estado]"
+ />
+ </td>
+ <td class="px-4 py-3 text-sm text-slate-600">
+ {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
+ </td>
+ <td class="px-4 py-3 text-sm text-right text-slate-700">
+ Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
+ </td>
+ <td class="px-4 py-3 text-right">
+ <button
+ type="button"
+ (click)="verDetalle(d)"
+ class="text-primary hover:text-accent text-sm font-semibold transition"
+ >
+ Ver detalle
+ </button>
+ </td>
+ </tr>
+ }
+ }
+ </tbody>
+ </table>
+ </div>
 
-    <!-- Paginación -->
-    @if (!cargando() && devoluciones().length > 0) {
-      <div
-        class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
-      >
-        <span class="text-sm text-slate-600">
-          Página {{ pagina() }} de {{ pages() }} — {{ totalAcumulado() }} registro(s)
-        </span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Paginación -->
+ @if (!cargando() && devoluciones().length > 0) {
+ <div
+ class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
+ >
+ <span class="text-sm text-slate-600">
+ Página {{ pagina() }} de {{ pages() }} — {{ totalAcumulado() }} registro(s)
+ </span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+ >
+ Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition"
+ >
+ Siguiente
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal de detalle -->
 @if (modalAbierto() && devolucionDetalle(); as d) {
-  <div
-    class="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 overflow-y-auto"
-    (click)="cerrarModal()"
-  >
-    <div
-      class="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8"
-      (click)="$event.stopPropagation()"
-    >
-      <!-- Header del modal -->
-      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-primary">
-            Devolución #{{ d.id_devolucion }}
-          </h2>
-          <p class="text-sm text-slate-600">
-            Venta {{ d.codigo_venta ?? ('#' + d.id_venta) }} —
-            {{ d.cliente_nombre ?? 'Cliente sin nombre' }}
-          </p>
-        </div>
-        <app-badge [variant]="badgeVariante[d.estado]" [texto]="etiquetasEstado[d.estado]" />
-      </div>
+ <div
+ class="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4 overflow-y-auto"
+ (click)="cerrarModal()"
+ >
+ <div
+ class="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8"
+ (click)="$event.stopPropagation()"
+ >
+ <!-- Header del modal -->
+ <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+ <div>
+ <h2 class="text-lg font-bold text-primary">
+ Devolución #{{ d.id_devolucion }}
+ </h2>
+ <p class="text-sm text-slate-600">
+ Venta {{ d.codigo_venta ?? ('#' + d.id_venta) }} —
+ {{ d.cliente_nombre ?? 'Cliente sin nombre' }}
+ </p>
+ </div>
+ <app-badge [variant]="badgeVariante[d.estado]" [texto]="etiquetasEstado[d.estado]" />
+ </div>
 
-      <!-- Cuerpo del modal -->
-      <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-        <!-- Info general -->
-        <dl class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha solicitud</dt>
-            <dd class="text-slate-800">
-              {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
-            </dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha procesado</dt>
-            <dd class="text-slate-800">
-              {{ d.fecha_procesado ? (d.fecha_procesado | date: 'dd/MM/yyyy HH:mm') : '—' }}
-            </dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-slate-500 uppercase text-xs">Procesador</dt>
-            <dd class="text-slate-800">{{ d.procesador_nombre ?? '—' }}</dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-slate-500 uppercase text-xs">Monto devuelto</dt>
-            <dd class="text-slate-800">
-              Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
-            </dd>
-          </div>
-        </dl>
+ <!-- Cuerpo del modal -->
+ <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+ <!-- Info general -->
+ <dl class="grid grid-cols-2 gap-4 text-sm">
+ <div>
+ <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha solicitud</dt>
+ <dd class="text-slate-800">
+ {{ d.fecha_solicitud | date: 'dd/MM/yyyy HH:mm' }}
+ </dd>
+ </div>
+ <div>
+ <dt class="font-semibold text-slate-500 uppercase text-xs">Fecha procesado</dt>
+ <dd class="text-slate-800">
+ {{ d.fecha_procesado ? (d.fecha_procesado | date: 'dd/MM/yyyy HH:mm') : '—' }}
+ </dd>
+ </div>
+ <div>
+ <dt class="font-semibold text-slate-500 uppercase text-xs">Procesador</dt>
+ <dd class="text-slate-800">{{ d.procesador_nombre ?? '—' }}</dd>
+ </div>
+ <div>
+ <dt class="font-semibold text-slate-500 uppercase text-xs">Monto devuelto</dt>
+ <dd class="text-slate-800">
+ Bs. {{ d.monto_total_devuelto | number: '1.2-2' }}
+ </dd>
+ </div>
+ </dl>
 
-        <!-- Motivo -->
-        <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Motivo de la solicitud</p>
-          <p class="text-sm text-slate-800 bg-slate-50 rounded-lg p-3">{{ d.motivo }}</p>
-        </div>
-        @if (d.motivo_rechazo) {
-          <div>
-            <p class="text-xs font-semibold text-rose-600 uppercase mb-1">Motivo de rechazo</p>
-            <p class="text-sm text-rose-800 bg-rose-50 rounded-lg p-3">{{ d.motivo_rechazo }}</p>
-          </div>
-        }
+ <!-- Motivo -->
+ <div>
+ <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Motivo de la solicitud</p>
+ <p class="text-sm text-slate-800 bg-slate-50 rounded-lg p-3">{{ d.motivo }}</p>
+ </div>
+ @if (d.motivo_rechazo) {
+ <div>
+ <p class="text-xs font-semibold text-rose-600 uppercase mb-1">Motivo de rechazo</p>
+ <p class="text-sm text-rose-800 bg-rose-50 rounded-lg p-3">{{ d.motivo_rechazo }}</p>
+ </div>
+ }
 
-        <!-- Items -->
-        <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase mb-2">
-            Ítems a devolver ({{ d.items.length }})
-          </p>
-          <div class="border border-slate-200 rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-              <thead class="bg-slate-50">
-                <tr>
-                  <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">Producto</th>
-                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Cantidad</th>
-                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Precio unit.</th>
-                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                @for (item of d.items; track item.id_detalle) {
-                  <tr>
-                    <td class="px-3 py-2 text-slate-800">
-                      {{ item.nombre_producto ?? ('Producto #' + item.id_producto) }}
-                    </td>
-                    <td class="px-3 py-2 text-right text-slate-700">{{ item.cantidad_devuelta }}</td>
-                    <td class="px-3 py-2 text-right text-slate-700">
-                      Bs. {{ item.precio_unitario | number: '1.2-2' }}
-                    </td>
-                    <td class="px-3 py-2 text-right font-medium text-slate-800">
-                      Bs. {{ item.subtotal | number: '1.2-2' }}
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
+ <!-- Items -->
+ <div>
+ <p class="text-xs font-semibold text-slate-500 uppercase mb-2">
+ Ítems a devolver ({{ d.items.length }})
+ </p>
+ <div class="border border-slate-200 rounded-lg overflow-hidden">
+ <table class="min-w-full divide-y divide-slate-200 text-sm">
+ <thead class="bg-slate-50">
+ <tr>
+ <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">Producto</th>
+ <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Cantidad</th>
+ <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Precio unit.</th>
+ <th class="px-3 py-2 text-right text-xs font-semibold text-slate-600">Subtotal</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (item of d.items; track item.id_detalle) {
+ <tr>
+ <td class="px-3 py-2 text-slate-800">
+ {{ item.nombre_producto ?? ('Producto #' + item.id_producto) }}
+ </td>
+ <td class="px-3 py-2 text-right text-slate-700">{{ item.cantidad_devuelta }}</td>
+ <td class="px-3 py-2 text-right text-slate-700">
+ Bs. {{ item.precio_unitario | number: '1.2-2' }}
+ </td>
+ <td class="px-3 py-2 text-right font-medium text-slate-800">
+ Bs. {{ item.subtotal | number: '1.2-2' }}
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
 
-        <!-- Motivo de rechazo (input solo cuando aplica) -->
-        @if (d.estado === 'SOLICITADA') {
-          <div>
-            <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
-              Motivo de rechazo (obligatorio para RECHAZAR)
-            </label>
-            <textarea
-              [ngModel]="motivoRechazo()"
-              (ngModelChange)="motivoRechazo.set($event)"
-              rows="2"
-              placeholder="Detalle por qué se rechaza la solicitud..."
-              class="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
-            ></textarea>
-          </div>
-        }
+ <!-- Motivo de rechazo (input solo cuando aplica) -->
+ @if (d.estado === 'SOLICITADA') {
+ <div>
+ <label class="text-xs font-semibold text-slate-500 uppercase mb-1 block">
+ Motivo de rechazo (obligatorio para RECHAZAR)
+ </label>
+ <textarea
+ [ngModel]="motivoRechazo()"
+ (ngModelChange)="motivoRechazo.set($event)"
+ rows="2"
+ placeholder="Detalle por qué se rechaza la solicitud..."
+ class="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
+ ></textarea>
+ </div>
+ }
 
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
-      </div>
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
+ </div>
 
-      <!-- Footer del modal -->
-      <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          (click)="cerrarModal()"
-          class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"
-        >
-          Cerrar
-        </button>
-        @if (d.estado === 'SOLICITADA') {
-          <button
-            type="button"
-            (click)="ejecutarAccion('RECHAZAR')"
-            [disabled]="guardando()"
-            class="px-4 py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition"
-          >
-            Rechazar
-          </button>
-          <button
-            type="button"
-            (click)="ejecutarAccion('APROBAR')"
-            [disabled]="guardando()"
-            class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary disabled:opacity-50 transition"
-          >
-            Aprobar
-          </button>
-        }
-        @if (d.estado === 'APROBADA') {
-          <button
-            type="button"
-            (click)="ejecutarAccion('COMPLETAR')"
-            [disabled]="guardando()"
-            class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition"
-          >
-            Completar (reintegrar stock)
-          </button>
-        }
-      </div>
-    </div>
-  </div>
+ <!-- Footer del modal -->
+ <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition"
+ >
+ Cerrar
+ </button>
+ @if (d.estado === 'SOLICITADA') {
+ <button
+ type="button"
+ (click)="ejecutarAccion('RECHAZAR')"
+ [disabled]="guardando()"
+ class="px-4 py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition"
+ >
+ Rechazar
+ </button>
+ <button
+ type="button"
+ (click)="ejecutarAccion('APROBAR')"
+ [disabled]="guardando()"
+ class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-accent hover:text-primary disabled:opacity-50 transition"
+ >
+ Aprobar
+ </button>
+ }
+ @if (d.estado === 'APROBADA') {
+ <button
+ type="button"
+ (click)="ejecutarAccion('COMPLETAR')"
+ [disabled]="guardando()"
+ class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition"
+ >
+ Completar (reintegrar stock)
+ </button>
+ }
+ </div>
+ </div>
+ </div>
 
-  <!-- ConfirmDialog: se renderiza por encima del modal (z-60 interno). -->
-  @if (confirmarAccion(); as ctx) {
-    <app-confirm-dialog
-      [titulo]="'Confirmar acción'"
-      [mensaje]="
-        ctx.accion === 'RECHAZAR'
-          ? '¿Rechazar esta devolución? El cliente verá el motivo de rechazo.'
-          : ctx.accion === 'APROBAR'
-            ? '¿Aprobar esta devolución? Pasará a estado APROBADA y luego podrá completarla.'
-            : '¿Completar esta devolución? Se reintegrará el stock al inventario (kardex) en la misma transacción.'
-      "
-      [textoConfirmar]="accionLabel(ctx.accion)"
-      [peligro]="ctx.accion === 'RECHAZAR'"
-      (confirmado)="confirmarEjecucion()"
-      (cancelado)="cancelarEjecucion()"
-    />
-  }
+ <!-- ConfirmDialog: se renderiza por encima del modal (z-60 interno). -->
+ @if (confirmarAccion(); as ctx) {
+ <app-confirm-dialog
+ [titulo]="'Confirmar acción'"
+ [mensaje]="
+ ctx.accion === 'RECHAZAR'
+ ? '¿Rechazar esta devolución? El cliente verá el motivo de rechazo.'
+ : ctx.accion === 'APROBAR'
+ ? '¿Aprobar esta devolución? Pasará a estado APROBADA y luego podrá completarla.'
+ : '¿Completar esta devolución? Se reintegrará el stock al inventario (kardex) en la misma transacción.'
+ "
+ [textoConfirmar]="accionLabel(ctx.accion)"
+ [peligro]="ctx.accion === 'RECHAZAR'"
+ (confirmado)="confirmarEjecucion()"
+ (cancelado)="cancelarEjecucion()"
+ />
+ }
 }

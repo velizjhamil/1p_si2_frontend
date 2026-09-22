@@ -1,365 +1,365 @@
-<!-- CU19 — Zonas de cobertura y tarifas de una agencia -->
+<!-- Zonas de cobertura y tarifas de una agencia -->
 <section class="bg-white rounded-xl border border-primary/10 shadow-sm p-5 space-y-4">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h2 class="text-lg font-bold text-primary">Zonas de cobertura y tarifas</h2>
-      <p class="text-sm text-gray-600">
-        Ciudades (y subzonas) donde reparte la agencia. Cada zona tiene tarifas por peso o por volumen.
-      </p>
-    </div>
-    @if (puedeEditar) {
-      <button
-        type="button"
-        (click)="abrirZona(null)"
-        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
-      >
-        + Agregar zona
-      </button>
-    }
-  </div>
+ <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+ <div>
+ <h2 class="text-lg font-bold text-primary">Zonas de cobertura y tarifas</h2>
+ <p class="text-sm text-gray-600">
+ Ciudades (y subzonas) donde reparte la agencia. Cada zona tiene tarifas por peso o por volumen.
+ </p>
+ </div>
+ @if (puedeEditar) {
+ <button
+ type="button"
+ (click)="abrirZona(null)"
+ class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
+ >
+ + Agregar zona
+ </button>
+ }
+ </div>
 
-  @if (puedeGestionar() && !habilitada()) {
-    <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-      Agencia deshabilitada: no admite nuevas zonas ni tarifas ni cambios en ellas. Puede consultarlas y eliminarlas.
-    </p>
-  }
-  @if (exitoMessage()) {
-    <div class="px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm" role="status">
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage()) {
-    <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
-      {{ errorMessage() }}
-    </div>
-  }
+ @if (puedeGestionar() && !habilitada()) {
+ <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+ Agencia deshabilitada: no admite nuevas zonas ni tarifas ni cambios en ellas. Puede consultarlas y eliminarlas.
+ </p>
+ }
+ @if (exitoMessage()) {
+ <div class="px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm" role="status">
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage()) {
+ <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+ {{ errorMessage() }}
+ </div>
+ }
 
-  @if (cargando()) {
-    <p class="text-sm text-primary/60 py-4 text-center">Cargando zonas...</p>
-  } @else if (zonas().length === 0) {
-    <p class="text-sm text-gray-500 py-6 text-center border border-dashed border-primary/20 rounded-lg">
-      La agencia todavía no tiene zonas de cobertura: no aparecerá como disponible para ninguna ciudad.
-    </p>
-  } @else {
-    <ul class="space-y-3">
-      @for (z of zonas(); track z.id_zona) {
-        <li class="border border-primary/15 rounded-xl overflow-hidden">
-          <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-container/60">
-            <div>
-              <p class="font-semibold text-primary">{{ nombreZona(z) }}</p>
-              <p class="text-xs text-gray-500">
-                {{ z.departamento || '' }}{{ z.departamento ? ' · ' : '' }}{{ z.total_tarifas }} tarifa(s)
-              </p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3 text-sm">
-              <button
-                type="button"
-                (click)="alternarZona(z)"
-                [attr.aria-expanded]="expandida() === z.id_zona"
-                class="text-primary font-medium hover:underline"
-              >
-                {{ expandida() === z.id_zona ? 'Ocultar tarifas' : 'Ver tarifas' }}
-              </button>
-              @if (puedeEditar) {
-                <button type="button" (click)="abrirZona(z)" class="text-primary/80 font-medium hover:text-primary">
-                  Editar
-                </button>
-              }
-              @if (puedeGestionar()) {
-                <button type="button" (click)="confirmarZona.set(z)" class="text-red-600 font-medium hover:text-red-400">
-                  Eliminar
-                </button>
-              }
-            </div>
-          </div>
+ @if (cargando()) {
+ <p class="text-sm text-primary/60 py-4 text-center">Cargando zonas...</p>
+ } @else if (zonas().length === 0) {
+ <p class="text-sm text-gray-500 py-6 text-center border border-dashed border-primary/20 rounded-lg">
+ La agencia todavía no tiene zonas de cobertura: no aparecerá como disponible para ninguna ciudad.
+ </p>
+ } @else {
+ <ul class="space-y-3">
+ @for (z of zonas(); track z.id_zona) {
+ <li class="border border-primary/15 rounded-xl overflow-hidden">
+ <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-container/60">
+ <div>
+ <p class="font-semibold text-primary">{{ nombreZona(z) }}</p>
+ <p class="text-xs text-gray-500">
+ {{ z.departamento || '' }}{{ z.departamento ? ' · ' : '' }}{{ z.total_tarifas }} tarifa(s)
+ </p>
+ </div>
+ <div class="flex flex-wrap items-center gap-3 text-sm">
+ <button
+ type="button"
+ (click)="alternarZona(z)"
+ [attr.aria-expanded]="expandida() === z.id_zona"
+ class="text-primary font-medium hover:underline"
+ >
+ {{ expandida() === z.id_zona ? 'Ocultar tarifas' : 'Ver tarifas' }}
+ </button>
+ @if (puedeEditar) {
+ <button type="button" (click)="abrirZona(z)" class="text-primary/80 font-medium hover:text-primary">
+ Editar
+ </button>
+ }
+ @if (puedeGestionar()) {
+ <button type="button" (click)="confirmarZona.set(z)" class="text-red-600 font-medium hover:text-red-400">
+ Eliminar
+ </button>
+ }
+ </div>
+ </div>
 
-          @if (expandida() === z.id_zona) {
-            <div class="px-4 py-3 space-y-3 bg-white">
-              @if (puedeEditar) {
-                <div class="flex justify-end">
-                  <button
-                    type="button"
-                    (click)="abrirTarifa(z, null)"
-                    class="bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
-                  >
-                    + Agregar tarifa
-                  </button>
-                </div>
-              }
-              @if (cargandoTarifas() && tarifasDe(z).length === 0) {
-                <p class="text-sm text-primary/60">Cargando tarifas...</p>
-              } @else if (tarifasDe(z).length === 0) {
-                <p class="text-sm text-gray-500">Esta zona no tiene tarifas: no se puede cotizar con ella.</p>
-              } @else {
-                <div class="overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <thead class="text-xs text-slate-500 uppercase">
-                      <tr>
-                        <th class="text-left py-2 pr-3 font-semibold">Criterio</th>
-                        <th class="text-left py-2 pr-3 font-semibold">Rango</th>
-                        <th class="text-right py-2 pr-3 font-semibold">Costo</th>
-                        <th class="text-left py-2 pr-3 font-semibold">Vigencia</th>
-                        <th class="text-center py-2 pr-3 font-semibold">Estado</th>
-                        @if (puedeGestionar()) {
-                          <th class="text-right py-2 font-semibold">Acciones</th>
-                        }
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                      @for (t of tarifasDe(z); track t.id_tarifa) {
-                        <tr>
-                          <td class="py-2 pr-3 text-slate-800">{{ criterioLabel[t.criterio] }}</td>
-                          <td class="py-2 pr-3 text-slate-700">{{ formatoRango(t.criterio, t.rango_min, t.rango_max) }}</td>
-                          <td class="py-2 pr-3 text-right font-medium text-slate-900">{{ costo(t.costo) }}</td>
-                          <td class="py-2 pr-3 text-slate-600 whitespace-nowrap">
-                            {{ formatoVigencia(t.vigente_desde, t.vigente_hasta) }}
-                          </td>
-                          <td class="py-2 pr-3 text-center">
-                            <app-badge [variant]="estado(t).variante" [texto]="estado(t).texto" />
-                          </td>
-                          @if (puedeGestionar()) {
-                            <td class="py-2 text-right whitespace-nowrap">
-                              @if (puedeEditar) {
-                                <button type="button" (click)="abrirTarifa(z, t)" class="text-primary font-medium mr-3 hover:underline">
-                                  Editar
-                                </button>
-                                <button
-                                  type="button"
-                                  (click)="alternarActiva(z, t)"
-                                  class="text-primary/70 font-medium mr-3 hover:text-primary"
-                                >
-                                  {{ t.is_active ? 'Desactivar' : 'Activar' }}
-                                </button>
-                              }
-                              <button
-                                type="button"
-                                (click)="confirmarTarifa.set({ zona: z, tarifa: t })"
-                                class="text-red-600 font-medium hover:text-red-400"
-                              >
-                                Eliminar
-                              </button>
-                            </td>
-                          }
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-                <p class="text-xs text-slate-500">
-                  Rango [mínimo, máximo): el mínimo se incluye y el máximo no. Costos = lo que se paga a la agencia.
-                </p>
-              }
-            </div>
-          }
-        </li>
-      }
-    </ul>
-  }
+ @if (expandida() === z.id_zona) {
+ <div class="px-4 py-3 space-y-3 bg-white">
+ @if (puedeEditar) {
+ <div class="flex justify-end">
+ <button
+ type="button"
+ (click)="abrirTarifa(z, null)"
+ class="bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium"
+ >
+ + Agregar tarifa
+ </button>
+ </div>
+ }
+ @if (cargandoTarifas() && tarifasDe(z).length === 0) {
+ <p class="text-sm text-primary/60">Cargando tarifas...</p>
+ } @else if (tarifasDe(z).length === 0) {
+ <p class="text-sm text-gray-500">Esta zona no tiene tarifas: no se puede cotizar con ella.</p>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="text-xs text-slate-500 uppercase">
+ <tr>
+ <th class="text-left py-2 pr-3 font-semibold">Criterio</th>
+ <th class="text-left py-2 pr-3 font-semibold">Rango</th>
+ <th class="text-right py-2 pr-3 font-semibold">Costo</th>
+ <th class="text-left py-2 pr-3 font-semibold">Vigencia</th>
+ <th class="text-center py-2 pr-3 font-semibold">Estado</th>
+ @if (puedeGestionar()) {
+ <th class="text-right py-2 font-semibold">Acciones</th>
+ }
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (t of tarifasDe(z); track t.id_tarifa) {
+ <tr>
+ <td class="py-2 pr-3 text-slate-800">{{ criterioLabel[t.criterio] }}</td>
+ <td class="py-2 pr-3 text-slate-700">{{ formatoRango(t.criterio, t.rango_min, t.rango_max) }}</td>
+ <td class="py-2 pr-3 text-right font-medium text-slate-900">{{ costo(t.costo) }}</td>
+ <td class="py-2 pr-3 text-slate-600 whitespace-nowrap">
+ {{ formatoVigencia(t.vigente_desde, t.vigente_hasta) }}
+ </td>
+ <td class="py-2 pr-3 text-center">
+ <app-badge [variant]="estado(t).variante" [texto]="estado(t).texto" />
+ </td>
+ @if (puedeGestionar()) {
+ <td class="py-2 text-right whitespace-nowrap">
+ @if (puedeEditar) {
+ <button type="button" (click)="abrirTarifa(z, t)" class="text-primary font-medium mr-3 hover:underline">
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="alternarActiva(z, t)"
+ class="text-primary/70 font-medium mr-3 hover:text-primary"
+ >
+ {{ t.is_active ? 'Desactivar' : 'Activar' }}
+ </button>
+ }
+ <button
+ type="button"
+ (click)="confirmarTarifa.set({ zona: z, tarifa: t })"
+ class="text-red-600 font-medium hover:text-red-400"
+ >
+ Eliminar
+ </button>
+ </td>
+ }
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <p class="text-xs text-slate-500">
+ Rango [mínimo, máximo): el mínimo se incluye y el máximo no. Costos = lo que se paga a la agencia.
+ </p>
+ }
+ </div>
+ }
+ </li>
+ }
+ </ul>
+ }
 </section>
 
 <!-- Modal zona -->
 @if (zonaModal(); as ctx) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-primary/40 backdrop-blur-sm" (click)="cerrarZona()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">{{ ctx.zona ? 'Editar zona' : 'Agregar zona de cobertura' }}</h2>
-        <p class="text-white/80 text-xs mt-0.5">Ciudad del catálogo y subzona opcional (vacía = toda la ciudad).</p>
-      </div>
-      <div class="p-6 space-y-4">
-        @if (zError()) {
-          <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
-            {{ zError() }}
-          </div>
-        }
-        <label class="block text-sm font-medium text-primary">
-          Ciudad *
-          <select
-            [ngModel]="zCiudad()"
-            (ngModelChange)="zCiudad.set($event)"
-            aria-label="Ciudad de la zona"
-            class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-          >
-            <option [ngValue]="null" disabled>Seleccione una ciudad</option>
-            @for (c of ciudades(); track c.id) {
-              <option [ngValue]="c.id">{{ c.nombre }}{{ c.departamento ? ' — ' + c.departamento : '' }}</option>
-            }
-          </select>
-        </label>
-        <label class="block text-sm font-medium text-primary">
-          Subzona / barrio (opcional)
-          <input
-            type="text"
-            maxlength="100"
-            [ngModel]="zSubzona()"
-            (ngModelChange)="zSubzona.set($event)"
-            placeholder="Ej: Sopocachi"
-            aria-label="Subzona"
-            class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-          />
-        </label>
-        <div class="flex justify-end gap-3 pt-1">
-          <button type="button" (click)="cerrarZona()" class="px-4 py-2 rounded-lg border border-primary/30 text-primary hover:bg-container text-sm font-medium">
-            Cancelar
-          </button>
-          <button
-            type="button"
-            (click)="guardarZona()"
-            [disabled]="zGuardando()"
-            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary text-sm font-medium disabled:opacity-50"
-          >
-            {{ zGuardando() ? 'Guardando...' : 'Guardar zona' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div class="absolute inset-0 bg-primary/40 backdrop-blur-sm" (click)="cerrarZona()"></div>
+ <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">{{ ctx.zona ? 'Editar zona' : 'Agregar zona de cobertura' }}</h2>
+ <p class="text-white/80 text-xs mt-0.5">Ciudad del catálogo y subzona opcional (vacía = toda la ciudad).</p>
+ </div>
+ <div class="p-6 space-y-4">
+ @if (zError()) {
+ <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+ {{ zError() }}
+ </div>
+ }
+ <label class="block text-sm font-medium text-primary">
+ Ciudad *
+ <select
+ [ngModel]="zCiudad()"
+ (ngModelChange)="zCiudad.set($event)"
+ aria-label="Ciudad de la zona"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ >
+ <option [ngValue]="null" disabled>Seleccione una ciudad</option>
+ @for (c of ciudades(); track c.id) {
+ <option [ngValue]="c.id">{{ c.nombre }}{{ c.departamento ? ' — ' + c.departamento : '' }}</option>
+ }
+ </select>
+ </label>
+ <label class="block text-sm font-medium text-primary">
+ Subzona / barrio (opcional)
+ <input
+ type="text"
+ maxlength="100"
+ [ngModel]="zSubzona()"
+ (ngModelChange)="zSubzona.set($event)"
+ placeholder="Ej: Sopocachi"
+ aria-label="Subzona"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ />
+ </label>
+ <div class="flex justify-end gap-3 pt-1">
+ <button type="button" (click)="cerrarZona()" class="px-4 py-2 rounded-lg border border-primary/30 text-primary hover:bg-container text-sm font-medium">
+ Cancelar
+ </button>
+ <button
+ type="button"
+ (click)="guardarZona()"
+ [disabled]="zGuardando()"
+ class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary text-sm font-medium disabled:opacity-50"
+ >
+ {{ zGuardando() ? 'Guardando...' : 'Guardar zona' }}
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
 }
 
 <!-- Modal tarifa -->
 @if (tarifaModal(); as ctx) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-primary/40 backdrop-blur-sm" (click)="cerrarTarifa()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">{{ ctx.tarifa ? 'Editar tarifa' : 'Agregar tarifa' }}</h2>
-        <p class="text-white/80 text-xs mt-0.5">{{ nombreZona(ctx.zona) }}</p>
-      </div>
-      <div class="p-6 space-y-4">
-        @if (tError()) {
-          <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
-            {{ tError() }}
-          </div>
-        }
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div class="absolute inset-0 bg-primary/40 backdrop-blur-sm" (click)="cerrarTarifa()"></div>
+ <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">{{ ctx.tarifa ? 'Editar tarifa' : 'Agregar tarifa' }}</h2>
+ <p class="text-white/80 text-xs mt-0.5">{{ nombreZona(ctx.zona) }}</p>
+ </div>
+ <div class="p-6 space-y-4">
+ @if (tError()) {
+ <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+ {{ tError() }}
+ </div>
+ }
 
-        <label class="block text-sm font-medium text-primary">
-          Criterio *
-          <select
-            [ngModel]="tCriterio()"
-            (ngModelChange)="tCriterio.set($event)"
-            aria-label="Criterio de la tarifa"
-            class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-          >
-            @for (c of criterios; track c) {
-              <option [value]="c">{{ criterioLabel[c] }}</option>
-            }
-          </select>
-        </label>
+ <label class="block text-sm font-medium text-primary">
+ Criterio *
+ <select
+ [ngModel]="tCriterio()"
+ (ngModelChange)="tCriterio.set($event)"
+ aria-label="Criterio de la tarifa"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ >
+ @for (c of criterios; track c) {
+ <option [value]="c">{{ criterioLabel[c] }}</option>
+ }
+ </select>
+ </label>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="block text-sm font-medium text-primary">
-            Mínimo (incluido) *
-            <input
-              type="text"
-              inputmode="decimal"
-              [ngModel]="tMin()"
-              (ngModelChange)="tMin.set($event)"
-              aria-label="Rango mínimo"
-              class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-            />
-          </label>
-          <label class="block text-sm font-medium text-primary">
-            Máximo (excluido)
-            <input
-              type="text"
-              inputmode="decimal"
-              [ngModel]="tMax()"
-              (ngModelChange)="tMax.set($event)"
-              [disabled]="tSinTope()"
-              aria-label="Rango máximo"
-              class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white disabled:bg-slate-100"
-            />
-          </label>
-        </div>
-        <label class="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" [ngModel]="tSinTope()" (ngModelChange)="tSinTope.set($event)" aria-label="Sin tope" />
-          Sin tope: último tramo abierto ("en adelante")
-        </label>
+ <div class="grid grid-cols-2 gap-3">
+ <label class="block text-sm font-medium text-primary">
+ Mínimo (incluido) *
+ <input
+ type="text"
+ inputmode="decimal"
+ [ngModel]="tMin()"
+ (ngModelChange)="tMin.set($event)"
+ aria-label="Rango mínimo"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ />
+ </label>
+ <label class="block text-sm font-medium text-primary">
+ Máximo (excluido)
+ <input
+ type="text"
+ inputmode="decimal"
+ [ngModel]="tMax()"
+ (ngModelChange)="tMax.set($event)"
+ [disabled]="tSinTope()"
+ aria-label="Rango máximo"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white disabled:bg-slate-100"
+ />
+ </label>
+ </div>
+ <label class="flex items-center gap-2 text-sm text-slate-700">
+ <input type="checkbox" [ngModel]="tSinTope()" (ngModelChange)="tSinTope.set($event)" aria-label="Sin tope" />
+ Sin tope: último tramo abierto ("en adelante")
+ </label>
 
-        <label class="block text-sm font-medium text-primary">
-          Costo de agencia (Bs) *
-          <input
-            type="text"
-            inputmode="decimal"
-            [ngModel]="tCosto()"
-            (ngModelChange)="tCosto.set($event)"
-            placeholder="Ej: 12.50"
-            aria-label="Costo"
-            class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-          />
-        </label>
+ <label class="block text-sm font-medium text-primary">
+ Costo de agencia (Bs) *
+ <input
+ type="text"
+ inputmode="decimal"
+ [ngModel]="tCosto()"
+ (ngModelChange)="tCosto.set($event)"
+ placeholder="Ej: 12.50"
+ aria-label="Costo"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ />
+ </label>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="block text-sm font-medium text-primary">
-            Vigente desde *
-            <input
-              type="date"
-              [ngModel]="tDesde()"
-              (ngModelChange)="tDesde.set($event)"
-              aria-label="Vigente desde"
-              class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
-            />
-          </label>
-          <label class="block text-sm font-medium text-primary">
-            Vigente hasta
-            <input
-              type="date"
-              [ngModel]="tHasta()"
-              (ngModelChange)="tHasta.set($event)"
-              [disabled]="tSinFin()"
-              aria-label="Vigente hasta"
-              class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white disabled:bg-slate-100"
-            />
-          </label>
-        </div>
-        <label class="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" [ngModel]="tSinFin()" (ngModelChange)="tSinFin.set($event)" aria-label="Sin fin" />
-          Sin fin de vigencia
-        </label>
-        <label class="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" [ngModel]="tActiva()" (ngModelChange)="tActiva.set($event)" aria-label="Tarifa activa" />
-          Tarifa activa (una inactiva no se aplica ni bloquea a las demás)
-        </label>
-        <p class="text-xs text-slate-500">
-          No pueden solaparse dos tarifas activas de la misma zona y criterio con rangos y vigencias que se crucen.
-        </p>
+ <div class="grid grid-cols-2 gap-3">
+ <label class="block text-sm font-medium text-primary">
+ Vigente desde *
+ <input
+ type="date"
+ [ngModel]="tDesde()"
+ (ngModelChange)="tDesde.set($event)"
+ aria-label="Vigente desde"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white"
+ />
+ </label>
+ <label class="block text-sm font-medium text-primary">
+ Vigente hasta
+ <input
+ type="date"
+ [ngModel]="tHasta()"
+ (ngModelChange)="tHasta.set($event)"
+ [disabled]="tSinFin()"
+ aria-label="Vigente hasta"
+ class="mt-1 w-full text-sm border border-slate-300 rounded-lg p-2.5 bg-white disabled:bg-slate-100"
+ />
+ </label>
+ </div>
+ <label class="flex items-center gap-2 text-sm text-slate-700">
+ <input type="checkbox" [ngModel]="tSinFin()" (ngModelChange)="tSinFin.set($event)" aria-label="Sin fin" />
+ Sin fin de vigencia
+ </label>
+ <label class="flex items-center gap-2 text-sm text-slate-700">
+ <input type="checkbox" [ngModel]="tActiva()" (ngModelChange)="tActiva.set($event)" aria-label="Tarifa activa" />
+ Tarifa activa (una inactiva no se aplica ni bloquea a las demás)
+ </label>
+ <p class="text-xs text-slate-500">
+ No pueden solaparse dos tarifas activas de la misma zona y criterio con rangos y vigencias que se crucen.
+ </p>
 
-        <div class="flex justify-end gap-3 pt-1">
-          <button type="button" (click)="cerrarTarifa()" class="px-4 py-2 rounded-lg border border-primary/30 text-primary hover:bg-container text-sm font-medium">
-            Cancelar
-          </button>
-          <button
-            type="button"
-            (click)="guardarTarifa()"
-            [disabled]="tGuardando()"
-            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary text-sm font-medium disabled:opacity-50"
-          >
-            {{ tGuardando() ? 'Guardando...' : 'Guardar tarifa' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-1">
+ <button type="button" (click)="cerrarTarifa()" class="px-4 py-2 rounded-lg border border-primary/30 text-primary hover:bg-container text-sm font-medium">
+ Cancelar
+ </button>
+ <button
+ type="button"
+ (click)="guardarTarifa()"
+ [disabled]="tGuardando()"
+ class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent hover:text-primary text-sm font-medium disabled:opacity-50"
+ >
+ {{ tGuardando() ? 'Guardando...' : 'Guardar tarifa' }}
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
 }
 
 @if (confirmarZona(); as z) {
-  <app-confirm-dialog
-    titulo="Eliminar zona"
-    [mensaje]="'¿Eliminar la zona ' + nombreZona(z) + '? Si tiene tarifas, el sistema lo impedirá: elimínelas primero.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacionZona()"
-    (cancelado)="confirmarZona.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar zona"
+ [mensaje]="'¿Eliminar la zona ' + nombreZona(z) + '? Si tiene tarifas, el sistema lo impedirá: elimínelas primero.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacionZona()"
+ (cancelado)="confirmarZona.set(null)"
+ ></app-confirm-dialog>
 }
 
 @if (confirmarTarifa(); as ctx) {
-  <app-confirm-dialog
-    titulo="Eliminar tarifa"
-    [mensaje]="'¿Eliminar esta tarifa de ' + criterioLabel[ctx.tarifa.criterio] + '? Si algún envío la usa, el sistema lo impedirá y convendrá desactivarla.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacionTarifa()"
-    (cancelado)="confirmarTarifa.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar tarifa"
+ [mensaje]="'¿Eliminar esta tarifa de ' + criterioLabel[ctx.tarifa.criterio] + '? Si algún envío la usa, el sistema lo impedirá y convendrá desactivarla.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacionTarifa()"
+ (cancelado)="confirmarTarifa.set(null)"
+ ></app-confirm-dialog>
 }

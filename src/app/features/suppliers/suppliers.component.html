@@ -1,466 +1,466 @@
-<!-- CU23 — Gestión de Proveedores (ASU/GS) -->
+<!-- Gestión de Proveedores (ASU/GS) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Gestión de Proveedores</h1>
-      <p class="text-gray-600 mt-1">
-        Administre los abastecedores de la empresa, sus contactos y estados.
-      </p>
-      @if (sucursalAsignadaNombre()) {
-        <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
-          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-          Sucursal Asignada: {{ sucursalAsignadaNombre() }}
-        </div>
-      }
-    </div>
-    <button
-      type="button"
-      (click)="abrirModalCrear()"
-      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-    >
-      + Registrar Proveedor
-    </button>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Gestión de Proveedores</h1>
+ <p class="text-gray-600 mt-1">
+ Administre los abastecedores de la empresa, sus contactos y estados.
+ </p>
+ @if (sucursalAsignadaNombre()) {
+ <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+ <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+ Sucursal Asignada: {{ sucursalAsignadaNombre() }}
+ </div>
+ }
+ </div>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Registrar Proveedor
+ </button>
+ </div>
 
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Proveedores Activos
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalActivos() }}</p>
-    </div>
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Verificados
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ totalVerificados() }}</p>
-    </div>
-    <div class="bg-container rounded-xl p-4 border border-primary/10">
-      <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
-        Total Registrados
-      </p>
-      <p class="text-3xl font-bold text-primary mt-1">{{ total() }}</p>
-    </div>
-  </div>
+ <!-- KPI Cards -->
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Proveedores Activos
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalActivos() }}</p>
+ </div>
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Verificados
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ totalVerificados() }}</p>
+ </div>
+ <div class="bg-container rounded-xl p-4 border border-primary/10">
+ <p class="text-xs font-semibold text-primary/70 uppercase tracking-wide">
+ Total Registrados
+ </p>
+ <p class="text-3xl font-bold text-primary mt-1">{{ total() }}</p>
+ </div>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de búsqueda y filtros -->
-  <div class="bg-container rounded-xl p-4 mb-6 border border-primary/10 space-y-3">
-    <div class="flex flex-col md:flex-row gap-3">
-      <!-- Input de búsqueda -->
-      <div class="flex-1 relative">
-        <input
-          type="text"
-          [value]="busqueda()"
-          (input)="onBusqueda($event)"
-          placeholder="Buscar por nombre, NIT/RUT o contacto..."
-          class="w-full pl-3 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-        />
-      </div>
+ <!-- Barra de búsqueda y filtros -->
+ <div class="bg-container rounded-xl p-4 mb-6 border border-primary/10 space-y-3">
+ <div class="flex flex-col md:flex-row gap-3">
+ <!-- Input de búsqueda -->
+ <div class="flex-1 relative">
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por nombre, NIT/RUT o contacto..."
+ class="w-full pl-3 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
 
-      <!-- Filtro por categoría/línea -->
-      <div class="w-full md:w-56">
-        <select
-          [value]="filtroCategoria()"
-          (change)="onFiltroCategoria($event)"
-          class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-        >
-          <option value="">Todas las categorías</option>
-          <option value="Textiles">Textiles</option>
-          <option value="Calzado">Calzado</option>
-          <option value="Accesorios">Accesorios</option>
-          <option value="Confección">Confección</option>
-          <option value="Avíos">Avíos</option>
-        </select>
-      </div>
+ <!-- Filtro por categoría/línea -->
+ <div class="w-full md:w-56">
+ <select
+ [value]="filtroCategoria()"
+ (change)="onFiltroCategoria($event)"
+ class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ >
+ <option value="">Todas las categorías</option>
+ <option value="Textiles">Textiles</option>
+ <option value="Calzado">Calzado</option>
+ <option value="Accesorios">Accesorios</option>
+ <option value="Confección">Confección</option>
+ <option value="Avíos">Avíos</option>
+ </select>
+ </div>
 
-      <!-- Filtro por ciudad (sucursal que gestiona) -->
-      <div class="w-full md:w-56">
-        <select
-          [value]="filtroCiudad()"
-          (change)="onFiltroCiudad($event)"
-          class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-        >
-          <option value="">Todas las ciudades</option>
-          @for (ciudad of ciudades(); track ciudad.id) {
-            <option [value]="ciudad.nombre">{{ ciudad.nombre }}</option>
-          }
-        </select>
-      </div>
-    </div>
+ <!-- Filtro por ciudad (sucursal que gestiona) -->
+ <div class="w-full md:w-56">
+ <select
+ [value]="filtroCiudad()"
+ (change)="onFiltroCiudad($event)"
+ class="w-full px-3 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ >
+ <option value="">Todas las ciudades</option>
+ @for (ciudad of ciudades(); track ciudad.id) {
+ <option [value]="ciudad.nombre">{{ ciudad.nombre }}</option>
+ }
+ </select>
+ </div>
+ </div>
 
-    <!-- Filtro por estado (tabs de estado del CU23) -->
-    <div class="flex flex-wrap gap-2 pt-1 border-t border-primary/10">
-      <button
-        type="button"
-        (click)="onFiltroEstado('todos')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'todos'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todos ({{ total() }})
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('Activo')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'Activo'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Activos
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('Verificado')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'Verificado'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Verificados
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('Inactivo')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'Inactivo'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Inactivos
-      </button>
-    </div>
-  </div>
+ <!-- Filtro por estado (tabs de estado ) -->
+ <div class="flex flex-wrap gap-2 pt-1 border-t border-primary/10">
+ <button
+ type="button"
+ (click)="onFiltroEstado('todos')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'todos'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todos ({{ total() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('Activo')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'Activo'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Activos
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('Verificado')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'Verificado'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Verificados
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('Inactivo')"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === 'Inactivo'
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Inactivos
+ </button>
+ </div>
+ </div>
 
-  <!-- Tabla de proveedores -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando proveedores...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">ID</th>
-              <th class="text-left px-4 py-3 font-semibold">Razón Social</th>
-              <th class="text-left px-4 py-3 font-semibold">NIT / RUT</th>
-              <th class="text-left px-4 py-3 font-semibold">Sucursal</th>
-              <th class="text-left px-4 py-3 font-semibold">Contacto</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (proveedor of proveedores(); track proveedor.id_proveedor) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3 text-primary font-semibold">
-                  #{{ proveedor.id_proveedor }}
-                </td>
-                <td class="px-4 py-3">
-                  <p class="font-medium text-gray-800">{{ proveedor.nombre }}</p>
-                  @if (proveedor.categoria) {
-                    <p class="text-xs text-primary/70">{{ proveedor.categoria }}</p>
-                  }
-                </td>
-                <td class="px-4 py-3 text-gray-600">{{ proveedor.nit_rut }}</td>
-                <td class="px-4 py-3 text-xs text-gray-700 whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                    {{ proveedor.sucursal_nombre || 'Global / Matriz' }}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <p class="text-gray-800">{{ proveedor.contacto_operativo || '—' }}</p>
-                  <p class="text-xs text-gray-500">{{ proveedor.correo || '—' }}</p>
-                  <p class="text-xs text-gray-500">{{ proveedor.telefono || '—' }}</p>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <app-badge
-                    [variant]="proveedor.estado === 'Activo' ? 'success' : (proveedor.estado === 'Verificado' ? 'info' : 'danger')"
-                    [texto]="proveedor.estado"
-                  />
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    (click)="abrirModalEditar(proveedor)"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                    title="Editar proveedor"
-                  >
-                    Editar
-                  </button>
-                  @if (proveedor.estado !== 'Inactivo') {
-                    <button
-                      type="button"
-                      (click)="desactivar(proveedor)"
-                      class="text-primary/60 hover:text-primary font-medium mr-3 transition text-sm"
-                      title="Marcar como Inactivo"
-                    >
-                      Desactivar
-                    </button>
-                  }
-                  <button
-                    type="button"
-                    (click)="pedirEliminar(proveedor)"
-                    class="text-red-600 hover:text-red-400 font-medium transition"
-                    title="Eliminar proveedor"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron proveedores con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginación server-side -->
-      <div
-        class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
-      >
-        <span>
-          Página {{ pagina() }} de {{ pages() }} — {{ total() }} proveedores
-        </span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Tabla de proveedores -->
+ <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+ @if (cargando()) {
+ <div class="p-10 text-center text-primary/60 text-sm">Cargando proveedores...</div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-primary text-white">
+ <tr>
+ <th class="text-left px-4 py-3 font-semibold">ID</th>
+ <th class="text-left px-4 py-3 font-semibold">Razón Social</th>
+ <th class="text-left px-4 py-3 font-semibold">NIT / RUT</th>
+ <th class="text-left px-4 py-3 font-semibold">Sucursal</th>
+ <th class="text-left px-4 py-3 font-semibold">Contacto</th>
+ <th class="text-center px-4 py-3 font-semibold">Estado</th>
+ <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (proveedor of proveedores(); track proveedor.id_proveedor) {
+ <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+ <td class="px-4 py-3 text-primary font-semibold">
+ #{{ proveedor.id_proveedor }}
+ </td>
+ <td class="px-4 py-3">
+ <p class="font-medium text-gray-800">{{ proveedor.nombre }}</p>
+ @if (proveedor.categoria) {
+ <p class="text-xs text-primary/70">{{ proveedor.categoria }}</p>
+ }
+ </td>
+ <td class="px-4 py-3 text-gray-600">{{ proveedor.nit_rut }}</td>
+ <td class="px-4 py-3 text-xs text-gray-700 whitespace-nowrap">
+ <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+ <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+ </svg>
+ {{ proveedor.sucursal_nombre || 'Global / Matriz' }}
+ </span>
+ </td>
+ <td class="px-4 py-3">
+ <p class="text-gray-800">{{ proveedor.contacto_operativo || '—' }}</p>
+ <p class="text-xs text-gray-500">{{ proveedor.correo || '—' }}</p>
+ <p class="text-xs text-gray-500">{{ proveedor.telefono || '—' }}</p>
+ </td>
+ <td class="px-4 py-3 text-center">
+ <app-badge
+ [variant]="proveedor.estado === 'Activo' ? 'success' : (proveedor.estado === 'Verificado' ? 'info' : 'danger')"
+ [texto]="proveedor.estado"
+ />
+ </td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <button
+ type="button"
+ (click)="abrirModalEditar(proveedor)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ title="Editar proveedor"
+ >
+ Editar
+ </button>
+ @if (proveedor.estado !== 'Inactivo') {
+ <button
+ type="button"
+ (click)="desactivar(proveedor)"
+ class="text-primary/60 hover:text-primary font-medium mr-3 transition text-sm"
+ title="Marcar como Inactivo"
+ >
+ Desactivar
+ </button>
+ }
+ <button
+ type="button"
+ (click)="pedirEliminar(proveedor)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ title="Eliminar proveedor"
+ >
+ Eliminar
+ </button>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="6" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron proveedores con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <!-- Paginación server-side -->
+ <div
+ class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70"
+ >
+ <span>
+ Página {{ pagina() }} de {{ pages() }} — {{ total() }} proveedores
+ </span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal Registrar / Editar Proveedor -->
 @if (modalAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModal()"
-    ></div>
-    <div
-      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoId() ? 'Editar Proveedor' : 'Registrar Proveedor' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          {{
-            editandoId()
-              ? 'Actualice los datos de contacto o razón social.'
-              : 'Complete los datos del nuevo abastecedor.'
-          }}
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModal()"
+ ></div>
+ <div
+ class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoId() ? 'Editar Proveedor' : 'Registrar Proveedor' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ {{
+ editandoId()
+ ? 'Actualice los datos de contacto o razón social.'
+ : 'Complete los datos del nuevo abastecedor.'
+ }}
+ </p>
+ </div>
 
-      <form [formGroup]="proveedorForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <form [formGroup]="proveedorForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="nombre">
-            Razón Social / Nombre *
-          </label>
-          <input
-            id="nombre"
-            type="text"
-            formControlName="nombre"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: Textiles Bolivia S.R.L."
-          />
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="nombre">
+ Razón Social / Nombre *
+ </label>
+ <input
+ id="nombre"
+ type="text"
+ formControlName="nombre"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Textiles Bolivia S.R.L."
+ />
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="nit_rut">
-            NIT / RUT *
-          </label>
-          <input
-            id="nit_rut"
-            type="text"
-            formControlName="nit_rut"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: 1020304051"
-          />
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="nit_rut">
+ NIT / RUT *
+ </label>
+ <input
+ id="nit_rut"
+ type="text"
+ formControlName="nit_rut"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: 1020304051"
+ />
+ </div>
 
-        <div>
-          <label
-            class="block text-sm font-medium text-primary mb-1"
-            for="contacto_operativo"
-          >
-            Nombre de Contacto Operativo
-          </label>
-          <input
-            id="contacto_operativo"
-            type="text"
-            formControlName="contacto_operativo"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Ej: Marcela Rojas"
-          />
-        </div>
+ <div>
+ <label
+ class="block text-sm font-medium text-primary mb-1"
+ for="contacto_operativo"
+ >
+ Nombre de Contacto Operativo
+ </label>
+ <input
+ id="contacto_operativo"
+ type="text"
+ formControlName="contacto_operativo"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Marcela Rojas"
+ />
+ </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="telefono">
-              Teléfono de contacto
-            </label>
-            <input
-              id="telefono"
-              type="text"
-              formControlName="telefono"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="+591 3 344-1101"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="correo">
-              Correo Electrónico
-            </label>
-            <input
-              id="correo"
-              type="email"
-              formControlName="correo"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="ventas@proveedor.com"
-            />
-          </div>
-        </div>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="telefono">
+ Teléfono de contacto
+ </label>
+ <input
+ id="telefono"
+ type="text"
+ formControlName="telefono"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="+591 3 344-1101"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="correo">
+ Correo Electrónico
+ </label>
+ <input
+ id="correo"
+ type="email"
+ formControlName="correo"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="ventas@proveedor.com"
+ />
+ </div>
+ </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="categoria">
-              Línea / Categoría
-            </label>
-            <input
-              id="categoria"
-              type="text"
-              formControlName="categoria"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="Ej: Textiles"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="direccion">
-              Dirección
-            </label>
-            <input
-              id="direccion"
-              type="text"
-              formControlName="direccion"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="Ej: Parque Industrial Mz 12"
-            />
-          </div>
-        </div>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="categoria">
+ Línea / Categoría
+ </label>
+ <input
+ id="categoria"
+ type="text"
+ formControlName="categoria"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Textiles"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="direccion">
+ Dirección
+ </label>
+ <input
+ id="direccion"
+ type="text"
+ formControlName="direccion"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Parque Industrial Mz 12"
+ />
+ </div>
+ </div>
 
-        @if (esAdmin()) {
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="sucursal_id">
-              Sucursal Asignada (Opcional)
-            </label>
-            <select
-              id="sucursal_id"
-              formControlName="sucursal_id"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-            >
-              <option [ngValue]="null">Global / Empresa Matriz (Sin sucursal exclusiva)</option>
-              @for (s of sucursales(); track s.codigo_sucursal) {
-                <option [value]="s.codigo_sucursal">{{ s.nombre }} ({{ s.ciudad?.nombre }})</option>
-              }
-            </select>
-            <p class="text-xs text-gray-500 mt-1">
-              Deje en Global para proveedores corporativos compartidos, o vincúlelo a una sucursal física específica.
-            </p>
-          </div>
-        } @else if (esGerente() && sucursalAsignadaNombre()) {
-          <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-800 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
-            <span>Este proveedor quedará vinculado operativamente a su sucursal (<strong>{{ sucursalAsignadaNombre() }}</strong>).</span>
-          </div>
-        }
+ @if (esAdmin()) {
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="sucursal_id">
+ Sucursal Asignada (Opcional)
+ </label>
+ <select
+ id="sucursal_id"
+ formControlName="sucursal_id"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option [ngValue]="null">Global / Empresa Matriz (Sin sucursal exclusiva)</option>
+ @for (s of sucursales(); track s.codigo_sucursal) {
+ <option [value]="s.codigo_sucursal">{{ s.nombre }} ({{ s.ciudad?.nombre }})</option>
+ }
+ </select>
+ <p class="text-xs text-gray-500 mt-1">
+ Deje en Global para proveedores corporativos compartidos, o vincúlelo a una sucursal física específica.
+ </p>
+ </div>
+ } @else if (esGerente() && sucursalAsignadaNombre()) {
+ <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-800 flex items-center gap-2">
+ <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+ <span>Este proveedor quedará vinculado operativamente a su sucursal (<strong>{{ sucursalAsignadaNombre() }}</strong>).</span>
+ </div>
+ }
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModal()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardando()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Proveedor') }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardando()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {{ guardando() ? 'Guardando...' : (editandoId() ? 'Guardar Cambios' : 'Registrar Proveedor') }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }
 
-<!-- ConfirmDialog de eliminación (CU23: 409 si tiene productos asociados) -->
+<!-- ConfirmDialog de eliminación -->
 @if (confirmarEliminar(); as proveedor) {
-  <app-confirm-dialog
-    titulo="Eliminar Proveedor"
-    [mensaje]="'¿Eliminar a ' + proveedor.nombre + '? Si tiene productos asociados, el sistema impedirá la eliminación y sugerirá marcarlo como Inactivo.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar Proveedor"
+ [mensaje]="'¿Eliminar a ' + proveedor.nombre + '? Si tiene productos asociados, el sistema impedirá la eliminación y sugerirá marcarlo como Inactivo.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ ></app-confirm-dialog>
 }

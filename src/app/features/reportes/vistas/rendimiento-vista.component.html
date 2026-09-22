@@ -1,46 +1,46 @@
-<!-- CU20 — Reporte de Rendimiento de vendedores -->
+<!-- Reporte de Rendimiento de vendedores -->
 @let d = datos();
 
 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-  <app-reporte-kpi etiqueta="Vendedores con ventas" [valor]="d.total_vendedores | number" />
-  <app-reporte-kpi etiqueta="Ingresos" [valor]="'Bs. ' + (d.total_ingresos | number: '1.2-2')" nota="Suma de `total` de sus ventas" />
-  <app-reporte-kpi etiqueta="Operaciones" [valor]="d.total_operaciones | number" />
+ <app-reporte-kpi etiqueta="Vendedores con ventas" [valor]="d.total_vendedores | number" />
+ <app-reporte-kpi etiqueta="Ingresos" [valor]="'Bs. ' + (d.total_ingresos | number: '1.2-2')" nota="Suma de `total` de sus ventas" />
+ <app-reporte-kpi etiqueta="Operaciones" [valor]="d.total_operaciones | number" />
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-  <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por vendedor</h2>
-  <app-reporte-chart [config]="grafico()" [alto]="alto()" descripcion="Ingresos por vendedor" />
+ <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por vendedor</h2>
+ <app-reporte-chart [config]="grafico()" [alto]="alto()" descripcion="Ingresos por vendedor" />
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-vendedores">
-      <thead class="bg-container">
-        <tr>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Vendedor</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Correo</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ticket promedio</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Tipos</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Primera venta (UTC)</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Última venta (UTC)</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 text-sm">
-        @for (v of d.items; track v.id_vendedor) {
-          <tr>
-            <td class="px-4 py-3">{{ v.nombre }}</td>
-            <td class="px-4 py-3">{{ v.correo }}</td>
-            <td class="px-4 py-3 text-right">{{ v.total_ventas }}</td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ v.total_ingresos | number: '1.2-2' }}</td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ v.ticket_promedio | number: '1.2-2' }}</td>
-            <td class="px-4 py-3">{{ tipos(v.tipos_venta) }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ v.primera_venta ? (v.primera_venta | date: 'dd/MM/yyyy HH:mm' : 'UTC') : '—' }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ v.ultima_venta ? (v.ultima_venta | date: 'dd/MM/yyyy HH:mm' : 'UTC') : '—' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+ <div class="overflow-x-auto">
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-vendedores">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Vendedor</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Correo</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
+ <th class="px-4 py-3 text-right text-xs font-semibold text-primary uppercase">Ticket promedio</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Tipos</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Primera venta (UTC)</th>
+ <th class="px-4 py-3 text-left text-xs font-semibold text-primary uppercase">Última venta (UTC)</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (v of d.items; track v.id_vendedor) {
+ <tr>
+ <td class="px-4 py-3">{{ v.nombre }}</td>
+ <td class="px-4 py-3">{{ v.correo }}</td>
+ <td class="px-4 py-3 text-right">{{ v.total_ventas }}</td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ v.total_ingresos | number: '1.2-2' }}</td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">Bs. {{ v.ticket_promedio | number: '1.2-2' }}</td>
+ <td class="px-4 py-3">{{ tipos(v.tipos_venta) }}</td>
+ <td class="px-4 py-3 whitespace-nowrap">{{ v.primera_venta ? (v.primera_venta | date: 'dd/MM/yyyy HH:mm' : 'UTC') : '—' }}</td>
+ <td class="px-4 py-3 whitespace-nowrap">{{ v.ultima_venta ? (v.ultima_venta | date: 'dd/MM/yyyy HH:mm' : 'UTC') : '—' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
 </div>

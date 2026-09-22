@@ -11,10 +11,10 @@ import { DashboardMetrics } from '../../core/models/dashboard.model';
  */
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private readonly api = inject(ApiService);
+ private readonly api = inject(ApiService);
 
-  /** GET /api/v1/dashboard/metrics — KPIs + resumen de la empresa. */
-  getMetrics(): Observable<ApiResponse<DashboardMetrics>> {
-    return this.api.get<ApiResponse<DashboardMetrics>>('/dashboard/metrics');
-  }
+ /** GET /api/v1/dashboard/metrics — KPIs + resumen de la empresa. */
+ getMetrics(): Observable<ApiResponse<DashboardMetrics>> {
+ return this.api.get<ApiResponse<DashboardMetrics>>('/dashboard/metrics');
+ }
 }

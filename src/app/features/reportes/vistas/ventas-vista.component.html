@@ -1,142 +1,142 @@
-<!-- CU20 — Reporte de Ventas -->
+<!-- Reporte de Ventas -->
 @let d = datos();
 
 <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4 mb-6">
-  <app-reporte-kpi etiqueta="Ingresos por productos" [valor]="'Bs. ' + (d.ingresos_productos | number: '1.2-2')" nota="Sin costo de envío" />
-  <app-reporte-kpi etiqueta="Nº de ventas" [valor]="d.num_ventas | number" nota="Solo ventas pagadas" />
-  <app-reporte-kpi etiqueta="Unidades vendidas" [valor]="d.unidades_vendidas | number" />
-  <app-reporte-kpi etiqueta="Ticket promedio" [valor]="'Bs. ' + (d.ticket_promedio | number: '1.2-2')" />
-  @if (d.total_facturado !== null) {
-    <app-reporte-kpi etiqueta="Total facturado" [valor]="'Bs. ' + (d.total_facturado | number: '1.2-2')" nota="Incluye envío" />
-  }
-  @if (d.total_envios !== null) {
-    <app-reporte-kpi etiqueta="Envíos cobrados" [valor]="'Bs. ' + (d.total_envios | number: '1.2-2')" />
-  }
+ <app-reporte-kpi etiqueta="Ingresos por productos" [valor]="'Bs. ' + (d.ingresos_productos | number: '1.2-2')" nota="Sin costo de envío" />
+ <app-reporte-kpi etiqueta="Nº de ventas" [valor]="d.num_ventas | number" nota="Solo ventas pagadas" />
+ <app-reporte-kpi etiqueta="Unidades vendidas" [valor]="d.unidades_vendidas | number" />
+ <app-reporte-kpi etiqueta="Ticket promedio" [valor]="'Bs. ' + (d.ticket_promedio | number: '1.2-2')" />
+ @if (d.total_facturado !== null) {
+ <app-reporte-kpi etiqueta="Total facturado" [valor]="'Bs. ' + (d.total_facturado | number: '1.2-2')" nota="Incluye envío" />
+ }
+ @if (d.total_envios !== null) {
+ <app-reporte-kpi etiqueta="Envíos cobrados" [valor]="'Bs. ' + (d.total_envios | number: '1.2-2')" />
+ }
 </div>
 @if (d.total_facturado === null) {
-  <p class="text-xs text-gray-500 -mt-3 mb-6">
-    Con filtro de categoría no se informan el total facturado ni los envíos: el envío no es atribuible a una categoría.
-  </p>
+ <p class="text-xs text-gray-500 -mt-3 mb-6">
+ Con filtro de categoría no se informan el total facturado ni los envíos: el envío no es atribuible a una categoría.
+ </p>
 }
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-  <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por día (UTC)</h2>
-  <app-reporte-chart [config]="graficoFecha()" [alto]="280" descripcion="Ingresos por día del período" />
+ <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por día (UTC)</h2>
+ <app-reporte-chart [config]="graficoFecha()" [alto]="280" descripcion="Ingresos por día del período" />
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-    <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por categoría</h2>
-    <app-reporte-chart [config]="graficoCategoria()" descripcion="Ingresos por categoría" />
-  </div>
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-    <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por canal</h2>
-    <app-reporte-chart [config]="graficoCanal()" descripcion="Ingresos por canal de venta" />
-  </div>
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-    <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por método de pago</h2>
-    <app-reporte-chart [config]="graficoMetodo()" descripcion="Ingresos por método de pago" />
-  </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+ <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por categoría</h2>
+ <app-reporte-chart [config]="graficoCategoria()" descripcion="Ingresos por categoría" />
+ </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+ <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por canal</h2>
+ <app-reporte-chart [config]="graficoCanal()" descripcion="Ingresos por canal de venta" />
+ </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+ <h2 class="text-sm font-semibold text-primary mb-3">Ingresos por método de pago</h2>
+ <app-reporte-chart [config]="graficoMetodo()" descripcion="Ingresos por método de pago" />
+ </div>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-  <!-- Por día -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Detalle por día (solo días con ventas)</h2>
-    <div class="overflow-x-auto max-h-96">
-      <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-fecha">
-        <thead class="bg-container sticky top-0">
-          <tr>
-            <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Fecha</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
-            <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 text-sm">
-          @for (p of diasConVentas(); track p.fecha) {
-            <tr>
-              <td class="px-4 py-2">{{ p.fecha }}</td>
-              <td class="px-4 py-2 text-right">{{ p.num_ventas }}</td>
-              <td class="px-4 py-2 text-right">{{ p.unidades }}</td>
-              <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ p.ingresos | number: '1.2-2' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
+ <!-- Por día -->
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Detalle por día (solo días con ventas)</h2>
+ <div class="overflow-x-auto max-h-96">
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-fecha">
+ <thead class="bg-container sticky top-0">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Fecha</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (p of diasConVentas(); track p.fecha) {
+ <tr>
+ <td class="px-4 py-2">{{ p.fecha }}</td>
+ <td class="px-4 py-2 text-right">{{ p.num_ventas }}</td>
+ <td class="px-4 py-2 text-right">{{ p.unidades }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ p.ingresos | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
 
-  <div class="space-y-6">
-    <!-- Por categoría -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por categoría</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-categoria">
-          <thead class="bg-container">
-            <tr>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            @for (c of d.por_categoria; track c.id_categoria) {
-              <tr>
-                <td class="px-4 py-2">{{ c.categoria }}</td>
-                <td class="px-4 py-2 text-right">{{ c.unidades }}</td>
-                <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.ingresos | number: '1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
+ <div class="space-y-6">
+ <!-- Por categoría -->
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por categoría</h2>
+ <div class="overflow-x-auto">
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-categoria">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Categoría</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Unidades</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (c of d.por_categoria; track c.id_categoria) {
+ <tr>
+ <td class="px-4 py-2">{{ c.categoria }}</td>
+ <td class="px-4 py-2 text-right">{{ c.unidades }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.ingresos | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
 
-    <!-- Por canal y método de pago -->
-    <div class="grid grid-cols-1 gap-6">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por canal</h2>
-        <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-canal">
-          <thead class="bg-container">
-            <tr>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Canal</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            @for (c of d.por_canal; track c.canal) {
-              <tr>
-                <td class="px-4 py-2">{{ etiquetaCanal(c.canal) }}</td>
-                <td class="px-4 py-2 text-right">{{ c.num_ventas }}</td>
-                <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.ingresos | number: '1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por método de pago</h2>
-        <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-metodo">
-          <thead class="bg-container">
-            <tr>
-              <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Método</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
-              <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            @for (m of d.por_metodo_pago; track m.metodo_pago) {
-              <tr>
-                <td class="px-4 py-2">{{ m.metodo_pago }}</td>
-                <td class="px-4 py-2 text-right">{{ m.num_ventas }}</td>
-                <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ m.ingresos | number: '1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+ <!-- Por canal y método de pago -->
+ <div class="grid grid-cols-1 gap-6">
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por canal</h2>
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-canal">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Canal</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (c of d.por_canal; track c.canal) {
+ <tr>
+ <td class="px-4 py-2">{{ etiquetaCanal(c.canal) }}</td>
+ <td class="px-4 py-2 text-right">{{ c.num_ventas }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ c.ingresos | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+ <h2 class="px-4 py-3 text-sm font-semibold text-primary border-b border-slate-200">Por método de pago</h2>
+ <table class="min-w-full divide-y divide-slate-200" data-testid="tabla-por-metodo">
+ <thead class="bg-container">
+ <tr>
+ <th class="px-4 py-2 text-left text-xs font-semibold text-primary uppercase">Método</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ventas</th>
+ <th class="px-4 py-2 text-right text-xs font-semibold text-primary uppercase">Ingresos</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100 text-sm">
+ @for (m of d.por_metodo_pago; track m.metodo_pago) {
+ <tr>
+ <td class="px-4 py-2">{{ m.metodo_pago }}</td>
+ <td class="px-4 py-2 text-right">{{ m.num_ventas }}</td>
+ <td class="px-4 py-2 text-right whitespace-nowrap">Bs. {{ m.ingresos | number: '1.2-2' }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
 </div>

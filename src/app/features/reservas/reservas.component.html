@@ -1,236 +1,583 @@
-<!-- CU14 — Gestionar Reserva de Prendas (FASE MOCK) -->
-<section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-primary">Gestión de Reservas</h1>
-    <p class="text-gray-600 mt-1">
-      Reserve prendas para clientes y siga su ciclo de vida hasta la venta.
-    </p>
-  </div>
+<!-- Gestión de Reservas: Pago en Efectivo, Descuento de Stock por Sucursal y Expiración 48h -->
+<section class="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+ <!-- Encabezado con título y botones de acción rápida -->
+ <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+ <div>
+ <h1 class="text-2xl md:text-3xl font-bold text-primary">Gestión de Reservas de Prendas</h1>
+ <p class="text-gray-600 text-sm mt-1">
+ Reservas simplificadas: Confirmación inmediata con pago en efectivo (Retiro en Tienda o Envío a Domicilio), temporizador de 48 horas y stock descontado por sucursal.
+ </p>
+ </div>
+ <div class="flex items-center gap-3">
+ <button
+ type="button"
+ (click)="procesarExpiracionesManual()"
+ [disabled]="verificandoExpiraciones()"
+ class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm shadow-sm transition disabled:opacity-50"
+ title="Verifica reservas activas con más de 48 horas vencidas para liberar las prendas al inventario"
+ >
+ @if (verificandoExpiraciones()) {
+ <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+ <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+ <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+ </svg>
+ <span>Verificando 48h...</span>
+ } @else {
+ <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>Verificar Expiraciones (48h)</span>
+ }
+ </button>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <button
+ type="button"
+ (click)="cargarReservas()"
+ class="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 text-sm font-medium transition shadow-sm"
+ title="Recargar listado"
+ >
+ <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+ </svg>
+ <span>Refrescar</span>
+ </button>
+ </div>
+ </div>
 
-  <!-- Barra de filtros: búsqueda + tabs por estado -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por nombre de cliente..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <button
-        type="button"
-        (click)="onFiltroEstado('todas')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'todas'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todas
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('PENDIENTE')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'PENDIENTE'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Pendientes
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('CONFIRMADA')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'CONFIRMADA'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Confirmadas
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('COMPLETADA')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'COMPLETADA'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Completadas
-      </button>
-      <button
-        type="button"
-        (click)="onFiltroEstado('CANCELADA')"
-        class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroEstado() === 'CANCELADA'
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Canceladas
-      </button>
-    </div>
-  </div>
+ <!-- Alertas de estado -->
+ @if (exitoMessage()) {
+ <div class="px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between shadow-sm animate-fade-in">
+ <div class="flex items-center gap-2">
+ <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>{{ exitoMessage() }}</span>
+ </div>
+ <button (click)="exitoMessage.set('')" class="text-emerald-600 hover:text-emerald-800 font-bold">&times;</button>
+ </div>
+ }
+ @if (errorMessage()) {
+ <div class="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between shadow-sm animate-fade-in">
+ <div class="flex items-center gap-2">
+ <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>{{ errorMessage() }}</span>
+ </div>
+ <button (click)="errorMessage.set('')" class="text-red-600 hover:text-red-800 font-bold">&times;</button>
+ </div>
+ }
 
-  <!-- Datatable de reservas -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando reservas...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">Código</th>
-              <th class="text-left px-4 py-3 font-semibold">Cliente</th>
-              <th class="text-left px-4 py-3 font-semibold">Prendas</th>
-              <th class="text-left px-4 py-3 font-semibold">Expiración</th>
-              <th class="text-center px-4 py-3 font-semibold">Total Estimado</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (reserva of reservasFiltradas(); track reserva.id) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3 text-primary font-semibold whitespace-nowrap">
-                  #{{ reserva.id }}
-                </td>
-                <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">
-                  {{ reserva.cliente_nombre }}
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex flex-wrap gap-1.5">
-                    @for (prenda of reserva.prendas; track prenda.nombre) {
-                      <span
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-container text-primary text-xs font-medium border border-primary/20"
-                      >
-                        {{ prenda.nombre }}
-                        <span
-                          class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
-                        >
-                          {{ prenda.cantidad }}
-                        </span>
-                      </span>
-                    }
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
-                  {{ reserva.fecha_expiracion | date: 'dd/MM/yyyy' }}
-                </td>
-                <td class="px-4 py-3 text-center font-semibold text-gray-800 whitespace-nowrap">
-                  {{ reserva.total_estimado | currency: 'BOB' : 'symbol' : '1.0-2' }}
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <app-badge [variant]="badgeDeEstado(reserva.estado)" [texto]="reserva.estado" />
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  @if (reserva.estado === 'PENDIENTE') {
-                    <button
-                      type="button"
-                      (click)="confirmar(reserva)"
-                      class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                      title="Confirmar reserva (PENDIENTE -> CONFIRMADA)"
-                    >
-                      Confirmar Reserva
-                    </button>
-                  }
-                  @if (reserva.estado === 'CONFIRMADA') {
-                    <button
-                      type="button"
-                      (click)="completarVenta(reserva)"
-                      class="text-green-700 hover:text-green-500 font-medium mr-3 transition"
-                      title="Completar la venta de la reserva"
-                    >
-                      Completar Venta
-                    </button>
-                  }
-                  @if (reserva.estado === 'PENDIENTE' || reserva.estado === 'CONFIRMADA') {
-                    <button
-                      type="button"
-                      (click)="pedirCancelar(reserva)"
-                      class="text-red-600 hover:text-red-400 font-medium transition"
-                      title="Cancelar reserva"
-                    >
-                      Cancelar
-                    </button>
-                  }
-                  @if (reserva.estado === 'COMPLETADA' || reserva.estado === 'CANCELADA') {
-                    <span class="text-gray-400 text-xs italic">Sin acciones</span>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron reservas con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <!-- Pie: contador -->
-      <div
-        class="px-4 py-3 bg-container/50 text-xs text-primary/70 flex items-center justify-between"
-      >
-        <span>{{ reservasFiltradas().length }} de {{ reservas().length }} reservas</span>
-        <span class="italic">Ciclo: Pendiente → Confirmada → Completada / Cancelada</span>
-      </div>
-    }
-  </div>
+ <!-- Tarjetas KPI del ciclo de vida comercial -->
+ <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+ <!-- Total -->
+ <div
+ (click)="onFiltroEstado('todas')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'todas' ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Todas</div>
+ <div class="text-2xl font-bold text-gray-900 mt-1">{{ totalReservas() }}</div>
+ <div class="text-[11px] text-gray-500 mt-0.5">En registro</div>
+ </div>
+
+ <!-- Pendientes -->
+ <div
+ (click)="onFiltroEstado('PENDIENTE')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'PENDIENTE' ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+ <span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendientes
+ </div>
+ <div class="text-2xl font-bold text-amber-900 mt-1">{{ totalPendientes() }}</div>
+ <div class="text-[11px] text-amber-700/80 mt-0.5">En espera</div>
+ </div>
+
+ <!-- Confirmadas (48h activas) -->
+ <div
+ (click)="onFiltroEstado('CONFIRMADA')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'CONFIRMADA' ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/50' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-blue-700 uppercase tracking-wider flex items-center gap-1">
+ <span class="w-2 h-2 rounded-full bg-blue-500"></span> Confirmadas
+ </div>
+ <div class="text-2xl font-bold text-blue-900 mt-1">{{ totalConfirmadas() }}</div>
+ <div class="text-[11px] text-blue-700/80 mt-0.5">Efectivo / 48h vigentes</div>
+ </div>
+
+ <!-- Próximas a vencer (<24h) -->
+ <div
+ (click)="onFiltroEstado('PROXIMAS_VENCER')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'PROXIMAS_VENCER' ? 'border-orange-500 ring-2 ring-orange-500/20 bg-orange-50/50' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-orange-700 uppercase tracking-wider flex items-center gap-1">
+ <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span> Próximas &lt;24h
+ </div>
+ <div class="text-2xl font-bold text-orange-900 mt-1">{{ totalProximasVencer() }}</div>
+ <div class="text-[11px] text-orange-700/80 mt-0.5">Riesgo de expirar</div>
+ </div>
+
+ <!-- Expiradas / Devueltas a stock -->
+ <div
+ (click)="onFiltroEstado('CANCELADA')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'CANCELADA' ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/50' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-red-700 uppercase tracking-wider flex items-center gap-1">
+ <span class="w-2 h-2 rounded-full bg-red-500"></span> Expiradas
+ </div>
+ <div class="text-2xl font-bold text-red-900 mt-1">{{ totalExpiradas() }}</div>
+ <div class="text-[11px] text-red-700/80 mt-0.5">Devuelto a stock</div>
+ </div>
+
+ <!-- Completadas -->
+ <div
+ (click)="onFiltroEstado('COMPLETADA')"
+ class="cursor-pointer p-4 rounded-xl bg-white border transition hover:shadow-md"
+ [class]="filtroEstado() === 'COMPLETADA' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/50' : 'border-gray-200'"
+ >
+ <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+ <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Completadas
+ </div>
+ <div class="text-2xl font-bold text-emerald-900 mt-1">{{ totalCompletadas() }}</div>
+ <div class="text-[11px] text-emerald-700/80 mt-0.5">Venta concluida</div>
+ </div>
+ </div>
+
+ <!-- Barra de Filtros y Búsqueda -->
+ <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 flex flex-col lg:flex-row gap-3 lg:items-center">
+ <!-- Buscador -->
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por código de reserva, nombre de cliente o correo..."
+ class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition"
+ />
+ </div>
+
+ <!-- Pestañas de estado -->
+ <div class="flex flex-wrap gap-1.5">
+ <button
+ type="button"
+ (click)="onFiltroEstado('todas')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'todas' ? 'bg-primary text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ Todas ({{ totalReservas() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('PENDIENTE')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'PENDIENTE' ? 'bg-amber-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ Pendientes ({{ totalPendientes() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('CONFIRMADA')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'CONFIRMADA' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ Confirmadas 48h ({{ totalConfirmadas() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('PROXIMAS_VENCER')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'PROXIMAS_VENCER' ? 'bg-orange-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ ⚠️ &lt;24h ({{ totalProximasVencer() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('CANCELADA')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'CANCELADA' ? 'bg-red-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ Expiradas / Canceladas ({{ totalExpiradas() }})
+ </button>
+ <button
+ type="button"
+ (click)="onFiltroEstado('COMPLETADA')"
+ class="px-3 py-2 rounded-xl text-xs font-medium transition"
+ [class]="filtroEstado() === 'COMPLETADA' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+ >
+ Completadas ({{ totalCompletadas() }})
+ </button>
+ </div>
+ </div>
+
+ <!-- Datatable principal -->
+ <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+ @if (cargando()) {
+ <div class="p-12 text-center text-gray-500 text-sm">
+ <svg class="animate-spin w-8 h-8 text-primary mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+ <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+ <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+ </svg>
+ Cargando reservas y validando temporizadores de 48h...
+ </div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-gray-50 text-gray-600 border-b border-gray-200 text-xs uppercase tracking-wider">
+ <tr>
+ <th class="text-left px-4 py-3.5 font-semibold">Reserva</th>
+ <th class="text-left px-4 py-3.5 font-semibold">Cliente</th>
+ <th class="text-left px-4 py-3.5 font-semibold">Prendas Apartadas</th>
+ <th class="text-left px-4 py-3.5 font-semibold">Temporizador (48 Horas)</th>
+ <th class="text-left px-4 py-3.5 font-semibold">Modalidad &amp; Pago en Efectivo</th>
+ <th class="text-center px-4 py-3.5 font-semibold">Estado</th>
+ <th class="text-right px-4 py-3.5 font-semibold">Acciones</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-gray-100">
+ @for (reserva of reservasFiltradas(); track reserva.id) {
+ <tr class="hover:bg-gray-50/80 transition" [class.bg-red-50/30]="reserva.es_expirada">
+ <!-- ID, Modalidad y Sucursal -->
+ <td class="px-4 py-3.5 whitespace-nowrap">
+ <div class="font-bold text-primary">#{{ reserva.id }}</div>
+ @if (reserva.tipo_entrega === 'DOMICILIO') {
+ <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 mt-0.5">
+ 🚚 Envío a Domicilio
+ </span>
+ } @else {
+ <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 mt-0.5">
+ 🏪 Retiro en Tienda
+ </span>
+ }
+ @if (reserva.sucursal_nombre) {
+ <div class="text-[11px] text-gray-500 font-medium mt-0.5">📍 {{ reserva.sucursal_nombre }}</div>
+ }
+ <div class="text-[11px] text-gray-400">
+ {{ reserva.fecha_reserva | date: 'dd/MM/yyyy HH:mm' }}
+ </div>
+ </td>
+
+ <!-- Cliente -->
+ <td class="px-4 py-3.5 whitespace-nowrap">
+ <div class="font-semibold text-gray-900">{{ reserva.cliente_nombre }}</div>
+ @if (reserva.cliente_correo) {
+ <div class="text-[11px] text-gray-500">{{ reserva.cliente_correo }}</div>
+ }
+ @if (reserva.telefono_entrega) {
+ <div class="text-[11px] text-gray-600 font-medium">📞 {{ reserva.telefono_entrega }}</div>
+ }
+ @if (reserva.direccion_entrega) {
+ <div class="text-[11px] text-gray-500 max-w-xs truncate" [title]="reserva.direccion_entrega">
+ 🏠 {{ reserva.direccion_entrega }}
+ </div>
+ }
+ </td>
+
+ <!-- Prendas -->
+ <td class="px-4 py-3.5">
+ <div class="flex flex-wrap gap-1.5 max-w-xs">
+ @for (prenda of reserva.prendas; track prenda.nombre) {
+ <span
+ class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-xs font-medium border border-gray-200"
+ >
+ <span>{{ prenda.nombre }}</span>
+ <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold">
+ {{ prenda.cantidad }}
+ </span>
+ </span>
+ }
+ </div>
+ </td>
+
+ <!-- Temporizador 48 Horas -->
+ <td class="px-4 py-3.5 whitespace-nowrap">
+ @if (reserva.es_expirada || (reserva.estado === 'CANCELADA' && reserva.motivo_cancelacion?.toLowerCase()?.includes('expirad'))) {
+ <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-800 text-xs font-bold border border-red-200">
+ <span>⛔ EXPIRADA</span>
+ </div>
+ <div class="text-[11px] text-red-600 mt-1 font-medium">Plazo de 48h vencido</div>
+ } @else if (reserva.estado === 'COMPLETADA') {
+ <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium">
+ <span>✓ Entregada a tiempo</span>
+ </div>
+ } @else if (reserva.estado === 'CANCELADA') {
+ <div class="text-xs text-gray-500 italic">Cancelada</div>
+ } @else {
+ <!-- Estado CONFIRMADA con timer activo -->
+ @if (esUrgente(reserva)) {
+ <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500 text-white text-xs font-bold shadow-sm animate-pulse">
+ <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>{{ formatoTiempoRestante(reserva.minutos_restantes) }}</span>
+ </div>
+ <div class="text-[11px] font-semibold text-red-600 mt-1">¡Vence muy pronto!</div>
+ } @else if (esProximo(reserva)) {
+ <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold border border-orange-200">
+ <svg class="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>{{ formatoTiempoRestante(reserva.minutos_restantes) }}</span>
+ </div>
+ <div class="text-[11px] text-orange-600 mt-1">Menos de 24 horas</div>
+ } @else {
+ <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium border border-blue-200">
+ <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span>{{ formatoTiempoRestante(reserva.minutos_restantes) }}</span>
+ </div>
+ <div class="text-[11px] text-gray-500 mt-1">
+ Hasta {{ reserva.fecha_expiracion_dt | date: 'dd/MM/yyyy HH:mm' }}
+ </div>
+ }
+ }
+ </td>
+
+ <!-- Modalidad y Pago en Efectivo -->
+ <td class="px-4 py-3.5">
+ <div class="text-xs">
+ <span class="text-gray-500">Total a Pagar:</span>
+ <span class="font-bold text-gray-900 ml-1">
+ {{ reserva.total_estimado | currency: 'BOB' : 'symbol' : '1.2-2' }}
+ </span>
+ </div>
+
+ <div class="mt-1">
+ <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+ 💵 Pago en Efectivo
+ </span>
+ </div>
+
+ <div class="text-[10px] text-gray-500 mt-0.5">
+ @if (reserva.tipo_entrega === 'DOMICILIO') {
+ Cobro contra entrega al despachar
+ } @else {
+ Cobro al retirar en tienda
+ }
+ </div>
+ </td>
+
+ <!-- Estado Badge -->
+ <td class="px-4 py-3.5 text-center whitespace-nowrap">
+ <app-badge [variant]="badgeDeEstado(reserva)" [texto]="textoBadgeEstado(reserva)" />
+ </td>
+
+ <!-- Acciones -->
+ <td class="px-4 py-3.5 text-right whitespace-nowrap">
+ <div class="flex items-center justify-end gap-2">
+ <!-- Botón Completar Venta si CONFIRMADA -->
+ @if (reserva.estado === 'CONFIRMADA' && !reserva.es_expirada) {
+ <button
+ type="button"
+ (click)="completarVenta(reserva)"
+ class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition inline-flex items-center gap-1"
+ title="Completar la venta y registrar pago en efectivo"
+ >
+ <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+ </svg>
+ <span>Completar Venta</span>
+ </button>
+ }
+
+ <!-- Ver Detalle -->
+ <button
+ type="button"
+ (click)="verDetalle(reserva)"
+ class="p-1.5 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition"
+ title="Ver detalle completo"
+ >
+ <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+ </svg>
+ </button>
+
+ <!-- Cancelar si PENDIENTE o CONFIRMADA -->
+ @if ((reserva.estado === 'PENDIENTE' || reserva.estado === 'CONFIRMADA') && !reserva.es_expirada) {
+ <button
+ type="button"
+ (click)="pedirCancelar(reserva)"
+ class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+ title="Cancelar reserva y devolver stock"
+ >
+ <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ }
+ </div>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="7" class="px-4 py-12 text-center text-gray-500 text-sm">
+ <div class="max-w-xs mx-auto text-center">
+ <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+ </svg>
+ <p class="font-medium text-gray-600">No hay reservas en este estado</p>
+ <p class="text-xs text-gray-400 mt-1">Prueba seleccionando otra pestaña de filtro o limpiando la búsqueda.</p>
+ </div>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+
+ <!-- Pie de tabla -->
+ <div class="px-5 py-3.5 bg-gray-50 text-xs text-gray-500 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+ <span>Mostrando {{ reservasFiltradas().length }} de {{ reservas().length }} reservas registradas</span>
+ <div class="flex items-center gap-4 text-[11px] text-gray-400">
+ <span>🔵 Confirmada (Efectivo / Temporizador 48h)</span>
+ <span>🟢 Completada (Venta entregada)</span>
+ <span>🔴 Expirada / Cancelada (Stock devuelto)</span>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
-<!-- ConfirmDialog de cancelación -->
+<!-- ========================================================================= -->
+<!-- MODAL: DETALLES DE LA RESERVA -->
+<!-- ========================================================================= -->
+@if (modalDetalle(); as r) {
+ <div class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+ <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-gray-100 animate-scale-up">
+ <!-- Cabecera -->
+ <div class="bg-primary text-white p-6 flex items-center justify-between">
+ <div>
+ <h3 class="text-lg font-bold">Detalle de Reserva #{{ r.id }}</h3>
+ <p class="text-xs text-white/80">Cliente: {{ r.cliente_nombre }} &bull; {{ r.fecha_reserva | date: 'dd/MM/yyyy HH:mm' }}</p>
+ </div>
+ <button (click)="cerrarModalDetalle()" class="text-white/80 hover:text-white text-2xl font-bold">&times;</button>
+ </div>
+
+ <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-sm">
+ <!-- Estado y temporizador -->
+ <div class="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+ <div>
+ <div class="text-xs text-gray-500">Estado Actual</div>
+ <div class="mt-0.5">
+ <app-badge [variant]="badgeDeEstado(r)" [texto]="textoBadgeEstado(r)" />
+ </div>
+ </div>
+ <div class="text-right">
+ <div class="text-xs text-gray-500">Temporizador 48 Horas</div>
+ <div class="text-xs font-bold text-gray-800 mt-0.5">
+ {{ formatoTiempoRestante(r.minutos_restantes) }}
+ </div>
+ </div>
+ </div>
+
+ <!-- Modalidad de entrega y Sucursal -->
+ <div class="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5 text-xs">
+ <div class="flex justify-between items-center">
+ <span class="text-gray-600 font-medium">Modalidad de Entrega:</span>
+ @if (r.tipo_entrega === 'DOMICILIO') {
+ <span class="font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">🚚 Envío a Domicilio</span>
+ } @else {
+ <span class="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">🏪 Retiro en Tienda</span>
+ }
+ </div>
+ @if (r.sucursal_nombre) {
+ <div class="flex justify-between text-gray-600">
+ <span>Sucursal:</span>
+ <span class="font-medium text-gray-900">📍 {{ r.sucursal_nombre }}</span>
+ </div>
+ }
+ @if (r.telefono_entrega) {
+ <div class="flex justify-between text-gray-600">
+ <span>Teléfono de Contacto:</span>
+ <span class="font-medium text-gray-900">📞 {{ r.telefono_entrega }}</span>
+ </div>
+ }
+ @if (r.direccion_entrega) {
+ <div class="flex justify-between text-gray-600">
+ <span>Dirección de Despacho:</span>
+ <span class="font-medium text-gray-900">🏠 {{ r.direccion_entrega }}</span>
+ </div>
+ }
+ </div>
+
+ <!-- Prendas -->
+ <div>
+ <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-2">Prendas Apartadas</h4>
+ <div class="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+ @for (p of r.prendas; track p.nombre) {
+ <div class="p-3 flex items-center justify-between text-xs">
+ <span class="font-medium text-gray-800">{{ p.nombre }}</span>
+ <span class="font-bold text-primary">{{ p.cantidad }} unidad(es)</span>
+ </div>
+ }
+ </div>
+ </div>
+
+ <!-- Información de Cobro y Stock -->
+ <div>
+ <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-2">Cobro en Efectivo &amp; Stock</h4>
+ <div class="p-3.5 bg-gray-50 rounded-xl space-y-1.5 text-xs">
+ <div class="flex justify-between text-gray-600">
+ <span>Total Estimado de la Reserva:</span>
+ <span class="font-bold text-gray-900">{{ r.total_estimado | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+ </div>
+ <div class="flex justify-between text-gray-600">
+ <span>Forma de Pago:</span>
+ <span class="font-bold text-emerald-700">💵 100% en Efectivo al recibir</span>
+ </div>
+ <div class="flex justify-between text-gray-600">
+ <span>Estado del Inventario:</span>
+ <span class="font-medium text-gray-800">Descontado en tiempo real de sucursal</span>
+ </div>
+ <div class="flex justify-between text-gray-600">
+ <span>Vigencia de Reserva:</span>
+ <span class="font-medium text-gray-800">48 horas a partir del registro</span>
+ </div>
+ </div>
+ </div>
+
+ @if (r.motivo_cancelacion) {
+ <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 space-y-0.5">
+ <div class="font-bold">Motivo de Cancelación / Expiración:</div>
+ <p>{{ r.motivo_cancelacion }}</p>
+ </div>
+ }
+ </div>
+
+ <div class="p-4 bg-gray-50 border-t border-gray-100 text-right">
+ <button
+ type="button"
+ (click)="cerrarModalDetalle()"
+ class="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-semibold transition"
+ >
+ Cerrar
+ </button>
+ </div>
+ </div>
+ </div>
+}
+
+<!-- ConfirmDialog de cancelación manual -->
 @if (confirmarCancelar(); as reserva) {
-  <app-confirm-dialog
-    titulo="Cancelar Reserva"
-    [mensaje]="'¿Cancelar la reserva de ' + reserva.cliente_nombre + '? Las prendas volverán a estar disponibles para la venta.'"
-    textoConfirmar="Sí, Cancelar"
-    [peligro]="true"
-    (confirmado)="confirmarCancelacion()"
-    (cancelado)="confirmarCancelar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Cancelar Reserva"
+ [mensaje]="'¿Cancelar la reserva #' + reserva.id + ' de ' + reserva.cliente_nombre + '? Las prendas apartadas volverán a estar disponibles de inmediato en el inventario activo de la sucursal.'"
+ textoConfirmar="Sí, Cancelar Reserva"
+ [peligro]="true"
+ (confirmado)="confirmarCancelacion()"
+ (cancelado)="confirmarCancelar.set(null)"
+ ></app-confirm-dialog>
 }

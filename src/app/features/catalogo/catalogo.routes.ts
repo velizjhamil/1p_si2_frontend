@@ -7,33 +7,33 @@ import { authGuard } from '../../core/guards/auth.guard';
  * con el mismo patrón de lazy loading + authGuard por rol del resto de CUs.
  */
 export const CATALOGO_ROUTES: Routes = [
-  {
-    // CU6: Productos. Ruta de CONSULTA del catálogo (ASU/GS/V/C); la GESTIÓN
-    // (crear/editar/eliminar) la habilita el componente solo para ASU.
-    path: 'productos',
-    loadComponent: () =>
-      import('./productos/productos.component').then((m) => m.ProductosComponent),
-    canActivate: [authGuard],
-    data: { roles: ['ASU', 'GS', 'V', 'C'] },
-  },
-  {
-    // CU7: Gestión de Tallas y Colores (ASU).
-    path: 'tallas',
-    loadComponent: () =>
-      import('./tallas/tallas.component').then((m) => m.TallasComponent),
-    canActivate: [authGuard],
-    data: { roles: ['ASU'], strict: true },
-  },
-  {
-    // CU24: Gestión de Temporadas y Colecciones (backend real FastAPI).
-    // Acceso exclusivo del Administrador super usuario (ASU): strict = lista exacta,
-    // sin el pase libre de otros alias administrativos del authGuard.
-    path: 'temporadas',
-    loadComponent: () =>
-      import('./temporadas/temporadas.component').then(
-        (m) => m.TemporadasComponent,
-      ),
-    canActivate: [authGuard],
-    data: { roles: ['ASU'], strict: true },
-  },
+ {
+ // Productos. Ruta de CONSULTA del catálogo (ASU/GS/V/C); la GESTIÓN
+ // (crear/editar/eliminar) la habilita el componente solo para ASU.
+ path: 'productos',
+ loadComponent: () =>
+ import('./productos/productos.component').then((m) => m.ProductosComponent),
+ canActivate: [authGuard],
+ data: { roles: ['ASU', 'GS', 'V', 'C'] },
+ },
+ {
+ // Gestión de Tallas y Colores (ASU).
+ path: 'tallas',
+ loadComponent: () =>
+ import('./tallas/tallas.component').then((m) => m.TallasComponent),
+ canActivate: [authGuard],
+ data: { roles: ['ASU'], strict: true },
+ },
+ {
+ // Gestión de Temporadas y Colecciones (backend real FastAPI).
+ // Acceso exclusivo del Administrador super usuario (ASU): strict = lista exacta,
+ // sin el pase libre de otros alias administrativos del authGuard.
+ path: 'temporadas',
+ loadComponent: () =>
+ import('./temporadas/temporadas.component').then(
+ (m) => m.TemporadasComponent,
+ ),
+ canActivate: [authGuard],
+ data: { roles: ['ASU'], strict: true },
+ },
 ];

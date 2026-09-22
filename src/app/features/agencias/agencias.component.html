@@ -1,198 +1,198 @@
-<!-- CU19 — Agencias de reparto (ASU/GS administran; D consulta) -->
+<!-- Agencias de reparto (ASU/GS administran; D consulta) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Agencias de Reparto</h1>
-      <p class="text-gray-600 mt-1">
-        @if (puedeGestionar) {
-          Empresas de transporte externas autorizadas para realizar entregas: cobertura, tarifas y habilitación.
-        } @else {
-          Consulta de las agencias de reparto habilitadas, su cobertura y sus tarifas.
-        }
-      </p>
-    </div>
-    @if (puedeGestionar) {
-      <button
-        type="button"
-        (click)="abrirCrear()"
-        class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-      >
-        + Registrar agencia
-      </button>
-    }
-  </div>
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Agencias de Reparto</h1>
+ <p class="text-gray-600 mt-1">
+ @if (puedeGestionar) {
+ Empresas de transporte externas autorizadas para realizar entregas: cobertura, tarifas y habilitación.
+ } @else {
+ Consulta de las agencias de reparto habilitadas, su cobertura y sus tarifas.
+ }
+ </p>
+ </div>
+ @if (puedeGestionar) {
+ <button
+ type="button"
+ (click)="abrirCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ + Registrar agencia
+ </button>
+ }
+ </div>
 
-  @if (exitoMessage()) {
-    <div class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm" role="status">
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage()) {
-    <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
-      {{ errorMessage() }}
-    </div>
-  }
+ @if (exitoMessage()) {
+ <div class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm" role="status">
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage()) {
+ <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Filtros -->
-  <div class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4">
-    <div class="relative flex-1">
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        [placeholder]="puedeGestionar ? 'Buscar por razón social, NIT o contacto...' : 'Buscar por razón social o contacto...'"
-        aria-label="Buscar agencias"
-        class="w-full px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    @if (puedeGestionar) {
-      <div class="flex gap-2">
-        @for (f of filtros; track f.valor) {
-          <button
-            type="button"
-            (click)="onFiltroEstado(f.valor)"
-            class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
-            [class]="
-              filtroEstado() === f.valor
-                ? 'bg-primary text-white shadow-sm'
-                : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-            "
-          >
-            {{ f.texto }}
-          </button>
-        }
-      </div>
-    }
-  </div>
+ <!-- Filtros -->
+ <div class="bg-container rounded-xl p-4 flex flex-col lg:flex-row gap-3 lg:items-center mb-4">
+ <div class="relative flex-1">
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ [placeholder]="puedeGestionar ? 'Buscar por razón social, NIT o contacto...' : 'Buscar por razón social o contacto...'"
+ aria-label="Buscar agencias"
+ class="w-full px-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ @if (puedeGestionar) {
+ <div class="flex gap-2">
+ @for (f of filtros; track f.valor) {
+ <button
+ type="button"
+ (click)="onFiltroEstado(f.valor)"
+ class="px-3 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroEstado() === f.valor
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ {{ f.texto }}
+ </button>
+ }
+ </div>
+ }
+ </div>
 
-  <!-- Tabla -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
-    @if (cargando()) {
-      <div class="p-10 text-center text-primary/60 text-sm">Cargando agencias...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-primary text-white">
-            <tr>
-              <th class="text-left px-4 py-3 font-semibold">Razón social</th>
-              @if (puedeGestionar) {
-                <th class="text-left px-4 py-3 font-semibold">NIT</th>
-              }
-              <th class="text-left px-4 py-3 font-semibold">Contacto</th>
-              <th class="text-center px-4 py-3 font-semibold">Estado</th>
-              <th class="text-right px-4 py-3 font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (a of agencias(); track a.id_agencia) {
-              <tr class="border-b border-primary/10 hover:bg-container/60 transition">
-                <td class="px-4 py-3">
-                  <a [routerLink]="['/agencias', a.id_agencia]" class="font-medium text-primary hover:underline">
-                    {{ a.razon_social }}
-                  </a>
-                </td>
-                @if (puedeGestionar) {
-                  <td class="px-4 py-3 text-gray-600">{{ a.nit }}</td>
-                }
-                <td class="px-4 py-3">
-                  <p class="text-gray-800">{{ a.contacto_operativo || '—' }}</p>
-                  <p class="text-xs text-gray-500">{{ a.telefono || '—' }}</p>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <app-badge
-                    [variant]="a.is_active ? 'success' : 'neutral'"
-                    [texto]="a.is_active ? 'Habilitada' : 'Deshabilitada'"
-                  />
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <a
-                    [routerLink]="['/agencias', a.id_agencia]"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                  >
-                    {{ puedeGestionar ? 'Zonas y tarifas' : 'Ver cobertura' }}
-                  </a>
-                  @if (puedeGestionar) {
-                    <button
-                      type="button"
-                      (click)="abrirEditar(a)"
-                      class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      (click)="alternarEstado(a)"
-                      class="text-primary/60 hover:text-primary font-medium mr-3 transition"
-                    >
-                      {{ a.is_active ? 'Deshabilitar' : 'Habilitar' }}
-                    </button>
-                    <button
-                      type="button"
-                      (click)="pedirEliminar(a)"
-                      class="text-red-600 hover:text-red-400 font-medium transition"
-                    >
-                      Eliminar
-                    </button>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td [attr.colspan]="puedeGestionar ? 5 : 4" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron agencias con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <div class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70">
-        <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} agencias</span>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="paginaAnterior()"
-            [disabled]="pagina() <= 1"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            ← Anterior
-          </button>
-          <button
-            type="button"
-            (click)="paginaSiguiente()"
-            [disabled]="pagina() >= pages()"
-            class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
-          >
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+ <!-- Tabla -->
+ <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-primary/10">
+ @if (cargando()) {
+ <div class="p-10 text-center text-primary/60 text-sm">Cargando agencias...</div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm">
+ <thead class="bg-primary text-white">
+ <tr>
+ <th class="text-left px-4 py-3 font-semibold">Razón social</th>
+ @if (puedeGestionar) {
+ <th class="text-left px-4 py-3 font-semibold">NIT</th>
+ }
+ <th class="text-left px-4 py-3 font-semibold">Contacto</th>
+ <th class="text-center px-4 py-3 font-semibold">Estado</th>
+ <th class="text-right px-4 py-3 font-semibold">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (a of agencias(); track a.id_agencia) {
+ <tr class="border-b border-primary/10 hover:bg-container/60 transition">
+ <td class="px-4 py-3">
+ <a [routerLink]="['/agencias', a.id_agencia]" class="font-medium text-primary hover:underline">
+ {{ a.razon_social }}
+ </a>
+ </td>
+ @if (puedeGestionar) {
+ <td class="px-4 py-3 text-gray-600">{{ a.nit }}</td>
+ }
+ <td class="px-4 py-3">
+ <p class="text-gray-800">{{ a.contacto_operativo || '—' }}</p>
+ <p class="text-xs text-gray-500">{{ a.telefono || '—' }}</p>
+ </td>
+ <td class="px-4 py-3 text-center">
+ <app-badge
+ [variant]="a.is_active ? 'success' : 'neutral'"
+ [texto]="a.is_active ? 'Habilitada' : 'Deshabilitada'"
+ />
+ </td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <a
+ [routerLink]="['/agencias', a.id_agencia]"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ >
+ {{ puedeGestionar ? 'Zonas y tarifas' : 'Ver cobertura' }}
+ </a>
+ @if (puedeGestionar) {
+ <button
+ type="button"
+ (click)="abrirEditar(a)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="alternarEstado(a)"
+ class="text-primary/60 hover:text-primary font-medium mr-3 transition"
+ >
+ {{ a.is_active ? 'Deshabilitar' : 'Habilitar' }}
+ </button>
+ <button
+ type="button"
+ (click)="pedirEliminar(a)"
+ class="text-red-600 hover:text-red-400 font-medium transition"
+ >
+ Eliminar
+ </button>
+ }
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td [attr.colspan]="puedeGestionar ? 5 : 4" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron agencias con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <div class="px-4 py-3 bg-container/50 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary/70">
+ <span>Página {{ pagina() }} de {{ pages() }} — {{ total() }} agencias</span>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="paginaAnterior()"
+ [disabled]="pagina() <= 1"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ ← Anterior
+ </button>
+ <button
+ type="button"
+ (click)="paginaSiguiente()"
+ [disabled]="pagina() >= pages()"
+ class="px-3 py-1.5 rounded-lg bg-white border border-primary/20 text-primary font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/40 transition"
+ >
+ Siguiente →
+ </button>
+ </div>
+ </div>
+ }
+ </div>
 </section>
 
 @if (formulario() !== undefined) {
-  <app-agencia-form [agencia]="formulario() ?? null" (guardado)="alGuardar($event)" (cancelado)="cerrarFormulario()" />
+ <app-agencia-form [agencia]="formulario() ?? null" (guardado)="alGuardar($event)" (cancelado)="cerrarFormulario()" />
 }
 
 @if (confirmarDeshabilitar(); as agencia) {
-  <app-confirm-dialog
-    titulo="Deshabilitar agencia"
-    [mensaje]="'¿Deshabilitar a ' + agencia.razon_social + '? Dejará de ofrecerse para nuevas asignaciones y cotizaciones; sus envíos anteriores no se modifican.'"
-    textoConfirmar="Deshabilitar"
-    [peligro]="true"
-    (confirmado)="confirmarDeshabilitacion()"
-    (cancelado)="confirmarDeshabilitar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Deshabilitar agencia"
+ [mensaje]="'¿Deshabilitar a ' + agencia.razon_social + '? Dejará de ofrecerse para nuevas asignaciones y cotizaciones; sus envíos anteriores no se modifican.'"
+ textoConfirmar="Deshabilitar"
+ [peligro]="true"
+ (confirmado)="confirmarDeshabilitacion()"
+ (cancelado)="confirmarDeshabilitar.set(null)"
+ ></app-confirm-dialog>
 }
 
 @if (confirmarEliminar(); as agencia) {
-  <app-confirm-dialog
-    titulo="Eliminar agencia"
-    [mensaje]="'¿Eliminar a ' + agencia.razon_social + ' con sus zonas y tarifas? Si tiene envíos asociados el sistema lo impedirá y sugerirá deshabilitarla.'"
-    textoConfirmar="Eliminar"
-    [peligro]="true"
-    (confirmado)="confirmarEliminacion()"
-    (cancelado)="confirmarEliminar.set(null)"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Eliminar agencia"
+ [mensaje]="'¿Eliminar a ' + agencia.razon_social + ' con sus zonas y tarifas? Si tiene envíos asociados el sistema lo impedirá y sugerirá deshabilitarla.'"
+ textoConfirmar="Eliminar"
+ [peligro]="true"
+ (confirmado)="confirmarEliminacion()"
+ (cancelado)="confirmarEliminar.set(null)"
+ ></app-confirm-dialog>
 }

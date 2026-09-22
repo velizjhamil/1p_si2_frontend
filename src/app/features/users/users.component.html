@@ -1,349 +1,349 @@
-<!-- CU3 — Gestión de Usuarios (solo ASU) -->
+<!-- Gestión de Usuarios (solo ASU) -->
 <section class="p-6 md:p-8 max-w-6xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">{{ titulo() }}</h1>
-      <p class="text-gray-600 mt-1">
-        {{ subtitulo() }}
-      </p>
-    </div>
-    <button
-      type="button"
-      (click)="abrirModalCrear()"
-      class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
-    >
-      {{ botonNuevo() }}
-    </button>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">{{ titulo() }}</h1>
+ <p class="text-gray-600 mt-1">
+ {{ subtitulo() }}
+ </p>
+ </div>
+ <button
+ type="button"
+ (click)="abrirModalCrear()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium shadow-sm"
+ >
+ {{ botonNuevo() }}
+ </button>
+ </div>
 
-  <!-- Alertas -->
-  @if (exitoMessage()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
-    >
-      {{ exitoMessage() }}
-    </div>
-  }
-  @if (errorMessage() && !modalAbierto()) {
-    <div
-      class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-    >
-      {{ errorMessage() }}
-    </div>
-  }
+ <!-- Alertas -->
+ @if (exitoMessage()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-container border border-primary/30 text-primary text-sm"
+ >
+ {{ exitoMessage() }}
+ </div>
+ }
+ @if (errorMessage() && !modalAbierto()) {
+ <div
+ class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-  <!-- Barra de herramientas: búsqueda + filtro por estado -->
-  <div
-    class="bg-container rounded-xl p-4 flex flex-col md:flex-row gap-3 md:items-center mb-4"
-  >
-    <div class="relative flex-1">
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <input
-        type="text"
-        [value]="busqueda()"
-        (input)="onBusqueda($event)"
-        placeholder="Buscar por nombre, correo o rol..."
-        class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-      />
-    </div>
-    <div class="flex gap-2">
-      <button
-        type="button"
-        (click)="filtroEstado.set('todos')"
-        class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroActivo('todos')
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        (click)="filtroEstado.set('activos')"
-        class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroActivo('activos')
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Activos
-      </button>
-      <button
-        type="button"
-        (click)="filtroEstado.set('inactivos')"
-        class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
-        [class]="
-          filtroActivo('inactivos')
-            ? 'bg-primary text-white shadow-sm'
-            : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
-        "
-      >
-        Inactivos
-      </button>
-    </div>
-  </div>
+ <!-- Barra de herramientas: búsqueda + filtro por estado -->
+ <div
+ class="bg-container rounded-xl p-4 flex flex-col md:flex-row gap-3 md:items-center mb-4"
+ >
+ <div class="relative flex-1">
+ <svg
+ class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+ />
+ </svg>
+ <input
+ type="text"
+ [value]="busqueda()"
+ (input)="onBusqueda($event)"
+ placeholder="Buscar por nombre, correo o rol..."
+ class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ />
+ </div>
+ <div class="flex gap-2">
+ <button
+ type="button"
+ (click)="filtroEstado.set('todos')"
+ class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroActivo('todos')
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Todos
+ </button>
+ <button
+ type="button"
+ (click)="filtroEstado.set('activos')"
+ class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroActivo('activos')
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Activos
+ </button>
+ <button
+ type="button"
+ (click)="filtroEstado.set('inactivos')"
+ class="px-4 py-2.5 rounded-lg text-sm font-medium transition"
+ [class]="
+ filtroActivo('inactivos')
+ ? 'bg-primary text-white shadow-sm'
+ : 'bg-white text-primary border border-primary/20 hover:bg-accent/40'
+ "
+ >
+ Inactivos
+ </button>
+ </div>
+ </div>
 
-  <!-- Tabla de usuarios -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-    @if (cargando()) {
-      <div class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse">Cargando usuarios...</div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
-            <tr>
-              <th class="px-6 py-3.5">Nombre Completo</th>
-              <th class="px-6 py-3.5">Correo Electrónico</th>
-              <th class="px-6 py-3.5">Rol Asignado</th>
-              <th class="px-6 py-3.5">Sucursal</th>
-              <th class="px-6 py-3.5 text-center">Estado</th>
-              <th class="px-6 py-3.5 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            @for (usuario of usuariosFiltrados(); track usuario.id_usuario) {
-              <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="px-6 py-4 font-semibold text-slate-900">
-                  {{ usuario.nombre }} {{ usuario.apellido ?? '' }}
-                </td>
-                <td class="px-6 py-4 text-slate-600">{{ usuario.correo }}</td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-block px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-xs font-semibold"
-                  >
-                    {{ usuario.rol.nombre_rol }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  @if (usuario.sucursal_nombre) {
-                    <span
-                      class="inline-block px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200/60 text-xs font-semibold"
-                    >
-                      {{ usuario.sucursal_nombre }}
-                    </span>
-                  } @else {
-                    <span class="text-xs text-slate-400 italic">Sin sucursal</span>
-                  }
-                </td>
-                <td class="px-6 py-4 text-center">
-                  @if (usuario.estado) {
-                    <span
-                      class="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-semibold"
-                    >
-                      Activo
-                    </span>
-                  } @else {
-                    <span
-                      class="inline-block px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/60 text-xs font-semibold"
-                    >
-                      Inactivo
-                    </span>
-                  }
-                </td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    (click)="abrirModalEditar(usuario)"
-                    class="text-primary hover:text-primary/70 font-medium mr-3 transition"
-                    title="Editar usuario"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    (click)="toggleEstado(usuario)"
-                    class="font-medium transition"
-                    [title]="usuario.estado ? 'Desactivar usuario' : 'Activar usuario'"
-                    [class]="
-                      usuario.estado
-                        ? 'text-red-600 hover:text-red-400'
-                        : 'text-green-700 hover:text-green-500'
-                    "
-                  >
-                    {{ usuario.estado ? 'Desactivar' : 'Activar' }}
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="px-4 py-10 text-center text-gray-500 text-sm">
-                  No se encontraron usuarios con los criterios de búsqueda.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <div class="px-4 py-3 bg-container/50 text-xs text-primary/70">
-        {{ usuariosFiltrados().length }} de {{ usuarios().length }} usuarios
-      </div>
-    }
-  </div>
+ <!-- Tabla de usuarios -->
+ <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+ @if (cargando()) {
+ <div class="p-12 text-center text-slate-400 text-sm font-medium animate-pulse">Cargando usuarios...</div>
+ } @else {
+ <div class="overflow-x-auto">
+ <table class="w-full text-sm text-left">
+ <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+ <tr>
+ <th class="px-6 py-3.5">Nombre Completo</th>
+ <th class="px-6 py-3.5">Correo Electrónico</th>
+ <th class="px-6 py-3.5">Rol Asignado</th>
+ <th class="px-6 py-3.5">Sucursal</th>
+ <th class="px-6 py-3.5 text-center">Estado</th>
+ <th class="px-6 py-3.5 text-right">Acciones</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (usuario of usuariosFiltrados(); track usuario.id_usuario) {
+ <tr class="hover:bg-slate-50/80 transition-colors">
+ <td class="px-6 py-4 font-semibold text-slate-900">
+ {{ usuario.nombre }} {{ usuario.apellido ?? '' }}
+ </td>
+ <td class="px-6 py-4 text-slate-600">{{ usuario.correo }}</td>
+ <td class="px-6 py-4">
+ <span
+ class="inline-block px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-xs font-semibold"
+ >
+ {{ usuario.rol.nombre_rol }}
+ </span>
+ </td>
+ <td class="px-6 py-4">
+ @if (usuario.sucursal_nombre) {
+ <span
+ class="inline-block px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200/60 text-xs font-semibold"
+ >
+ {{ usuario.sucursal_nombre }}
+ </span>
+ } @else {
+ <span class="text-xs text-slate-400 italic">Sin sucursal</span>
+ }
+ </td>
+ <td class="px-6 py-4 text-center">
+ @if (usuario.estado) {
+ <span
+ class="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-semibold"
+ >
+ Activo
+ </span>
+ } @else {
+ <span
+ class="inline-block px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/60 text-xs font-semibold"
+ >
+ Inactivo
+ </span>
+ }
+ </td>
+ <td class="px-4 py-3 text-right whitespace-nowrap">
+ <button
+ type="button"
+ (click)="abrirModalEditar(usuario)"
+ class="text-primary hover:text-primary/70 font-medium mr-3 transition"
+ title="Editar usuario"
+ >
+ Editar
+ </button>
+ <button
+ type="button"
+ (click)="toggleEstado(usuario)"
+ class="font-medium transition"
+ [title]="usuario.estado ? 'Desactivar usuario' : 'Activar usuario'"
+ [class]="
+ usuario.estado
+ ? 'text-red-600 hover:text-red-400'
+ : 'text-green-700 hover:text-green-500'
+ "
+ >
+ {{ usuario.estado ? 'Desactivar' : 'Activar' }}
+ </button>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="5" class="px-4 py-10 text-center text-gray-500 text-sm">
+ No se encontraron usuarios con los criterios de búsqueda.
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <div class="px-4 py-3 bg-container/50 text-xs text-primary/70">
+ {{ usuariosFiltrados().length }} de {{ usuarios().length }} usuarios
+ </div>
+ }
+ </div>
 </section>
 
 <!-- Modal Crear / Editar -->
 @if (modalAbierto()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-      (click)="cerrarModal()"
-    ></div>
-    <div
-      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-    >
-      <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
-        <h2 class="text-lg font-bold">
-          {{ editandoId() ? 'Editar Usuario' : 'Nuevo Usuario' }}
-        </h2>
-        <p class="text-white/80 text-xs mt-0.5">
-          {{
-            editandoId()
-              ? 'Actualice los campos y guarde los cambios.'
-              : 'Complete los datos de la nueva cuenta de acceso.'
-          }}
-        </p>
-      </div>
+ <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrarModal()"
+ ></div>
+ <div
+ class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+ >
+ <div class="bg-primary text-white px-6 py-4 rounded-t-2xl">
+ <h2 class="text-lg font-bold">
+ {{ editandoId() ? 'Editar Usuario' : 'Nuevo Usuario' }}
+ </h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ {{
+ editandoId()
+ ? 'Actualice los campos y guarde los cambios.'
+ : 'Complete los datos de la nueva cuenta de acceso.'
+ }}
+ </p>
+ </div>
 
-      <form [formGroup]="usuarioForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
-        @if (errorMessage()) {
-          <div
-            class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
+ <form [formGroup]="usuarioForm" (ngSubmit)="guardar()" class="p-6 space-y-4">
+ @if (errorMessage()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorMessage() }}
+ </div>
+ }
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="nombre"
-              >Nombre *</label
-            >
-            <input
-              id="nombre"
-              type="text"
-              formControlName="nombre"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="Ej: María"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="apellido"
-              >Apellido</label
-            >
-            <input
-              id="apellido"
-              type="text"
-              formControlName="apellido"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-              placeholder="Ej: Pérez"
-            />
-          </div>
-        </div>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="nombre"
+ >Nombre *</label
+ >
+ <input
+ id="nombre"
+ type="text"
+ formControlName="nombre"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: María"
+ />
+ </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="apellido"
+ >Apellido</label
+ >
+ <input
+ id="apellido"
+ type="text"
+ formControlName="apellido"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Ej: Pérez"
+ />
+ </div>
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="correo"
-            >Correo electrónico *</label
-          >
-          <input
-            id="correo"
-            type="email"
-            formControlName="correo"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="usuario@attention.com"
-          />
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="correo"
+ >Correo electrónico *</label
+ >
+ <input
+ id="correo"
+ type="email"
+ formControlName="correo"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="usuario@attention.com"
+ />
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="password">
-            {{ editandoId() ? 'Contraseña (vacío = no cambiar)' : 'Contraseña *' }}
-          </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
-            placeholder="Mínimo 6 caracteres"
-          />
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="password">
+ {{ editandoId() ? 'Contraseña (vacío = no cambiar)' : 'Contraseña *' }}
+ </label>
+ <input
+ id="password"
+ type="password"
+ formControlName="password"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm"
+ placeholder="Mínimo 6 caracteres"
+ />
+ </div>
 
-        <div>
-          <label class="block text-sm font-medium text-primary mb-1" for="rol">Rol *</label>
-          <select
-            id="rol"
-            formControlName="rol"
-            class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-          >
-            <option value="" disabled>Seleccione un rol...</option>
-            @for (rol of rolesDisponibles(); track rol.id_rol) {
-              <option [value]="rol.id_rol">
-                {{ rol.nombre_rol }}{{ rol.descripcion ? ' — ' + rol.descripcion : '' }}
-              </option>
-            }
-          </select>
-        </div>
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="rol">Rol *</label>
+ <select
+ id="rol"
+ formControlName="rol"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option value="" disabled>Seleccione un rol...</option>
+ @for (rol of rolesDisponibles(); track rol.id_rol) {
+ <option [value]="rol.id_rol">
+ {{ rol.nombre_rol }}{{ rol.descripcion ? ' — ' + rol.descripcion : '' }}
+ </option>
+ }
+ </select>
+ </div>
 
-        @if (!esGerente()) {
-          <div>
-            <label class="block text-sm font-medium text-primary mb-1" for="id_sucursal">
-              Sucursal Asignada
-            </label>
-            <select
-              id="id_sucursal"
-              formControlName="id_sucursal"
-              class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
-            >
-              <option value="">-- Sin Sucursal Asignada --</option>
-              @for (s of sucursales(); track s.codigo_sucursal) {
-                <option [value]="s.codigo_sucursal">
-                  {{ s.nombre }} ({{ s.ciudad.nombre }})
-                </option>
-              }
-            </select>
-            <p class="text-xs text-gray-500 mt-1">
-              Requerido para roles operativos (Gerente de Sucursal y Vendedor).
-            </p>
-          </div>
-        }
+ @if (!esGerente()) {
+ <div>
+ <label class="block text-sm font-medium text-primary mb-1" for="id_sucursal">
+ Sucursal Asignada
+ </label>
+ <select
+ id="id_sucursal"
+ formControlName="id_sucursal"
+ class="w-full px-3 py-2.5 rounded-lg border border-primary/20 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm bg-white"
+ >
+ <option value="">-- Sin Sucursal Asignada --</option>
+ @for (s of sucursales(); track s.codigo_sucursal) {
+ <option [value]="s.codigo_sucursal">
+ {{ s.nombre }} ({{ s.ciudad.nombre }})
+ </option>
+ }
+ </select>
+ <p class="text-xs text-gray-500 mt-1">
+ Requerido para roles operativos (Gerente de Sucursal y Vendedor).
+ </p>
+ </div>
+ }
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="cerrarModal()"
-            class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="guardando()"
-            class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            @if (guardando()) {
-              Guardando...
-            } @else if (editandoId()) {
-              Guardar Cambios
-            } @else {
-              Crear Usuario
-            }
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="flex justify-end gap-3 pt-2">
+ <button
+ type="button"
+ (click)="cerrarModal()"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ Cancelar
+ </button>
+ <button
+ type="submit"
+ [disabled]="guardando()"
+ class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ @if (guardando()) {
+ Guardando...
+ } @else if (editandoId()) {
+ Guardar Cambios
+ } @else {
+ Crear Usuario
+ }
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
 }

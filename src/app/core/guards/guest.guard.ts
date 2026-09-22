@@ -8,12 +8,12 @@ import { AuthService } from '../services/auth.service';
  * Si no está autenticado, permite el acceso y renderizado del formulario.
  */
 export const guestGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
+ const authService = inject(AuthService);
 
-  if (authService.isAuthenticated()) {
-    authService.redirectUserHome();
-    return false;
-  }
+ if (authService.isAuthenticated()) {
+ authService.redirectUserHome();
+ return false;
+ }
 
-  return true;
+ return true;
 };

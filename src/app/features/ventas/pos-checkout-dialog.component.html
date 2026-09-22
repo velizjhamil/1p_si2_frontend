@@ -1,649 +1,649 @@
-<!-- CU11 — Modal Punto de Venta (POS) del Vendedor/GS/ASU -->
+<!-- Modal Punto de Venta (POS) del Vendedor/GS/ASU -->
 <!-- Backdrop + modal centrado. z-50 como el modal de detalle de venta. -->
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden">
-  <div
-    class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-    (click)="cerrar()"
-  ></div>
+ <div
+ class="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+ (click)="cerrar()"
+ ></div>
 
-  <div
-    class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
-  >
-    <!-- Header con stepper -->
-    <div class="bg-primary text-white px-6 py-4 flex-shrink-0">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <h2 class="text-lg font-bold">Punto de Venta (POS)</h2>
-          <p class="text-white/80 text-xs mt-0.5">
-            @switch (paso()) {
-              @case ('cliente') {
-                Paso 1 de 3 — Seleccione el cliente
-              }
-              @case ('productos') {
-                Paso 2 de 3 — Agregue los productos a cobrar
-              }
-              @case ('cobro') {
-                Paso 3 de 3 — Confirme el cobro
-              }
-            }
-          </p>
-        </div>
-        <button
-          type="button"
-          (click)="cerrar()"
-          class="text-white/80 hover:text-white transition p-1"
-          title="Cancelar y cerrar"
-        >
-          <span class="text-2xl leading-none">×</span>
-        </button>
-      </div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+ >
+ <!-- Header con stepper -->
+ <div class="bg-primary text-white px-6 py-4 flex-shrink-0">
+ <div class="flex items-center justify-between mb-3">
+ <div>
+ <h2 class="text-lg font-bold">Punto de Venta (POS)</h2>
+ <p class="text-white/80 text-xs mt-0.5">
+ @switch (paso()) {
+ @case ('cliente') {
+ Paso 1 de 3 — Seleccione el cliente
+ }
+ @case ('productos') {
+ Paso 2 de 3 — Agregue los productos a cobrar
+ }
+ @case ('cobro') {
+ Paso 3 de 3 — Confirme el cobro
+ }
+ }
+ </p>
+ </div>
+ <button
+ type="button"
+ (click)="cerrar()"
+ class="text-white/80 hover:text-white transition p-1"
+ title="Cancelar y cerrar"
+ >
+ <span class="text-2xl leading-none">×</span>
+ </button>
+ </div>
 
-      <!-- Stepper visual -->
-      <div class="flex items-center gap-2 text-xs">
-        <div
-          class="flex items-center gap-1.5"
-          [class.opacity-50]="paso() !== 'cliente'"
-        >
-          <span
-            class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
-            [class.bg-white]="paso() === 'cliente'"
-            [class.text-primary]="paso() === 'cliente'"
-            [class.bg-white\\/20]="paso() !== 'cliente'"
-          >1</span>
-          <span>Cliente</span>
-        </div>
-        <div class="flex-1 h-px bg-white/30"></div>
-        <div
-          class="flex items-center gap-1.5"
-          [class.opacity-50]="paso() !== 'productos'"
-        >
-          <span
-            class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
-            [class.bg-white]="paso() === 'productos'"
-            [class.text-primary]="paso() === 'productos'"
-            [class.bg-white\\/20]="paso() !== 'productos'"
-          >2</span>
-          <span>Productos</span>
-        </div>
-        <div class="flex-1 h-px bg-white/30"></div>
-        <div
-          class="flex items-center gap-1.5"
-          [class.opacity-50]="paso() !== 'cobro'"
-        >
-          <span
-            class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
-            [class.bg-white]="paso() === 'cobro'"
-            [class.text-primary]="paso() === 'cobro'"
-            [class.bg-white\\/20]="paso() !== 'cobro'"
-          >3</span>
-          <span>Cobro</span>
-        </div>
-      </div>
-    </div>
+ <!-- Stepper visual -->
+ <div class="flex items-center gap-2 text-xs">
+ <div
+ class="flex items-center gap-1.5"
+ [class.opacity-50]="paso() !== 'cliente'"
+ >
+ <span
+ class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
+ [class.bg-white]="paso() === 'cliente'"
+ [class.text-primary]="paso() === 'cliente'"
+ [class.bg-white\\/20]="paso() !== 'cliente'"
+ >1</span>
+ <span>Cliente</span>
+ </div>
+ <div class="flex-1 h-px bg-white/30"></div>
+ <div
+ class="flex items-center gap-1.5"
+ [class.opacity-50]="paso() !== 'productos'"
+ >
+ <span
+ class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
+ [class.bg-white]="paso() === 'productos'"
+ [class.text-primary]="paso() === 'productos'"
+ [class.bg-white\\/20]="paso() !== 'productos'"
+ >2</span>
+ <span>Productos</span>
+ </div>
+ <div class="flex-1 h-px bg-white/30"></div>
+ <div
+ class="flex items-center gap-1.5"
+ [class.opacity-50]="paso() !== 'cobro'"
+ >
+ <span
+ class="w-6 h-6 rounded-full flex items-center justify-center font-bold"
+ [class.bg-white]="paso() === 'cobro'"
+ [class.text-primary]="paso() === 'cobro'"
+ [class.bg-white\\/20]="paso() !== 'cobro'"
+ >3</span>
+ <span>Cobro</span>
+ </div>
+ </div>
+ </div>
 
-    <!-- Contenido scrollable -->
-    <div class="flex-1 overflow-y-auto p-6">
-      <!-- ============================================================== -->
-      <!-- PASO 1: Cliente -->
-      <!-- ============================================================== -->
-      @if (paso() === 'cliente') {
-        <div class="space-y-4">
-          @if (clienteSeleccionado(); as cli) {
-            <div
-              class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between"
-            >
-              <div>
-                <p class="text-xs text-green-700 font-semibold uppercase">
-                  Cliente seleccionado
-                </p>
-                <p class="text-base font-bold text-green-900 mt-1">
-                  {{ nombreCompleto(cli) }}
-                </p>
-                <p class="text-sm text-green-700">{{ cli.correo }}</p>
-              </div>
-              <button
-                type="button"
-                (click)="clienteSeleccionado.set(null); paso.set('cliente')"
-                class="text-green-700 hover:text-green-900 text-sm font-medium underline"
-              >
-                Cambiar
-              </button>
-            </div>
-          }
+ <!-- Contenido scrollable -->
+ <div class="flex-1 overflow-y-auto p-6">
+ <!-- ============================================================== -->
+ <!-- PASO 1: Cliente -->
+ <!-- ============================================================== -->
+ @if (paso() === 'cliente') {
+ <div class="space-y-4">
+ @if (clienteSeleccionado(); as cli) {
+ <div
+ class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between"
+ >
+ <div>
+ <p class="text-xs text-green-700 font-semibold uppercase">
+ Cliente seleccionado
+ </p>
+ <p class="text-base font-bold text-green-900 mt-1">
+ {{ nombreCompleto(cli) }}
+ </p>
+ <p class="text-sm text-green-700">{{ cli.correo }}</p>
+ </div>
+ <button
+ type="button"
+ (click)="clienteSeleccionado.set(null); paso.set('cliente')"
+ class="text-green-700 hover:text-green-900 text-sm font-medium underline"
+ >
+ Cambiar
+ </button>
+ </div>
+ }
 
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">
-              Buscar cliente (nombre, apellido o correo)
-            </label>
-            <input
-              type="text"
-              [formControl]="busquedaCliente"
-              placeholder="Ej: Juan Pérez o juan@correo.com"
-              class="w-full px-4 py-2.5 rounded-lg text-sm bg-white text-slate-700 border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
+ <div>
+ <label class="block text-sm font-medium text-slate-700 mb-2">
+ Buscar cliente (nombre, apellido o correo)
+ </label>
+ <input
+ type="text"
+ [formControl]="busquedaCliente"
+ placeholder="Ej: Juan Pérez o juan@correo.com"
+ class="w-full px-4 py-2.5 rounded-lg text-sm bg-white text-slate-700 border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+ />
+ </div>
 
-          @if (cargandoClientes()) {
-            <p class="text-slate-400 text-sm font-medium animate-pulse py-6 text-center">
-              Buscando clientes...
-            </p>
-          } @else if (clientes().length === 0) {
-            <div class="py-8 text-center">
-              <p class="text-slate-500 text-sm">
-                @if (busquedaCliente.value) {
-                  No se encontraron clientes con ese criterio.
-                } @else {
-                  No hay clientes registrados disponibles.
-                }
-              </p>
-            </div>
-          } @else {
-            <div class="border border-slate-200 rounded-xl overflow-hidden">
-              <table class="w-full text-sm text-left">
-                <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th class="px-4 py-3">Cliente</th>
-                    <th class="px-4 py-3">Correo</th>
-                    <th class="px-4 py-3 text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  @for (cli of clientes(); track cli.id_usuario) {
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 font-medium text-slate-800">
-                        {{ nombreCompleto(cli) }}
-                      </td>
-                      <td class="px-4 py-3 text-slate-500">
-                        {{ cli.correo }}
-                      </td>
-                      <td class="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          (click)="elegirCliente(cli)"
-                          class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-accent hover:text-primary transition"
-                        >
-                          Seleccionar
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">
-              Mostrando {{ clientes().length }} clientes (máx. 20).
-            </p>
-          }
-        </div>
-      }
+ @if (cargandoClientes()) {
+ <p class="text-slate-400 text-sm font-medium animate-pulse py-6 text-center">
+ Buscando clientes...
+ </p>
+ } @else if (clientes().length === 0) {
+ <div class="py-8 text-center">
+ <p class="text-slate-500 text-sm">
+ @if (busquedaCliente.value) {
+ No se encontraron clientes con ese criterio.
+ } @else {
+ No hay clientes registrados disponibles.
+ }
+ </p>
+ </div>
+ } @else {
+ <div class="border border-slate-200 rounded-xl overflow-hidden">
+ <table class="w-full text-sm text-left">
+ <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+ <tr>
+ <th class="px-4 py-3">Cliente</th>
+ <th class="px-4 py-3">Correo</th>
+ <th class="px-4 py-3 text-right">Acción</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (cli of clientes(); track cli.id_usuario) {
+ <tr class="hover:bg-slate-50">
+ <td class="px-4 py-3 font-medium text-slate-800">
+ {{ nombreCompleto(cli) }}
+ </td>
+ <td class="px-4 py-3 text-slate-500">
+ {{ cli.correo }}
+ </td>
+ <td class="px-4 py-3 text-right">
+ <button
+ type="button"
+ (click)="elegirCliente(cli)"
+ class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-accent hover:text-primary transition"
+ >
+ Seleccionar
+ </button>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ <p class="text-xs text-slate-400 mt-2">
+ Mostrando {{ clientes().length }} clientes (máx. 20).
+ </p>
+ }
+ </div>
+ }
 
-      <!-- ============================================================== -->
-      <!-- PASO 2: Productos -->
-      <!-- ============================================================== -->
-      @if (paso() === 'productos') {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Columna izquierda: catálogo -->
-          <div class="lg:col-span-2 space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">
-                Buscar producto (nombre o descripción)
-              </label>
-              <input
-                type="text"
-                [formControl]="busquedaProducto"
-                placeholder="Ej: Camisa Oxford"
-                class="w-full px-4 py-2.5 rounded-lg text-sm bg-white text-slate-700 border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+ <!-- ============================================================== -->
+ <!-- PASO 2: Productos -->
+ <!-- ============================================================== -->
+ @if (paso() === 'productos') {
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ <!-- Columna izquierda: catálogo -->
+ <div class="lg:col-span-2 space-y-4">
+ <div>
+ <label class="block text-sm font-medium text-slate-700 mb-2">
+ Buscar producto (nombre o descripción)
+ </label>
+ <input
+ type="text"
+ [formControl]="busquedaProducto"
+ placeholder="Ej: Camisa Oxford"
+ class="w-full px-4 py-2.5 rounded-lg text-sm bg-white text-slate-700 border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+ />
+ </div>
 
-            @if (cargandoProductos()) {
-              <p class="text-slate-400 text-sm font-medium animate-pulse py-6 text-center">
-                Buscando productos...
-              </p>
-            } @else if (productos().length === 0) {
-              <div class="py-8 text-center">
-                <p class="text-slate-500 text-sm">
-                  No se encontraron productos activos.
-                </p>
-              </div>
-            } @else {
-              <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <table class="w-full text-sm text-left">
-                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                    <tr>
-                      <th class="px-3 py-2.5">Producto</th>
-                      <th class="px-3 py-2.5 text-right">Precio</th>
-                      <th class="px-3 py-2.5 text-center">Stock</th>
-                      <th class="px-3 py-2.5 text-right">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    @for (p of productos(); track p.id_producto) {
-                      <tr class="hover:bg-slate-50">
-                        <td class="px-3 py-2.5">
-                          <p class="font-medium text-slate-800">
-                            {{ p.nombre }}
-                          </p>
-                          <p class="text-xs text-slate-500">
-                            {{ p.categoria?.nombre }}
-                          </p>
-                        </td>
-                        <td class="px-3 py-2.5 text-right font-semibold text-slate-800">
-                          {{ formatBs(p.precio_venta) }}
-                        </td>
-                        <td class="px-3 py-2.5 text-center">
-                          @if (p.stock_total === 0) {
-                            <span
-                              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700"
-                            >Agotado</span>
-                          } @else if (p.stock_total < 5) {
-                            <span
-                              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
-                            >{{ p.stock_total }} u.</span>
-                          } @else {
-                            <span class="text-sm text-slate-700">{{ p.stock_total }} u.</span>
-                          }
-                        </td>
-                        <td class="px-3 py-2.5 text-right">
-                          @if (p.stock_total > 0) {
-                            <button
-                              type="button"
-                              (click)="toggleExpandirProducto(p.id_producto)"
-                              class="text-primary hover:text-accent text-xs font-semibold underline"
-                            >
-                              @if (productoExpandido() === p.id_producto) {
-                                Cancelar
-                              } @else {
-                                Agregar
-                              }
-                            </button>
-                          } @else {
-                            <span class="text-xs text-slate-400">Sin stock</span>
-                          }
-                        </td>
-                      </tr>
-                      @if (productoExpandido() === p.id_producto) {
-                        <tr class="bg-slate-50/60">
-                          <td colspan="4" class="px-3 py-3">
-                            <div
-                              [formGroup]="formVariante"
-                              class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end"
-                            >
-                              <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">
-                                  Talla
-                                </label>
-                                <select
-                                  formControlName="talla"
-                                  class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
-                                >
-                                  @for (t of p.tallas; track t.id_talla) {
-                                    <option [value]="t.nombre_talla">
-                                      {{ t.nombre_talla }}
-                                    </option>
-                                  }
-                                </select>
-                              </div>
-                              <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">
-                                  Color
-                                </label>
-                                <select
-                                  formControlName="color"
-                                  class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
-                                >
-                                  @for (c of p.colores; track c.id_color) {
-                                    <option [value]="c.nombre_color">
-                                      {{ c.nombre_color }}
-                                    </option>
-                                  }
-                                </select>
-                              </div>
-                              <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">
-                                  Cantidad (disp. {{ p.stock_total }})
-                                </label>
-                                <input
-                                  type="number"
-                                  formControlName="cantidad"
-                                  min="1"
-                                  [max]="p.stock_total"
-                                  class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
-                                />
-                              </div>
-                              <button
-                                type="button"
-                                (click)="agregarAlCarritoPos(p)"
-                                [disabled]="formVariante.invalid"
-                                class="bg-primary text-white px-3 py-2 rounded text-xs font-semibold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                Confirmar
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      }
-                    }
-                  </tbody>
-                </table>
-              </div>
-              <p class="text-xs text-slate-400 mt-2">
-                {{ productos().length }} de {{ productosTotal() }} productos.
-              </p>
-            }
-          </div>
+ @if (cargandoProductos()) {
+ <p class="text-slate-400 text-sm font-medium animate-pulse py-6 text-center">
+ Buscando productos...
+ </p>
+ } @else if (productos().length === 0) {
+ <div class="py-8 text-center">
+ <p class="text-slate-500 text-sm">
+ No se encontraron productos activos.
+ </p>
+ </div>
+ } @else {
+ <div class="border border-slate-200 rounded-xl overflow-hidden">
+ <table class="w-full text-sm text-left">
+ <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+ <tr>
+ <th class="px-3 py-2.5">Producto</th>
+ <th class="px-3 py-2.5 text-right">Precio</th>
+ <th class="px-3 py-2.5 text-center">Stock</th>
+ <th class="px-3 py-2.5 text-right">Acción</th>
+ </tr>
+ </thead>
+ <tbody class="divide-y divide-slate-100">
+ @for (p of productos(); track p.id_producto) {
+ <tr class="hover:bg-slate-50">
+ <td class="px-3 py-2.5">
+ <p class="font-medium text-slate-800">
+ {{ p.nombre }}
+ </p>
+ <p class="text-xs text-slate-500">
+ {{ p.categoria?.nombre }}
+ </p>
+ </td>
+ <td class="px-3 py-2.5 text-right font-semibold text-slate-800">
+ {{ formatBs(p.precio_venta) }}
+ </td>
+ <td class="px-3 py-2.5 text-center">
+ @if (p.stock_total === 0) {
+ <span
+ class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700"
+ >Agotado</span>
+ } @else if (p.stock_total < 5) {
+ <span
+ class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+ >{{ p.stock_total }} u.</span>
+ } @else {
+ <span class="text-sm text-slate-700">{{ p.stock_total }} u.</span>
+ }
+ </td>
+ <td class="px-3 py-2.5 text-right">
+ @if (p.stock_total > 0) {
+ <button
+ type="button"
+ (click)="toggleExpandirProducto(p.id_producto)"
+ class="text-primary hover:text-accent text-xs font-semibold underline"
+ >
+ @if (productoExpandido() === p.id_producto) {
+ Cancelar
+ } @else {
+ Agregar
+ }
+ </button>
+ } @else {
+ <span class="text-xs text-slate-400">Sin stock</span>
+ }
+ </td>
+ </tr>
+ @if (productoExpandido() === p.id_producto) {
+ <tr class="bg-slate-50/60">
+ <td colspan="4" class="px-3 py-3">
+ <div
+ [formGroup]="formVariante"
+ class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end"
+ >
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Talla
+ </label>
+ <select
+ formControlName="talla"
+ class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
+ >
+ @for (t of p.tallas; track t.id_talla) {
+ <option [value]="t.nombre_talla">
+ {{ t.nombre_talla }}
+ </option>
+ }
+ </select>
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Color
+ </label>
+ <select
+ formControlName="color"
+ class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
+ >
+ @for (c of p.colores; track c.id_color) {
+ <option [value]="c.nombre_color">
+ {{ c.nombre_color }}
+ </option>
+ }
+ </select>
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Cantidad (disp. {{ p.stock_total }})
+ </label>
+ <input
+ type="number"
+ formControlName="cantidad"
+ min="1"
+ [max]="p.stock_total"
+ class="w-full px-2 py-1.5 rounded text-xs border border-slate-200"
+ />
+ </div>
+ <button
+ type="button"
+ (click)="agregarAlCarritoPos(p)"
+ [disabled]="formVariante.invalid"
+ class="bg-primary text-white px-3 py-2 rounded text-xs font-semibold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
+ >
+ Confirmar
+ </button>
+ </div>
+ </td>
+ </tr>
+ }
+ }
+ </tbody>
+ </table>
+ </div>
+ <p class="text-xs text-slate-400 mt-2">
+ {{ productos().length }} de {{ productosTotal() }} productos.
+ </p>
+ }
+ </div>
 
-          <!-- Columna derecha: carrito del POS -->
-          <div class="space-y-3">
-            <div
-              class="bg-container rounded-xl p-4 border border-primary/10 lg:sticky lg:top-0"
-            >
-              <p class="text-xs font-medium text-primary/70 uppercase tracking-wide mb-2">
-                Carrito POS
-              </p>
-              <p class="text-2xl font-bold text-primary">
-                {{ formatBs(totalPos()) }}
-              </p>
-              <p class="text-xs text-slate-500 mt-1">
-                {{ contadorPos() }} unidades
-              </p>
+ <!-- Columna derecha: carrito del POS -->
+ <div class="space-y-3">
+ <div
+ class="bg-container rounded-xl p-4 border border-primary/10 lg:sticky lg:top-0"
+ >
+ <p class="text-xs font-medium text-primary/70 uppercase tracking-wide mb-2">
+ Carrito POS
+ </p>
+ <p class="text-2xl font-bold text-primary">
+ {{ formatBs(totalPos()) }}
+ </p>
+ <p class="text-xs text-slate-500 mt-1">
+ {{ contadorPos() }} unidades
+ </p>
 
-              @if (carritoPos().length === 0) {
-                <p class="text-xs text-slate-400 mt-4 italic">
-                  El carrito está vacío. Agregue productos desde el catálogo.
-                </p>
-              } @else {
-                <ul class="mt-4 space-y-2 max-h-64 overflow-y-auto">
-                  @for (item of carritoPos(); track $index) {
-                    <li
-                      class="bg-white rounded-lg p-2 border border-slate-200 text-xs"
-                    >
-                      <div class="flex items-start justify-between gap-2">
-                        <div class="flex-1 min-w-0">
-                          <p class="font-medium text-slate-800 truncate">
-                            {{ item.nombre }}
-                          </p>
-                          <p class="text-slate-500">
-                            {{ item.talla }} / {{ item.color }} · ×{{ item.cantidad }}
-                          </p>
-                          <p class="text-slate-700 font-semibold mt-0.5">
-                            {{ formatBs(item.subtotal) }}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          (click)="eliminarDelCarritoPos($index)"
-                          class="text-red-500 hover:text-red-700 transition"
-                          title="Quitar del carrito"
-                        >
-                          <span class="text-base leading-none">×</span>
-                        </button>
-                      </div>
-                    </li>
-                  }
-                </ul>
-              }
+ @if (carritoPos().length === 0) {
+ <p class="text-xs text-slate-400 mt-4 italic">
+ El carrito está vacío. Agregue productos desde el catálogo.
+ </p>
+ } @else {
+ <ul class="mt-4 space-y-2 max-h-64 overflow-y-auto">
+ @for (item of carritoPos(); track $index) {
+ <li
+ class="bg-white rounded-lg p-2 border border-slate-200 text-xs"
+ >
+ <div class="flex items-start justify-between gap-2">
+ <div class="flex-1 min-w-0">
+ <p class="font-medium text-slate-800 truncate">
+ {{ item.nombre }}
+ </p>
+ <p class="text-slate-500">
+ {{ item.talla }} / {{ item.color }} · ×{{ item.cantidad }}
+ </p>
+ <p class="text-slate-700 font-semibold mt-0.5">
+ {{ formatBs(item.subtotal) }}
+ </p>
+ </div>
+ <button
+ type="button"
+ (click)="eliminarDelCarritoPos($index)"
+ class="text-red-500 hover:text-red-700 transition"
+ title="Quitar del carrito"
+ >
+ <span class="text-base leading-none">×</span>
+ </button>
+ </div>
+ </li>
+ }
+ </ul>
+ }
 
-              <button
-                type="button"
-                (click)="irCobro()"
-                [disabled]="carritoPos().length === 0"
-                class="w-full mt-4 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Continuar al cobro
-              </button>
-            </div>
-          </div>
-        </div>
-      }
+ <button
+ type="button"
+ (click)="irCobro()"
+ [disabled]="carritoPos().length === 0"
+ class="w-full mt-4 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed"
+ >
+ Continuar al cobro
+ </button>
+ </div>
+ </div>
+ </div>
+ }
 
-      <!-- ============================================================== -->
-      <!-- PASO 3: Cobro -->
-      <!-- ============================================================== -->
-      @if (paso() === 'cobro') {
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Datos de entrega + método de pago -->
-          <div class="space-y-5">
-            <div>
-              <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
-                Datos de entrega
-              </h3>
-              <div [formGroup]="datosEntregaForm" class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">
-                    Nombre del cliente
-                  </label>
-                  <input
-                    type="text"
-                    formControlName="nombre_cliente"
-                    class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">
-                    Correo
-                  </label>
-                  <input
-                    type="email"
-                    formControlName="correo"
-                    class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                  />
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">
-                      Teléfono (7-8 dígitos)
-                    </label>
-                    <input
-                      type="tel"
-                      formControlName="telefono"
-                      class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">
-                      Ciudad
-                    </label>
-                    <input
-                      type="text"
-                      formControlName="ciudad"
-                      class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    formControlName="direccion"
-                    class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">
-                    Referencia (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    formControlName="referencia"
-                    class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
-                  />
-                </div>
-              </div>
-            </div>
+ <!-- ============================================================== -->
+ <!-- PASO 3: Cobro -->
+ <!-- ============================================================== -->
+ @if (paso() === 'cobro') {
+ <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+ <!-- Datos de entrega + método de pago -->
+ <div class="space-y-5">
+ <div>
+ <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
+ Datos de entrega
+ </h3>
+ <div [formGroup]="datosEntregaForm" class="space-y-3">
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Nombre del cliente
+ </label>
+ <input
+ type="text"
+ formControlName="nombre_cliente"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Correo
+ </label>
+ <input
+ type="email"
+ formControlName="correo"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ <div class="grid grid-cols-2 gap-3">
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Teléfono (7-8 dígitos)
+ </label>
+ <input
+ type="tel"
+ formControlName="telefono"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Ciudad
+ </label>
+ <input
+ type="text"
+ formControlName="ciudad"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Dirección
+ </label>
+ <input
+ type="text"
+ formControlName="direccion"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-slate-600 mb-1">
+ Referencia (opcional)
+ </label>
+ <input
+ type="text"
+ formControlName="referencia"
+ class="w-full px-3 py-2 rounded-lg text-sm border border-slate-200"
+ />
+ </div>
+ </div>
+ </div>
 
-            <div>
-              <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
-                Método de pago
-              </h3>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                @for (m of metodos; track m.id) {
-                  <button
-                    type="button"
-                    (click)="elegirMetodoPago(m.id)"
-                    class="border-2 rounded-xl p-3 text-left transition"
-                    [class.border-primary]="metodoPagoSeleccionado() === m.id"
-                    [class.bg-primary\/5]="metodoPagoSeleccionado() === m.id"
-                    [class.border-slate-200]="metodoPagoSeleccionado() !== m.id"
-                    [class.hover:border-primary\/50]="metodoPagoSeleccionado() !== m.id"
-                  >
-                    <div class="text-2xl mb-1">{{ m.icono }}</div>
-                    <p class="text-sm font-semibold text-slate-800">
-                      {{ m.label }}
-                    </p>
-                    <p class="text-xs text-slate-500">{{ m.descripcion }}</p>
-                  </button>
-                }
-              </div>
-            </div>
+ <div>
+ <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
+ Método de pago
+ </h3>
+ <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+ @for (m of metodos; track m.id) {
+ <button
+ type="button"
+ (click)="elegirMetodoPago(m.id)"
+ class="border-2 rounded-xl p-3 text-left transition"
+ [class.border-primary]="metodoPagoSeleccionado() === m.id"
+ [class.bg-primary\/5]="metodoPagoSeleccionado() === m.id"
+ [class.border-slate-200]="metodoPagoSeleccionado() !== m.id"
+ [class.hover:border-primary\/50]="metodoPagoSeleccionado() !== m.id"
+ >
+ <div class="text-2xl mb-1">{{ m.icono }}</div>
+ <p class="text-sm font-semibold text-slate-800">
+ {{ m.label }}
+ </p>
+ <p class="text-xs text-slate-500">{{ m.descripcion }}</p>
+ </button>
+ }
+ </div>
+ </div>
 
-            @if (errorCobro()) {
-              <div
-                class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-              >
-                {{ errorCobro() }}
-              </div>
-            }
-          </div>
+ @if (errorCobro()) {
+ <div
+ class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+ >
+ {{ errorCobro() }}
+ </div>
+ }
+ </div>
 
-          <!-- Resumen de la venta -->
-          <div>
-            <div
-              class="bg-container rounded-xl p-5 border border-primary/10 lg:sticky lg:top-0"
-            >
-              <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
-                Resumen
-              </h3>
-              <ul class="space-y-2 text-sm">
-                @for (item of carritoPos(); track $index) {
-                  <li class="flex justify-between gap-2">
-                    <span class="text-slate-700 flex-1 min-w-0 truncate">
-                      {{ item.cantidad }}× {{ item.nombre }}
-                      <span class="text-xs text-slate-500">
-                        ({{ item.talla }}/{{ item.color }})
-                      </span>
-                    </span>
-                    <span class="font-semibold text-slate-800 whitespace-nowrap">
-                      {{ formatBs(item.subtotal) }}
-                    </span>
-                  </li>
-                }
-              </ul>
-              <div class="border-t border-slate-200 mt-4 pt-3 space-y-1">
-                <div class="flex justify-between text-sm">
-                  <span class="text-slate-600">Subtotal</span>
-                  <span class="text-slate-800">{{ formatBs(subtotalPos()) }}</span>
-                </div>
-                <div class="flex justify-between text-lg font-bold mt-2">
-                  <span class="text-slate-800">TOTAL</span>
-                  <span class="text-primary">{{ formatBs(totalPos()) }}</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                (click)="cobrar()"
-                [disabled]="procesando() || datosEntregaForm.invalid"
-                class="w-full mt-5 bg-primary text-white px-4 py-3 rounded-lg text-base font-bold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                @if (procesando()) {
-                  <span class="animate-pulse">Procesando...</span>
-                } @else {
-                  <span>Cobrar {{ formatBs(totalPos()) }}</span>
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
+ <!-- Resumen de la venta -->
+ <div>
+ <div
+ class="bg-container rounded-xl p-5 border border-primary/10 lg:sticky lg:top-0"
+ >
+ <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase">
+ Resumen
+ </h3>
+ <ul class="space-y-2 text-sm">
+ @for (item of carritoPos(); track $index) {
+ <li class="flex justify-between gap-2">
+ <span class="text-slate-700 flex-1 min-w-0 truncate">
+ {{ item.cantidad }}× {{ item.nombre }}
+ <span class="text-xs text-slate-500">
+ ({{ item.talla }}/{{ item.color }})
+ </span>
+ </span>
+ <span class="font-semibold text-slate-800 whitespace-nowrap">
+ {{ formatBs(item.subtotal) }}
+ </span>
+ </li>
+ }
+ </ul>
+ <div class="border-t border-slate-200 mt-4 pt-3 space-y-1">
+ <div class="flex justify-between text-sm">
+ <span class="text-slate-600">Subtotal</span>
+ <span class="text-slate-800">{{ formatBs(subtotalPos()) }}</span>
+ </div>
+ <div class="flex justify-between text-lg font-bold mt-2">
+ <span class="text-slate-800">TOTAL</span>
+ <span class="text-primary">{{ formatBs(totalPos()) }}</span>
+ </div>
+ </div>
+ <button
+ type="button"
+ (click)="cobrar()"
+ [disabled]="procesando() || datosEntregaForm.invalid"
+ class="w-full mt-5 bg-primary text-white px-4 py-3 rounded-lg text-base font-bold hover:bg-accent hover:text-primary transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+ >
+ @if (procesando()) {
+ <span class="animate-pulse">Procesando...</span>
+ } @else {
+ <span>Cobrar {{ formatBs(totalPos()) }}</span>
+ }
+ </button>
+ </div>
+ </div>
+ </div>
+ }
+ </div>
 
-    <!-- Footer con navegación -->
-    <div
-      class="flex-shrink-0 px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
-    >
-      <div>
-        @if (paso() === 'productos' && clienteSeleccionado()) {
-          <button
-            type="button"
-            (click)="volverAClientes()"
-            class="text-slate-600 hover:text-slate-800 text-sm font-medium"
-          >
-            ← Cambiar cliente
-          </button>
-        } @else if (paso() === 'cobro') {
-          <button
-            type="button"
-            (click)="volverAProductos()"
-            class="text-slate-600 hover:text-slate-800 text-sm font-medium"
-          >
-            ← Volver a productos
-          </button>
-        }
-      </div>
-      <div class="text-xs text-slate-400">
-        @if (clienteSeleccionado(); as cli) {
-          Cliente: <span class="font-semibold text-slate-600">{{ nombreCompleto(cli) }}</span>
-        }
-      </div>
-    </div>
-  </div>
+ <!-- Footer con navegación -->
+ <div
+ class="flex-shrink-0 px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between"
+ >
+ <div>
+ @if (paso() === 'productos' && clienteSeleccionado()) {
+ <button
+ type="button"
+ (click)="volverAClientes()"
+ class="text-slate-600 hover:text-slate-800 text-sm font-medium"
+ >
+ ← Cambiar cliente
+ </button>
+ } @else if (paso() === 'cobro') {
+ <button
+ type="button"
+ (click)="volverAProductos()"
+ class="text-slate-600 hover:text-slate-800 text-sm font-medium"
+ >
+ ← Volver a productos
+ </button>
+ }
+ </div>
+ <div class="text-xs text-slate-400">
+ @if (clienteSeleccionado(); as cli) {
+ Cliente: <span class="font-semibold text-slate-600">{{ nombreCompleto(cli) }}</span>
+ }
+ </div>
+ </div>
+ </div>
 </div>
 
 <!-- ============================================================== -->
 <!-- Modal de éxito: comprobante -->
 <!-- ============================================================== -->
 @if (ventaExitosa(); as v) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 print:hidden">
-    <div class="absolute inset-0 bg-primary/60 backdrop-blur-sm"></div>
-    <div
-      class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center"
-    >
-      <div class="mb-4">
-        <div
-          class="w-16 h-16 bg-green-100 text-green-600 rounded-full mx-auto flex items-center justify-center text-3xl"
-        >✓</div>
-      </div>
-      <h2 class="text-2xl font-bold text-primary mb-1">Venta registrada</h2>
-      <p class="text-sm text-slate-600 mb-4">
-        Comprobante <span class="font-bold text-primary">{{ v.codigo }}</span>
-      </p>
+ <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 print:hidden">
+ <div class="absolute inset-0 bg-primary/60 backdrop-blur-sm"></div>
+ <div
+ class="modal-attention relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center"
+ >
+ <div class="mb-4">
+ <div
+ class="w-16 h-16 bg-green-100 text-green-600 rounded-full mx-auto flex items-center justify-center text-3xl"
+ >✓</div>
+ </div>
+ <h2 class="text-2xl font-bold text-primary mb-1">Venta registrada</h2>
+ <p class="text-sm text-slate-600 mb-4">
+ Comprobante <span class="font-bold text-primary">{{ v.codigo }}</span>
+ </p>
 
-      <div class="bg-container rounded-xl p-4 mb-4 text-left">
-        <div class="flex justify-between text-sm mb-1">
-          <span class="text-slate-600">Cliente:</span>
-          <span class="font-medium text-slate-800">
-            {{ v.datos_entrega.nombre_cliente }}
-          </span>
-        </div>
-        <div class="flex justify-between text-sm mb-1">
-          <span class="text-slate-600">Items:</span>
-          <span class="font-medium text-slate-800">{{ v.items.length }}</span>
-        </div>
-        <div class="flex justify-between text-sm mb-1">
-          <span class="text-slate-600">Pago:</span>
-          <span class="font-medium text-slate-800">{{ v.metodo_pago }}</span>
-        </div>
-        <div class="flex justify-between text-sm mb-1">
-          <span class="text-slate-600">Fecha:</span>
-          <span class="font-medium text-slate-800">
-            {{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}
-          </span>
-        </div>
-        <div class="flex justify-between text-lg font-bold border-t border-slate-200 pt-2 mt-2">
-          <span>TOTAL</span>
-          <span class="text-primary">{{ formatBs(v.total) }}</span>
-        </div>
-      </div>
+ <div class="bg-container rounded-xl p-4 mb-4 text-left">
+ <div class="flex justify-between text-sm mb-1">
+ <span class="text-slate-600">Cliente:</span>
+ <span class="font-medium text-slate-800">
+ {{ v.datos_entrega.nombre_cliente }}
+ </span>
+ </div>
+ <div class="flex justify-between text-sm mb-1">
+ <span class="text-slate-600">Items:</span>
+ <span class="font-medium text-slate-800">{{ v.items.length }}</span>
+ </div>
+ <div class="flex justify-between text-sm mb-1">
+ <span class="text-slate-600">Pago:</span>
+ <span class="font-medium text-slate-800">{{ v.metodo_pago }}</span>
+ </div>
+ <div class="flex justify-between text-sm mb-1">
+ <span class="text-slate-600">Fecha:</span>
+ <span class="font-medium text-slate-800">
+ {{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}
+ </span>
+ </div>
+ <div class="flex justify-between text-lg font-bold border-t border-slate-200 pt-2 mt-2">
+ <span>TOTAL</span>
+ <span class="text-primary">{{ formatBs(v.total) }}</span>
+ </div>
+ </div>
 
-      <button
-        type="button"
-        (click)="cerrarExito()"
-        class="w-full bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent hover:text-primary transition"
-      >
-        Cerrar y volver al listado
-      </button>
-    </div>
-  </div>
+ <button
+ type="button"
+ (click)="cerrarExito()"
+ class="w-full bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent hover:text-primary transition"
+ >
+ Cerrar y volver al listado
+ </button>
+ </div>
+ </div>
 }

@@ -1,253 +1,253 @@
-<!-- Header: hamburguesa + marca | avatar, rol badge y Cerrar Sesión (CU2) -->
+<!-- Header: hamburguesa + marca | avatar, rol badge y Cerrar Sesión -->
 <header
-  class="fixed top-0 inset-x-0 z-40 h-16 bg-white/90 backdrop-blur border-b border-slate-200"
+ class="fixed top-0 inset-x-0 z-40 h-16 bg-white/90 backdrop-blur border-b border-slate-200"
 >
-  <div class="flex items-center justify-between h-full px-4 sm:px-6">
-    <!-- Izquierda: hamburguesa (colapso desktop / drawer móvil) + marca -->
-    <div class="flex items-center gap-3">
-      <button
-        type="button"
-        (click)="toggleSidebar()"
-        class="h-10 w-10 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary active:scale-95 transition"
-        [title]="sidebarCollapsed() ? 'Expandir menú lateral' : 'Contraer menú lateral'"
-        [attr.aria-label]="sidebarCollapsed() ? 'Expandir menú lateral' : 'Contraer menú lateral'"
-      >
-        <svg class="h-6 w-6 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path [attr.d]="iconPaths['menu']" />
-        </svg>
-      </button>
-      <a [routerLink]="inicio()" class="flex items-center gap-2.5">
-        <span class="h-9 w-9 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
-          <span class="text-lg font-bold text-white leading-none">A</span>
-        </span>
-        <span class="text-lg font-semibold text-primary hidden sm:block">Attention</span>
-      </a>
-    </div>
+ <div class="flex items-center justify-between h-full px-4 sm:px-6">
+ <!-- Izquierda: hamburguesa (colapso desktop / drawer móvil) + marca -->
+ <div class="flex items-center gap-3">
+ <button
+ type="button"
+ (click)="toggleSidebar()"
+ class="h-10 w-10 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary active:scale-95 transition"
+ [title]="sidebarCollapsed() ? 'Expandir menú lateral' : 'Contraer menú lateral'"
+ [attr.aria-label]="sidebarCollapsed() ? 'Expandir menú lateral' : 'Contraer menú lateral'"
+ >
+ <svg class="h-6 w-6 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path [attr.d]="iconPaths['menu']" />
+ </svg>
+ </button>
+ <a [routerLink]="inicio()" class="flex items-center gap-2.5">
+ <span class="h-9 w-9 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
+ <span class="text-lg font-bold text-white leading-none">A</span>
+ </span>
+ <span class="text-lg font-semibold text-primary hidden sm:block">Attention</span>
+ </a>
+ </div>
 
-    <!-- Derecha: notificaciones (CU10) + carrito (CU15) + avatar y Cerrar Sesión -->
-    <div class="flex items-center gap-3">
-      <!-- Campanita de notificaciones con dropdown (CU10) -->
-      <app-notificaciones-bell />
+ <!-- Derecha: notificaciones + carrito + avatar y Cerrar Sesión -->
+ <div class="flex items-center gap-3">
+ <!-- Campanita de notificaciones con dropdown -->
+ <app-notificaciones-bell />
 
-      <!-- Botón Carrito con badge contador (CU15): SOLO rol Cliente -->
-      @if (esCliente()) {
-        <a
-          routerLink="/carrito"
-          class="relative h-10 w-10 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary active:scale-95 transition flex items-center justify-center"
-          title="Carrito de compras"
-          aria-label="Carrito de compras"
-        >
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path [attr.d]="iconPaths['cart']" />
-          </svg>
-          @if (carritoService.contador() > 0) {
-            <span
-              class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-accent text-primary text-[11px] font-bold flex items-center justify-center shadow-sm"
-            >
-              {{ carritoService.contador() > 99 ? '99+' : carritoService.contador() }}
-            </span>
-          }
-        </a>
-      }
-      <div class="hidden sm:flex flex-col items-end leading-tight">
-        <span class="text-sm font-semibold text-slate-800">
-          {{ usuario()?.nombre ?? 'Usuario' }}
-        </span>
-        @if (rol(); as r) {
-          <span
-            class="px-2 py-0.5 rounded-full bg-accent text-primary text-xs font-semibold"
-          >
-            {{ r }} · {{ rolLabel() }}
-          </span>
-        }
-      </div>
-      <span
-        class="h-9 w-9 rounded-full bg-container text-primary flex items-center justify-center text-sm font-bold"
-        aria-hidden="true"
-      >
-        {{ inicial() }}
-      </span>
-      <button
-        type="button"
-        (click)="cerrarSesion()"
-        class="flex items-center gap-2 h-9 px-3 rounded-full text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 transition"
-        aria-label="Cerrar sesión"
-        title="Cerrar sesión (CU2)"
-      >
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path [attr.d]="iconPaths['logout']" />
-        </svg>
-        <span class="hidden md:inline">Cerrar Sesión</span>
-      </button>
-    </div>
-  </div>
+ <!-- Botón Carrito con badge contador: SOLO rol Cliente -->
+ @if (esCliente()) {
+ <a
+ routerLink="/carrito"
+ class="relative h-10 w-10 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary active:scale-95 transition flex items-center justify-center"
+ title="Carrito de compras"
+ aria-label="Carrito de compras"
+ >
+ <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path [attr.d]="iconPaths['cart']" />
+ </svg>
+ @if (carritoService.contador() > 0) {
+ <span
+ class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-accent text-primary text-[11px] font-bold flex items-center justify-center shadow-sm"
+ >
+ {{ carritoService.contador() > 99 ? '99+' : carritoService.contador() }}
+ </span>
+ }
+ </a>
+ }
+ <div class="hidden sm:flex flex-col items-end leading-tight">
+ <span class="text-sm font-semibold text-slate-800">
+ {{ usuario()?.nombre ?? 'Usuario' }}
+ </span>
+ @if (rol(); as r) {
+ <span
+ class="px-2 py-0.5 rounded-full bg-accent text-primary text-xs font-semibold"
+ >
+ {{ r }} · {{ rolLabel() }}
+ </span>
+ }
+ </div>
+ <span
+ class="h-9 w-9 rounded-full bg-container text-primary flex items-center justify-center text-sm font-bold"
+ aria-hidden="true"
+ >
+ {{ inicial() }}
+ </span>
+ <button
+ type="button"
+ (click)="cerrarSesion()"
+ class="flex items-center gap-2 h-9 px-3 rounded-full text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 transition"
+ aria-label="Cerrar sesión"
+ title="Cerrar sesión"
+ >
+ <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path [attr.d]="iconPaths['logout']" />
+ </svg>
+ <span class="hidden md:inline">Cerrar Sesión</span>
+ </button>
+ </div>
+ </div>
 </header>
 
 <!-- Overlay oscuro detrás del drawer en pantallas < 1024px -->
 @if (sidebarOpen()) {
-  <div
-    class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"
-    (click)="closeSidebar()"
-    aria-hidden="true"
-  ></div>
+ <div
+ class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"
+ (click)="closeSidebar()"
+ aria-hidden="true"
+ ></div>
 }
 
 <!-- Sidebar: acordeón por módulos. Desktop: w-64 o w-[72px] colapsado.
-     Móvil: drawer deslizante que se cierra al navegar. -->
+ Móvil: drawer deslizante que se cierra al navegar. -->
 <aside
-  class="sidebar-attention fixed top-16 bottom-0 left-0 z-40 bg-white border-r border-slate-200 overflow-hidden"
-  [ngClass]="
-    (sidebarCollapsed() ? 'lg:w-[72px]' : 'lg:w-64') +
-    ' ' +
-    (sidebarOpen() ? 'translate-x-0 w-64' : '-translate-x-full w-64 lg:translate-x-0')
-  "
-  aria-label="Menú principal"
+ class="sidebar-attention fixed top-16 bottom-0 left-0 z-40 bg-white border-r border-slate-200 overflow-hidden"
+ [ngClass]="
+ (sidebarCollapsed() ? 'lg:w-[72px]' : 'lg:w-64') +
+ ' ' +
+ (sidebarOpen() ? 'translate-x-0 w-64' : '-translate-x-full w-64 lg:translate-x-0')
+ "
+ aria-label="Menú principal"
 >
-  <nav class="h-full flex flex-col overflow-y-auto overflow-x-hidden px-3 py-4 gap-1">
-    <!-- 📌 Enlaces directos superiores según rol (Dashboard, Empresa, Dashboard Sucursal, etc.) -->
-    @for (link of topLinks(); track link.route) {
-      <a
-        [routerLink]="link.route"
-        [ngClass]="
-          isActive(link.route)
-            ? 'bg-primary text-white font-semibold shadow-sm'
-            : 'text-primary hover:bg-container font-semibold'
-        "
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition shrink-0"
-        [title]="link.label"
-      >
-        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path [attr.d]="iconPaths[link.icon]" />
-        </svg>
-        <span class="whitespace-nowrap" [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()">{{ link.label }}</span>
-      </a>
-    }
+ <nav class="h-full flex flex-col overflow-y-auto overflow-x-hidden px-3 py-4 gap-1">
+ <!-- 📌 Enlaces directos superiores según rol (Dashboard, Empresa, Dashboard Sucursal, etc.) -->
+ @for (link of topLinks(); track link.route) {
+ <a
+ [routerLink]="link.route"
+ [ngClass]="
+ isActive(link.route)
+ ? 'bg-primary text-white font-semibold shadow-sm'
+ : 'text-primary hover:bg-container font-semibold'
+ "
+ class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition shrink-0"
+ [title]="link.label"
+ >
+ <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path [attr.d]="iconPaths[link.icon]" />
+ </svg>
+ <span class="whitespace-nowrap" [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()">{{ link.label }}</span>
+ </a>
+ }
 
-    @if (topLinks().length > 0 && menu().length > 0) {
-      <div class="my-2 border-t border-slate-100 shrink-0"></div>
-    }
+ @if (topLinks().length > 0 && menu().length > 0) {
+ <div class="my-2 border-t border-slate-100 shrink-0"></div>
+ }
 
-    <!-- 📁 Módulos del sistema (acordeón exclusivo) -->
-    @for (mod of menu(); track mod.label; let i = $index) {
-      <div class="shrink-0">
-        <!-- Encabezado del módulo (botón acordeón / tooltip si colapsado) -->
-        <button
-          type="button"
-          (click)="toggleModulo(i)"
-          [title]="mod.label"
-          [attr.aria-expanded]="moduloExpandido() === i"
-          [ngClass]="
-            moduloActivo(mod)
-              ? 'text-primary font-semibold hover:bg-slate-50/80'
-              : 'text-slate-600 hover:bg-slate-50 font-medium'
-          "
-          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition min-w-0"
-        >
-          <svg
-            class="h-5 w-5 shrink-0 transition-colors"
-            [class.text-primary]="moduloActivo(mod)"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path [attr.d]="iconPaths[mod.icon]" />
-          </svg>
-          <span
-            class="flex-1 text-left min-w-0 truncate"
-            [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()"
-            style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
-          >
-            {{ mod.label }}
-          </span>
-          <!-- Chevron del acordeón (oculto en modo colapsado) -->
-          <svg
-            class="h-4 w-4 shrink-0 transition-transform duration-200"
-            [class.rotate-180]="moduloExpandido() === i"
-            [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path [attr.d]="iconPaths['chevron']" />
-          </svg>
-        </button>
+ <!-- 📁 Módulos del sistema (acordeón exclusivo) -->
+ @for (mod of menu(); track mod.label; let i = $index) {
+ <div class="shrink-0">
+ <!-- Encabezado del módulo (botón acordeón / tooltip si colapsado) -->
+ <button
+ type="button"
+ (click)="toggleModulo(i)"
+ [title]="mod.label"
+ [attr.aria-expanded]="moduloExpandido() === i"
+ [ngClass]="
+ moduloActivo(mod)
+ ? 'text-primary font-semibold hover:bg-slate-50/80'
+ : 'text-slate-600 hover:bg-slate-50 font-medium'
+ "
+ class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition min-w-0"
+ >
+ <svg
+ class="h-5 w-5 shrink-0 transition-colors"
+ [class.text-primary]="moduloActivo(mod)"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ aria-hidden="true"
+ >
+ <path [attr.d]="iconPaths[mod.icon]" />
+ </svg>
+ <span
+ class="flex-1 text-left min-w-0 truncate"
+ [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()"
+ style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+ >
+ {{ mod.label }}
+ </span>
+ <!-- Chevron del acordeón (oculto en modo colapsado) -->
+ <svg
+ class="h-4 w-4 shrink-0 transition-transform duration-200"
+ [class.rotate-180]="moduloExpandido() === i"
+ [class.opacity-0]="sidebarCollapsed() && !sidebarOpen()"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ aria-hidden="true"
+ >
+ <path [attr.d]="iconPaths['chevron']" />
+ </svg>
+ </button>
 
-        <!-- Ítems del módulo (solo visibles con el acordeón abierto y sidebar expandido) -->
-        @if (moduloExpandido() === i && !sidebarCollapsed()) {
-          <div
-            class="mt-1 flex flex-col gap-1 pl-6"
-            style="padding-left: 1.5rem;"
-          >
-            @for (item of mod.items; track item.label) {
-              <a
-                [routerLink]="item.route"
-                routerLinkActive="bg-container text-primary font-semibold"
-                [routerLinkActiveOptions]="{ exact: true }"
-                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-normal transition min-w-0 overflow-hidden"
-                [title]="item.label"
-              >
-                <svg
-                  class="h-4 w-4 shrink-0 text-current opacity-70"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path [attr.d]="iconPaths[item.icon]" />
-                </svg>
-                <span
-                  class="flex-1 min-w-0 truncate text-left"
-                  style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
-                >
-                  {{ item.label }}
-                </span>
-                @if (item.badge) {
-                  <span
-                    class="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-accent text-primary text-[10px] font-bold tracking-wider"
-                  >
-                    {{ item.badge }}
-                  </span>
-                }
-              </a>
-            }
-          </div>
-        }
-      </div>
-    }
+ <!-- Ítems del módulo (solo visibles con el acordeón abierto y sidebar expandido) -->
+ @if (moduloExpandido() === i && !sidebarCollapsed()) {
+ <div
+ class="mt-1 flex flex-col gap-1 pl-6"
+ style="padding-left: 1.5rem;"
+ >
+ @for (item of mod.items; track item.label) {
+ <a
+ [routerLink]="item.route"
+ routerLinkActive="bg-container text-primary font-semibold"
+ [routerLinkActiveOptions]="{ exact: true }"
+ class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 font-normal transition min-w-0 overflow-hidden"
+ [title]="item.label"
+ >
+ <svg
+ class="h-4 w-4 shrink-0 text-current opacity-70"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ aria-hidden="true"
+ >
+ <path [attr.d]="iconPaths[item.icon]" />
+ </svg>
+ <span
+ class="flex-1 min-w-0 truncate text-left"
+ style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+ >
+ {{ item.label }}
+ </span>
+ @if (item.badge) {
+ <span
+ class="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-accent text-primary text-[10px] font-bold tracking-wider"
+ >
+ {{ item.badge }}
+ </span>
+ }
+ </a>
+ }
+ </div>
+ }
+ </div>
+ }
 
-    <!-- Indicador visual de modo colapsado (solo desktop) -->
-    @if (sidebarCollapsed()) {
-      <span class="hidden lg:block mt-4 mx-auto text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-        ···
-      </span>
-    }
-  </nav>
+ <!-- Indicador visual de modo colapsado (solo desktop) -->
+ @if (sidebarCollapsed()) {
+ <span class="hidden lg:block mt-4 mx-auto text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+ ···
+ </span>
+ }
+ </nav>
 </aside>
 
 <!-- Contenido de las vistas: padding-left responsive según estado del sidebar -->
 <main
-  class="pt-16 min-h-screen bg-canvas transition-[padding] duration-200 ease-in-out"
-  [ngClass]="
-    sidebarCollapsed()
-      ? 'lg:pl-[72px]'
-      : 'lg:pl-64'
-  "
+ class="pt-16 min-h-screen bg-canvas transition-[padding] duration-200 ease-in-out"
+ [ngClass]="
+ sidebarCollapsed()
+ ? 'lg:pl-[72px]'
+ : 'lg:pl-64'
+ "
 >
-  <router-outlet />
+ <router-outlet />
 </main>
 
-<!-- Widget Flotante del Asistente Virtual Attention AI (CU25): Exclusivo para rol Cliente (C) -->
+<!-- Widget Flotante del Asistente Virtual Attention AI: Exclusivo para rol Cliente (C) -->
 @if (esCliente()) {
-  <app-chat-ia-widget />
+ <app-chat-ia-widget />
 }

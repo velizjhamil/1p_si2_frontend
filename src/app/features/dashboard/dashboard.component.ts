@@ -12,35 +12,35 @@ import { DashboardMetrics } from '../../core/models/dashboard.model';
  * rápidos a los módulos de gestión.
  */
 @Component({
-  selector: 'app-admin-dashboard',
-  imports: [RouterLink],
-  templateUrl: './dashboard.component.html',
+ selector: 'app-admin-dashboard',
+ imports: [RouterLink],
+ templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
-  protected readonly authService = inject(AuthService);
-  private readonly dashboardService = inject(DashboardService);
+ protected readonly authService = inject(AuthService);
+ private readonly dashboardService = inject(DashboardService);
 
-  protected readonly usuario = this.authService.getCurrentUser();
-  protected readonly metrics = signal<DashboardMetrics | null>(null);
-  protected readonly cargando = signal(true);
-  protected readonly errorMessage = signal('');
+ protected readonly usuario = this.authService.getCurrentUser();
+ protected readonly metrics = signal<DashboardMetrics | null>(null);
+ protected readonly cargando = signal(true);
+ protected readonly errorMessage = signal('');
 
-  ngOnInit(): void {
-    this.dashboardService.getMetrics().subscribe({
-      next: (resp) => {
-        this.metrics.set(resp.data);
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.errorMessage.set(
-          'No se pudieron cargar las métricas del sistema.'
-        );
-        this.cargando.set(false);
-      },
-    });
-  }
+ ngOnInit(): void {
+ this.dashboardService.getMetrics().subscribe({
+ next: (resp) => {
+ this.metrics.set(resp.data);
+ this.cargando.set(false);
+ },
+ error: () => {
+ this.errorMessage.set(
+ 'No se pudieron cargar las métricas del sistema.'
+ );
+ this.cargando.set(false);
+ },
+ });
+ }
 
-  protected cerrarSesion(): void {
-    this.authService.logout();
-  }
+ protected cerrarSesion(): void {
+ this.authService.logout();
+ }
 }

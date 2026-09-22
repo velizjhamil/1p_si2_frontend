@@ -1,179 +1,179 @@
-<!-- CU15 — Carrito de Compras del Cliente -->
+<!-- Carrito de Compras del Cliente -->
 <section class="p-6 md:p-8 max-w-4xl mx-auto">
-  <!-- Encabezado -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-primary">Carrito de Compras</h1>
-      <p class="text-gray-600 mt-1">
-        Revise sus prendas seleccionadas antes de proceder al pago.
-      </p>
-    </div>
-    <a
-      routerLink="/tienda/home"
-      class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
-    >
-      ← Seguir Comprando
-    </a>
-  </div>
+ <!-- Encabezado -->
+ <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+ <div>
+ <h1 class="text-2xl font-bold text-primary">Carrito de Compras</h1>
+ <p class="text-gray-600 mt-1">
+ Revise sus prendas seleccionadas antes de proceder al pago.
+ </p>
+ </div>
+ <a
+ routerLink="/tienda/home"
+ class="px-5 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-container transition text-sm font-medium"
+ >
+ ← Seguir Comprando
+ </a>
+ </div>
 
-  @if (carrito.vacio()) {
-    <!-- Estado vacío -->
-    <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-12 text-center">
-      <div class="mx-auto h-20 w-20 rounded-full bg-container flex items-center justify-center mb-4">
-        <svg class="h-10 w-10 text-primary/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM20 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
-        </svg>
-      </div>
-      <h2 class="text-lg font-bold text-primary">Su carrito está vacío</h2>
-      <p class="text-gray-600 text-sm mt-1 mb-6">
-        Explore el catálogo y agregue sus prendas favoritas.
-      </p>
-      <a
-        routerLink="/tienda/home"
-        class="inline-block bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium text-sm"
-      >
-        Ir al Catálogo
-      </a>
-    </div>
-  } @else {
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <!-- Lista de ítems -->
-      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
-        <ul class="divide-y divide-primary/10">
-          @for (item of carrito.items(); track $index) {
-            <li class="p-4 flex gap-4 items-center hover:bg-container/40 transition">
-              <!-- Miniatura -->
-              <div class="h-16 w-16 rounded-xl bg-container flex items-center justify-center shrink-0 overflow-hidden">
-                @if (item.imagen_url) {
-                  <img [src]="item.imagen_url" [alt]="item.nombre" class="h-full w-full object-cover" />
-                } @else {
-                  <svg class="h-8 w-8 text-primary/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                    <path d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z" />
-                  </svg>
-                }
-              </div>
+ @if (carrito.vacio()) {
+ <!-- Estado vacío -->
+ <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-12 text-center">
+ <div class="mx-auto h-20 w-20 rounded-full bg-container flex items-center justify-center mb-4">
+ <svg class="h-10 w-10 text-primary/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path d="M9 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM20 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
+ </svg>
+ </div>
+ <h2 class="text-lg font-bold text-primary">Su carrito está vacío</h2>
+ <p class="text-gray-600 text-sm mt-1 mb-6">
+ Explore el catálogo y agregue sus prendas favoritas.
+ </p>
+ <a
+ routerLink="/tienda/home"
+ class="inline-block bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-accent hover:text-primary transition font-medium text-sm"
+ >
+ Ir al Catálogo
+ </a>
+ </div>
+ } @else {
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+ <!-- Lista de ítems -->
+ <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden">
+ <ul class="divide-y divide-primary/10">
+ @for (item of carrito.items(); track $index) {
+ <li class="p-4 flex gap-4 items-center hover:bg-container/40 transition">
+ <!-- Miniatura -->
+ <div class="h-16 w-16 rounded-xl bg-container flex items-center justify-center shrink-0 overflow-hidden">
+ @if (item.imagen_url) {
+ <img [src]="item.imagen_url" [alt]="item.nombre" class="h-full w-full object-cover" />
+ } @else {
+ <svg class="h-8 w-8 text-primary/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+ <path d="M20.4 6.6 16 4l-4 2-4-2L3.6 6.6 6 10l-2 2v9h7v-6h6v6h7v-9l-2-2 2.4-3.4z" />
+ </svg>
+ }
+ </div>
 
-              <!-- Info -->
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-gray-800 truncate">{{ item.nombre }}</p>
-                <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
-                  <span>Talla <strong class="text-primary">{{ item.talla }}</strong></span>
-                  <span>·</span>
-                  <span
-                    class="inline-block h-3 w-3 rounded-full border border-primary/20"
-                    [style.background]="item.color_hex"
-                  ></span>
-                  <span>{{ item.color }}</span>
-                </p>
-                <p class="text-sm text-primary font-semibold mt-1">{{ formatBs(item.precio) }}</p>
-              </div>
+ <!-- Info -->
+ <div class="flex-1 min-w-0">
+ <p class="font-semibold text-gray-800 truncate">{{ item.nombre }}</p>
+ <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+ <span>Talla <strong class="text-primary">{{ item.talla }}</strong></span>
+ <span>·</span>
+ <span
+ class="inline-block h-3 w-3 rounded-full border border-primary/20"
+ [style.background]="item.color_hex"
+ ></span>
+ <span>{{ item.color }}</span>
+ </p>
+ <p class="text-sm text-primary font-semibold mt-1">{{ formatBs(item.precio) }}</p>
+ </div>
 
-              <!-- Control de cantidad -->
-              <div class="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  (click)="decrementar(item.producto_id, item.talla, item.color, item.cantidad)"
-                  class="h-8 w-8 rounded-lg border border-primary/20 text-primary hover:bg-accent/40 transition font-bold"
-                  aria-label="Restar cantidad"
-                >
-                  −
-                </button>
-                <span class="w-8 text-center font-semibold text-gray-800">{{ item.cantidad }}</span>
-                <button
-                  type="button"
-                  (click)="incrementar(item.producto_id, item.talla, item.color, item.cantidad)"
-                  class="h-8 w-8 rounded-lg border border-primary/20 text-primary hover:bg-accent/40 transition font-bold"
-                  aria-label="Sumar cantidad"
-                >
-                  +
-                </button>
-              </div>
+ <!-- Control de cantidad -->
+ <div class="flex items-center gap-2 shrink-0">
+ <button
+ type="button"
+ (click)="decrementar(item.producto_id, item.talla, item.color, item.cantidad)"
+ class="h-8 w-8 rounded-lg border border-primary/20 text-primary hover:bg-accent/40 transition font-bold"
+ aria-label="Restar cantidad"
+ >
+ −
+ </button>
+ <span class="w-8 text-center font-semibold text-gray-800">{{ item.cantidad }}</span>
+ <button
+ type="button"
+ (click)="incrementar(item.producto_id, item.talla, item.color, item.cantidad)"
+ class="h-8 w-8 rounded-lg border border-primary/20 text-primary hover:bg-accent/40 transition font-bold"
+ aria-label="Sumar cantidad"
+ >
+ +
+ </button>
+ </div>
 
-              <!-- Subtotal y eliminar -->
-              <div class="text-right shrink-0 w-24">
-                <p class="font-bold text-primary">{{ formatBs(item.subtotal) }}</p>
-                <button
-                  type="button"
-                  (click)="eliminar(item.producto_id, item.talla, item.color)"
-                  class="text-red-600 hover:text-red-400 text-xs font-medium mt-1 transition"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </li>
-          }
-        </ul>
+ <!-- Subtotal y eliminar -->
+ <div class="text-right shrink-0 w-24">
+ <p class="font-bold text-primary">{{ formatBs(item.subtotal) }}</p>
+ <button
+ type="button"
+ (click)="eliminar(item.producto_id, item.talla, item.color)"
+ class="text-red-600 hover:text-red-400 text-xs font-medium mt-1 transition"
+ >
+ Eliminar
+ </button>
+ </div>
+ </li>
+ }
+ </ul>
 
-        <!-- Vaciar carrito -->
-        <div class="px-4 py-3 bg-container/50 flex justify-between items-center">
-          <span class="text-xs text-primary/70">
-            {{ carrito.contador() }} prenda(s) en el carrito
-          </span>
-          <button
-            type="button"
-            (click)="confirmandoVaciado = true"
-            class="text-red-600 hover:text-red-400 text-xs font-semibold transition"
-          >
-            🗑 Vaciar Carrito
-          </button>
-        </div>
-      </div>
+ <!-- Vaciar carrito -->
+ <div class="px-4 py-3 bg-container/50 flex justify-between items-center">
+ <span class="text-xs text-primary/70">
+ {{ carrito.contador() }} prenda(s) en el carrito
+ </span>
+ <button
+ type="button"
+ (click)="confirmandoVaciado = true"
+ class="text-red-600 hover:text-red-400 text-xs font-semibold transition"
+ >
+ 🗑 Vaciar Carrito
+ </button>
+ </div>
+ </div>
 
-      <!-- Resumen de compra -->
-      <aside class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6 lg:sticky lg:top-24">
-        <h2 class="font-bold text-primary mb-4">Resumen de Compra</h2>
-        <dl class="space-y-2.5 text-sm">
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Subtotal</dt>
-            <dd class="font-semibold text-gray-800">{{ formatBs(carrito.subtotal()) }}</dd>
-          </div>
-          <div class="flex justify-between">
-            <dt class="text-gray-600">Envío</dt>
-            <dd class="font-semibold text-gray-800">
-              @if (carrito.envio() === 0) {
-                <span class="text-green-600">GRATIS</span>
-              } @else {
-                {{ formatBs(carrito.envio()) }}
-              }
-            </dd>
-          </div>
-          <div class="border-t border-primary/10 pt-3 mt-3 flex justify-between items-baseline">
-            <dt class="font-bold text-primary">Total</dt>
-            <dd class="text-xl font-bold text-primary">{{ formatBs(carrito.total()) }}</dd>
-          </div>
-        </dl>
-        @if (carrito.subtotal() < 300) {
-          <p class="text-xs text-gray-500 mt-2 bg-container rounded-lg p-2.5">
-            💡 Agregue {{ formatBs(300 - carrito.subtotal()) }} más y su envío será <strong>GRATIS</strong>.
-          </p>
-        }
+ <!-- Resumen de compra -->
+ <aside class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6 lg:sticky lg:top-24">
+ <h2 class="font-bold text-primary mb-4">Resumen de Compra</h2>
+ <dl class="space-y-2.5 text-sm">
+ <div class="flex justify-between">
+ <dt class="text-gray-600">Subtotal</dt>
+ <dd class="font-semibold text-gray-800">{{ formatBs(carrito.subtotal()) }}</dd>
+ </div>
+ <div class="flex justify-between">
+ <dt class="text-gray-600">Envío</dt>
+ <dd class="font-semibold text-gray-800">
+ @if (carrito.envio() === 0) {
+ <span class="text-green-600">GRATIS</span>
+ } @else {
+ {{ formatBs(carrito.envio()) }}
+ }
+ </dd>
+ </div>
+ <div class="border-t border-primary/10 pt-3 mt-3 flex justify-between items-baseline">
+ <dt class="font-bold text-primary">Total</dt>
+ <dd class="text-xl font-bold text-primary">{{ formatBs(carrito.total()) }}</dd>
+ </div>
+ </dl>
+ @if (carrito.subtotal() < 300) {
+ <p class="text-xs text-gray-500 mt-2 bg-container rounded-lg p-2.5">
+ 💡 Agregue {{ formatBs(300 - carrito.subtotal()) }} más y su envío será <strong>GRATIS</strong>.
+ </p>
+ }
 
-        <a
-          routerLink="/checkout"
-          class="mt-5 block w-full text-center bg-primary text-white px-5 py-3 rounded-lg hover:bg-accent hover:text-primary transition font-bold text-sm shadow-sm"
-        >
-          Proceder al Pago →
-        </a>
-        <button
-          type="button"
-          (click)="confirmandoVaciado = true"
-          class="mt-2 w-full text-center text-red-600 hover:text-red-400 text-xs font-semibold py-1.5 transition"
-        >
-          Vaciar carrito
-        </button>
-      </aside>
-    </div>
-  }
+ <a
+ routerLink="/checkout"
+ class="mt-5 block w-full text-center bg-primary text-white px-5 py-3 rounded-lg hover:bg-accent hover:text-primary transition font-bold text-sm shadow-sm"
+ >
+ Proceder al Pago →
+ </a>
+ <button
+ type="button"
+ (click)="confirmandoVaciado = true"
+ class="mt-2 w-full text-center text-red-600 hover:text-red-400 text-xs font-semibold py-1.5 transition"
+ >
+ Vaciar carrito
+ </button>
+ </aside>
+ </div>
+ }
 </section>
 
 <!-- ConfirmDialog de vaciado -->
 @if (confirmandoVaciado) {
-  <app-confirm-dialog
-    titulo="Vaciar Carrito"
-    mensaje="¿Eliminar TODAS las prendas del carrito? Esta acción no se puede deshacer."
-    textoConfirmar="Vaciar"
-    [peligro]="true"
-    (confirmado)="confirmarVaciado()"
-    (cancelado)="confirmandoVaciado = false"
-  ></app-confirm-dialog>
+ <app-confirm-dialog
+ titulo="Vaciar Carrito"
+ mensaje="¿Eliminar TODAS las prendas del carrito? Esta acción no se puede deshacer."
+ textoConfirmar="Vaciar"
+ [peligro]="true"
+ (confirmado)="confirmarVaciado()"
+ (cancelado)="confirmandoVaciado = false"
+ ></app-confirm-dialog>
 }
